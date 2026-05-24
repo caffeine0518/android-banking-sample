@@ -1,6 +1,6 @@
 package com.study.bank.domain.model
 
-enum class Bank(val code: String, val displayName: String) {
+enum class BankCode(val code: String, val displayName: String) {
     TOSS("092", "토스뱅크"),
     KAKAO("090", "카카오뱅크"),
     KB("004", "KB국민은행"),
@@ -12,6 +12,6 @@ enum class Bank(val code: String, val displayName: String) {
     ;
 
     companion object {
-        fun byCode(code: String): Bank? = entries.firstOrNull { it.code == code }
+        fun byCode(code: String): BankCode? = entries.firstOrNull { it.code == code }
     }
 }

@@ -1,4 +1,4 @@
-package com.study.bank.domain.model
+package com.study.bank.domain.model.account
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -7,12 +7,7 @@ import kotlin.test.assertFailsWith
 class AccountNumberTest {
 
     @Test
-    fun `valid number with hyphens`() {
-        assertEquals("1000-1234-5678", AccountNumber("1000-1234-5678").value)
-    }
-
-    @Test
-    fun `valid number without hyphens`() {
+    fun `valid digits-only number`() {
         assertEquals("100012345678", AccountNumber("100012345678").value)
     }
 
@@ -23,7 +18,7 @@ class AccountNumberTest {
 
     @Test
     fun `too few digits is rejected`() {
-        assertFailsWith<IllegalArgumentException> { AccountNumber("123-456") }
+        assertFailsWith<IllegalArgumentException> { AccountNumber("123456") }
     }
 
     @Test
@@ -32,7 +27,12 @@ class AccountNumberTest {
     }
 
     @Test
-    fun `non-digit and non-hyphen chars are rejected`() {
-        assertFailsWith<IllegalArgumentException> { AccountNumber("1000-abcd-5678") }
+    fun `hyphens are rejected`() {
+        assertFailsWith<IllegalArgumentException> { AccountNumber("1000-1234-5678") }
+    }
+
+    @Test
+    fun `non-digit chars are rejected`() {
+        assertFailsWith<IllegalArgumentException> { AccountNumber("1000abcd5678") }
     }
 }

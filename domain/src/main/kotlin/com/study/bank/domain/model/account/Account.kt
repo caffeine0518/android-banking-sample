@@ -1,18 +1,12 @@
-package com.study.bank.domain.model
+package com.study.bank.domain.model.account
 
-@JvmInline
-value class AccountId(val value: String)
-
-enum class AccountType {
-    CHECKING,
-    SAVINGS,
-    DEPOSIT,
-}
+import com.study.bank.domain.model.BankCode
+import com.study.bank.domain.model.Money
 
 data class Account(
     val id: AccountId,
     val number: AccountNumber,
-    val bank: Bank,
+    val bankCode: BankCode,
     val holderName: String,
     val balance: Money,
     val type: AccountType,
