@@ -24,10 +24,9 @@ class MoneyTest {
     }
 
     @Test
-    fun `negative amount is rejected`() {
-        assertFailsWith<IllegalArgumentException> {
-            Money.of(BigDecimal("-1"), Currency.KRW)
-        }
+    fun `negative amount is allowed`() {
+        val money = Money.of(BigDecimal("-1"), Currency.KRW)
+        assertEquals(BigDecimal("-1"), money.amount)
     }
 
     @Test
@@ -96,10 +95,11 @@ class MoneyTest {
     }
 
     @Test
-    fun `minus that would be negative is rejected`() {
-        assertFailsWith<IllegalArgumentException> {
-            Money.of(100, Currency.KRW) - Money.of(200, Currency.KRW)
-        }
+    fun `minus can produce a negative result`() {
+        assertEquals(
+            Money.of(BigDecimal("-100"), Currency.KRW),
+            Money.of(100, Currency.KRW) - Money.of(200, Currency.KRW),
+        )
     }
 
     @Test
@@ -128,12 +128,17 @@ class MoneyTest {
     // --- predicates ---
 
     @Test
-    fun `isPositive is true for non-zero amount`() {
+    fun `isPositive is true for positive amount`() {
         assertTrue(Money.of(1, Currency.KRW).isPositive())
     }
 
     @Test
     fun `isPositive is false for zero amount`() {
         assertEquals(false, Money.zero(Currency.KRW).isPositive())
+    }
+
+    @Test
+    fun `isPositive is false for negative amount`() {
+        assertEquals(false, Money.of(BigDecimal("-1"), Currency.KRW).isPositive())
     }
 }
