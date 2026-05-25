@@ -1,6 +1,7 @@
 package com.study.bank.domain.model.transfer
 
 import com.study.bank.domain.model.BankCode
+import com.study.bank.domain.model.Currency
 import com.study.bank.domain.model.Money
 import com.study.bank.domain.model.account.AccountId
 import com.study.bank.domain.model.account.AccountNumber
@@ -13,7 +14,7 @@ class TransferRequestTest {
         fromAccountId = AccountId("acc-1"),
         toAccountNumber = AccountNumber("100012345678"),
         toBankCode = BankCode.TOSS,
-        amount = Money(10_000),
+        amount = Money.of(10_000, Currency.KRW),
         memo = "월세",
         idempotencyKey = "key-1",
     )
@@ -26,7 +27,7 @@ class TransferRequestTest {
     @Test
     fun `zero amount is rejected`() {
         assertFailsWith<IllegalArgumentException> {
-            validRequest().copy(amount = Money.ZERO)
+            validRequest().copy(amount = Money.zero(Currency.KRW))
         }
     }
 
