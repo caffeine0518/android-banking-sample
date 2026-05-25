@@ -1,59 +1,139 @@
 package com.study.bank.domain.model
 
+import java.math.BigDecimal
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 class MoneyTest {
 
+    // --- construction & invariants ---
+
     @Test
-    fun `ZERO is zero`() {
-        assertEquals(0L, Money.ZERO.amount)
+    fun `zero creates a zero amount for the given currency`() {
+        val zero = Money.zero(Currency.KRW)
+        assertEquals(BigDecimal("0"), zero.amount)
+        assertEquals(Currency.KRW, zero.currency)
+    }
+
+    @Test
+    fun `zero of different currencies are not equal`() {
+        assertNotEquals(Money.zero(Currency.KRW), Money.zero(Currency.USD))
     }
 
     @Test
     fun `negative amount is rejected`() {
-        assertFailsWith<IllegalArgumentException> { Money(-1) }
+        assertFailsWith<IllegalArgumentException> {
+            Money.of(BigDecimal("-1"), Currency.KRW)
+        }
     }
 
     @Test
-    fun `plus adds amounts`() {
-        assertEquals(Money(300), Money(100) + Money(200))
+    fun `KRW rejects fractional amount`() {
+        assertFailsWith<IllegalArgumentException> {
+            Money.of(BigDecimal("100.5"), Currency.KRW)
+        }
     }
 
     @Test
-    fun `minus subtracts amounts`() {
-        assertEquals(Money(50), Money(200) - Money(150))
+    fun `USD amount is normalized to two decimal places`() {
+        val money = Money.of(100, Currency.USD)
+        assertEquals(BigDecimal("100.00"), money.amount)
+    }
+
+    @Test
+    fun `USD rejects amount with more precision than currency allows`() {
+        assertFailsWith<IllegalArgumentException> {
+            Money.of(BigDecimal("100.123"), Currency.USD)
+        }
+    }
+
+    @Test
+    fun `equality treats scaled and unscaled inputs as the same`() {
+        assertEquals(Money.of("100", Currency.USD), Money.of("100.00", Currency.USD))
+    }
+
+    @Test
+    fun `same numeric amount across different currencies is not equal`() {
+        assertNotEquals(Money.of(100, Currency.KRW), Money.of(100, Currency.USD))
+    }
+
+    // --- plus ---
+
+    @Test
+    fun `plus adds amounts of the same currency`() {
+        assertEquals(
+            Money.of(300, Currency.KRW),
+            Money.of(100, Currency.KRW) + Money.of(200, Currency.KRW),
+        )
+    }
+
+    @Test
+    fun `plus across different currencies is rejected`() {
+        assertFailsWith<IllegalArgumentException> {
+            Money.of(100, Currency.KRW) + Money.of(100, Currency.USD)
+        }
+    }
+
+    // --- minus ---
+
+    @Test
+    fun `minus subtracts amounts of the same currency`() {
+        assertEquals(
+            Money.of(50, Currency.KRW),
+            Money.of(200, Currency.KRW) - Money.of(150, Currency.KRW),
+        )
     }
 
     @Test
     fun `minus to exactly zero is allowed`() {
-        assertEquals(Money.ZERO, Money(100) - Money(100))
+        assertEquals(
+            Money.zero(Currency.KRW),
+            Money.of(100, Currency.KRW) - Money.of(100, Currency.KRW),
+        )
     }
 
     @Test
-    fun `minus throws when result would be negative`() {
-        assertFailsWith<IllegalArgumentException> { Money(100) - Money(200) }
+    fun `minus that would be negative is rejected`() {
+        assertFailsWith<IllegalArgumentException> {
+            Money.of(100, Currency.KRW) - Money.of(200, Currency.KRW)
+        }
     }
 
     @Test
-    fun `compareTo less than`() {
-        assertTrue(Money(100) < Money(200))
+    fun `minus across different currencies is rejected`() {
+        assertFailsWith<IllegalArgumentException> {
+            Money.of(100, Currency.KRW) - Money.of(50, Currency.USD)
+        }
+    }
+
+    // --- compareTo ---
+
+    @Test
+    fun `compareTo orders amounts of the same currency`() {
+        assertTrue(Money.of(100, Currency.KRW) < Money.of(200, Currency.KRW))
+        assertTrue(Money.of(200, Currency.KRW) > Money.of(100, Currency.KRW))
+        assertEquals(0, Money.of(100, Currency.KRW).compareTo(Money.of(100, Currency.KRW)))
     }
 
     @Test
-    fun `compareTo greater than`() {
-        assertTrue(Money(200) > Money(100))
+    fun `compareTo across different currencies is rejected`() {
+        assertFailsWith<IllegalArgumentException> {
+            Money.of(100, Currency.KRW).compareTo(Money.of(100, Currency.USD))
+        }
+    }
+
+    // --- predicates ---
+
+    @Test
+    fun `isPositive is true for non-zero amount`() {
+        assertTrue(Money.of(1, Currency.KRW).isPositive())
     }
 
     @Test
-    fun `compareTo equal`() {
-        assertEquals(0, Money(100).compareTo(Money(100)))
-    }
-
-    @Test
-    fun `plus overflow throws ArithmeticException`() {
-        assertFailsWith<ArithmeticException> { Money(Long.MAX_VALUE) + Money(1) }
+    fun `isPositive is false for zero amount`() {
+        assertEquals(false, Money.zero(Currency.KRW).isPositive())
     }
 }
