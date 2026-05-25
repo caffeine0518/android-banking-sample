@@ -1,6 +1,7 @@
 package com.study.bank.domain.model
 
 import java.math.BigDecimal
+import java.math.RoundingMode
 
 /** Monetary amount in a specific [Currency]; arithmetic is same-currency only. */
 class Money private constructor(
@@ -17,6 +18,12 @@ class Money private constructor(
         requireSameCurrency(other)
         return of(amount.subtract(other.amount), currency)
     }
+
+    fun times(multiplier: BigDecimal, mode: RoundingMode): Money =
+        of(amount.multiply(multiplier).setScale(currency.exponent, mode), currency)
+
+    fun div(divisor: BigDecimal, mode: RoundingMode): Money =
+        of(amount.divide(divisor, currency.exponent, mode), currency)
 
     override fun compareTo(other: Money): Int {
         requireSameCurrency(other)
