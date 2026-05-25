@@ -1,6 +1,7 @@
 package com.study.bank.domain.model
 
 import java.math.BigDecimal
+import java.math.RoundingMode
 import org.junit.jupiter.api.Nested
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -150,6 +151,175 @@ class MoneyTest {
         @Test
         fun `isPositive is false for negative amount`() {
             assertEquals(false, Money.of(BigDecimal("-1"), Currency.KRW).isPositive())
+        }
+    }
+
+    @Nested
+    inner class Times {
+
+        @Test
+        fun `times multiplies amount by an integer scalar within currency precision`() {
+            assertEquals(
+                Money.of(300, Currency.KRW),
+                Money.of(100, Currency.KRW).times(BigDecimal("3"), RoundingMode.HALF_UP),
+            )
+        }
+
+        @Test
+        fun `times applies HALF_UP when product exceeds currency precision`() {
+            assertEquals(
+                Money.of(1, Currency.KRW),
+                Money.of(1, Currency.KRW).times(BigDecimal("0.5"), RoundingMode.HALF_UP),
+            )
+        }
+
+        @Test
+        fun `times applies HALF_DOWN when product exceeds currency precision`() {
+            assertEquals(
+                Money.zero(Currency.KRW),
+                Money.of(1, Currency.KRW).times(BigDecimal("0.5"), RoundingMode.HALF_DOWN),
+            )
+        }
+
+        @Test
+        fun `times applies FLOOR when product exceeds currency precision`() {
+            assertEquals(
+                Money.of(33, Currency.KRW),
+                Money.of(100, Currency.KRW).times(BigDecimal("0.333"), RoundingMode.FLOOR),
+            )
+        }
+
+        @Test
+        fun `times applies CEILING when product exceeds currency precision`() {
+            assertEquals(
+                Money.of(34, Currency.KRW),
+                Money.of(100, Currency.KRW).times(BigDecimal("0.333"), RoundingMode.CEILING),
+            )
+        }
+
+        @Test
+        fun `times applies HALF_UP for USD fractional product`() {
+            assertEquals(
+                Money.of(BigDecimal("16.67"), Currency.USD),
+                Money.of(BigDecimal("33.33"), Currency.USD).times(BigDecimal("0.5"), RoundingMode.HALF_UP),
+            )
+        }
+
+        @Test
+        fun `times by one returns the same amount`() {
+            assertEquals(
+                Money.of(100, Currency.KRW),
+                Money.of(100, Currency.KRW).times(BigDecimal.ONE, RoundingMode.HALF_UP),
+            )
+        }
+
+        @Test
+        fun `times by zero returns zero`() {
+            assertEquals(
+                Money.zero(Currency.KRW),
+                Money.of(100, Currency.KRW).times(BigDecimal.ZERO, RoundingMode.HALF_UP),
+            )
+        }
+
+        @Test
+        fun `times by negative scalar flips the sign`() {
+            assertEquals(
+                Money.of(BigDecimal("-100"), Currency.KRW),
+                Money.of(100, Currency.KRW).times(BigDecimal("-1"), RoundingMode.HALF_UP),
+            )
+        }
+
+        @Test
+        fun `times with UNNECESSARY throws when product exceeds currency precision`() {
+            assertFailsWith<ArithmeticException> {
+                Money.of(1, Currency.KRW).times(BigDecimal("0.5"), RoundingMode.UNNECESSARY)
+            }
+        }
+
+        @Test
+        fun `times preserves currency`() {
+            val result = Money.of(100, Currency.USD).times(BigDecimal("2"), RoundingMode.HALF_UP)
+            assertEquals(Currency.USD, result.currency)
+        }
+    }
+
+    @Nested
+    inner class Div {
+
+        @Test
+        fun `div divides amount evenly within currency precision`() {
+            assertEquals(
+                Money.of(50, Currency.KRW),
+                Money.of(100, Currency.KRW).div(BigDecimal("2"), RoundingMode.HALF_UP),
+            )
+        }
+
+        @Test
+        fun `div applies HALF_UP for USD non-terminating result`() {
+            assertEquals(
+                Money.of(BigDecimal("33.33"), Currency.USD),
+                Money.of(100, Currency.USD).div(BigDecimal("3"), RoundingMode.HALF_UP),
+            )
+        }
+
+        @Test
+        fun `div applies FLOOR for KRW non-terminating result`() {
+            assertEquals(
+                Money.of(33, Currency.KRW),
+                Money.of(100, Currency.KRW).div(BigDecimal("3"), RoundingMode.FLOOR),
+            )
+        }
+
+        @Test
+        fun `div applies CEILING for KRW non-terminating result`() {
+            assertEquals(
+                Money.of(34, Currency.KRW),
+                Money.of(100, Currency.KRW).div(BigDecimal("3"), RoundingMode.CEILING),
+            )
+        }
+
+        @Test
+        fun `div applies HALF_DOWN for KRW non-terminating result`() {
+            assertEquals(
+                Money.of(33, Currency.KRW),
+                Money.of(100, Currency.KRW).div(BigDecimal("3"), RoundingMode.HALF_DOWN),
+            )
+        }
+
+        @Test
+        fun `div by one returns the same amount`() {
+            assertEquals(
+                Money.of(100, Currency.KRW),
+                Money.of(100, Currency.KRW).div(BigDecimal.ONE, RoundingMode.HALF_UP),
+            )
+        }
+
+        @Test
+        fun `div by zero throws ArithmeticException`() {
+            assertFailsWith<ArithmeticException> {
+                Money.of(100, Currency.KRW).div(BigDecimal.ZERO, RoundingMode.HALF_UP)
+            }
+        }
+
+        @Test
+        fun `div with UNNECESSARY throws when result needs rounding`() {
+            assertFailsWith<ArithmeticException> {
+                Money.of(100, Currency.KRW).div(BigDecimal("3"), RoundingMode.UNNECESSARY)
+            }
+        }
+
+        @Test
+        fun `div by negative divisor flips the sign`() {
+            assertEquals(
+                Money.of(BigDecimal("-50"), Currency.KRW),
+                Money.of(100, Currency.KRW).div(BigDecimal("-2"), RoundingMode.HALF_UP),
+            )
+        }
+
+        @Test
+        fun `div preserves currency`() {
+            val result = Money.of(100, Currency.USD).div(BigDecimal("4"), RoundingMode.HALF_UP)
+            assertEquals(Currency.USD, result.currency)
         }
     }
 }
