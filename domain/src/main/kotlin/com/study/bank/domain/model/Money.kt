@@ -2,7 +2,7 @@ package com.study.bank.domain.model
 
 import java.math.BigDecimal
 
-/** Non-negative monetary amount in a specific [Currency]; arithmetic is same-currency only. */
+/** Monetary amount in a specific [Currency]; arithmetic is same-currency only. */
 class Money private constructor(
     val amount: BigDecimal,
     val currency: Currency,
@@ -15,11 +15,7 @@ class Money private constructor(
 
     operator fun minus(other: Money): Money {
         requireSameCurrency(other)
-        val result = amount.subtract(other.amount)
-        require(result.signum() >= 0) {
-            "Cannot subtract $other from $this (result would be negative)"
-        }
-        return of(result, currency)
+        return of(amount.subtract(other.amount), currency)
     }
 
     override fun compareTo(other: Money): Int {
@@ -47,7 +43,6 @@ class Money private constructor(
 
     companion object {
         fun of(amount: BigDecimal, currency: Currency): Money {
-            require(amount.signum() >= 0) { "Money cannot be negative: $amount" }
             require(amount.scale() <= currency.exponent) {
                 "Amount $amount has more fraction digits than ${currency.code} allows (${currency.exponent})"
             }
