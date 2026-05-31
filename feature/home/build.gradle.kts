@@ -27,7 +27,7 @@ android {
 
 dependencies {
     implementation(projects.domain)
-    implementation(projects.core.ui)
+    implementation(projects.coreUi.common)
     implementation(libs.androidx.navigation.compose)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

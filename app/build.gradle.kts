@@ -45,7 +45,7 @@ dependencies {
     implementation(projects.feature.account)
     implementation(projects.feature.transfer)
     implementation(projects.dataDi)
-    implementation(projects.core.designsystem)
+    implementation(projects.coreUi.designsystem)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
