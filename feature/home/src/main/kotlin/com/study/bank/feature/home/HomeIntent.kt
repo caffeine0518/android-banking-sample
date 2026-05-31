@@ -1,9 +1,9 @@
 package com.study.bank.feature.home
 
 import com.study.bank.domain.model.account.AccountId
-import com.study.bank.core.ui.mvi.MviIntent
 
-sealed interface HomeIntent : MviIntent {
+sealed interface HomeIntent {
+    data object Load : HomeIntent
     data object Refresh : HomeIntent
     data class AccountClicked(val accountId: AccountId) : HomeIntent
 }

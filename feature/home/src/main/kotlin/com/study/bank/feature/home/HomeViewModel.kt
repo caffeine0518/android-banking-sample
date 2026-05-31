@@ -1,6 +1,8 @@
 package com.study.bank.feature.home
 
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.study.bank.core.ui.mvi.MviStore
 import com.study.bank.domain.model.BankCode
 import com.study.bank.domain.model.Currency
 import com.study.bank.domain.model.Money
@@ -8,32 +10,37 @@ import com.study.bank.domain.model.account.Account
 import com.study.bank.domain.model.account.AccountId
 import com.study.bank.domain.model.account.AccountNumber
 import com.study.bank.domain.model.account.AccountType
-import com.study.bank.core.ui.mvi.MviViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
-class HomeViewModel : MviViewModel<HomeState, HomeIntent, HomeEffect>(
-    initialState = HomeState(),
-) {
+class HomeViewModel : ViewModel() {
 
-    init {
-        reduce { copy(accounts = MOCK_ACCOUNTS) }
-    }
-
-    override fun onIntent(intent: HomeIntent) {
+    private val store = MviStore<HomeState, HomeIntent, HomeEffect>(
+        initialState = HomeState(),
+        scope = viewModelScope,
+    ) { intent ->
         when (intent) {
-            HomeIntent.Refresh -> refresh()
+            HomeIntent.Load -> setState { copy(accounts = MOCK_ACCOUNTS) }
+            HomeIntent.Refresh -> {
+                setState { copy(isLoading = true) }
+                delay(REFRESH_DELAY_MS)
+                setState { copy(accounts = MOCK_ACCOUNTS, isLoading = false) }
+            }
             is HomeIntent.AccountClicked ->
                 sendEffect(HomeEffect.NavigateToAccountDetail(intent.accountId))
         }
     }
 
-    private fun refresh() {
-        viewModelScope.launch {
-            reduce { copy(isLoading = true) }
-            delay(REFRESH_DELAY_MS)
-            reduce { copy(accounts = MOCK_ACCOUNTS, isLoading = false) }
-        }
+    val state: StateFlow<HomeState> = store.state
+    val effect: Flow<HomeEffect> = store.effect
+
+    init {
+        store.sendIntent(HomeIntent.Load)
+    }
+
+    fun onIntent(intent: HomeIntent) {
+        store.sendIntent(intent)
     }
 
     private companion object {
