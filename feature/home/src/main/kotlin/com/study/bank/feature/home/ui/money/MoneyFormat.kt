@@ -1,4 +1,4 @@
-package com.study.bank.core.ui.money
+package com.study.bank.feature.home.ui.money
 
 import com.study.bank.domain.model.Currency
 import com.study.bank.domain.model.Money

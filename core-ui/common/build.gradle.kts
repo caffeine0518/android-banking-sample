@@ -26,8 +26,6 @@ android {
 }
 
 dependencies {
-    api(projects.domain)
-
     api(libs.kotlinx.coroutines.core)
     api(libs.androidx.lifecycle.viewmodel.compose)
     api(libs.androidx.lifecycle.runtime.compose)

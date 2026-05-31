@@ -15,7 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.study.bank.core.ui.money.format
+import com.study.bank.feature.home.ui.money.format
 import com.study.bank.domain.model.account.Account
 import com.study.bank.domain.model.account.AccountType
 
