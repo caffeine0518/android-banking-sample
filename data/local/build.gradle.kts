@@ -1,10 +1,9 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.ksp)
 }
 
 android {
-    namespace = "com.study.bank.data.di"
+    namespace = "com.study.bank.data.local"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
@@ -22,11 +21,4 @@ android {
 }
 
 dependencies {
-    implementation(projects.domain)
-    implementation(projects.data)
-    implementation(projects.data.remote)
-    implementation(projects.data.local)
-
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
 }
