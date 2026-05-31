@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.study.bank.navigation.BankNavHost
-import com.study.bank.ui.theme.BankTheme
+import com.study.bank.core.designsystem.theme.BankTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
