@@ -40,10 +40,7 @@ android {
 }
 
 dependencies {
-    implementation(projects.domain)
-    implementation(projects.feature.home)
-    implementation(projects.feature.account)
-    implementation(projects.feature.transfer)
+    implementation(projects.navigation)
     implementation(projects.dataDi)
     implementation(projects.coreUi.designsystem)
 
@@ -55,7 +52,6 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.navigation.compose)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
