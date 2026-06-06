@@ -19,17 +19,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.study.bank.domain.model.BankCode
-import com.study.bank.domain.model.Currency
-import com.study.bank.domain.model.Money
-import com.study.bank.domain.model.account.Account
 import com.study.bank.domain.model.account.AccountId
-import com.study.bank.domain.model.account.AccountNumber
-import com.study.bank.domain.model.account.AccountType
 import com.study.bank.feature.home.contract.HomeIntent
 import com.study.bank.feature.home.contract.HomeState
 import com.study.bank.feature.home.ui.component.AccountListItem
 import com.study.bank.feature.home.ui.component.TotalBalanceHeader
+import com.study.bank.feature.home.ui.preview.PreviewAccounts
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -95,29 +90,8 @@ private fun HomeContent(
 private fun HomeScreenPreview() {
     MaterialTheme {
         HomeScreen(
-            state = HomeState(accounts = PREVIEW_ACCOUNTS),
+            state = HomeState(accounts = PreviewAccounts),
             onIntent = {},
         )
     }
 }
-
-private val PREVIEW_ACCOUNTS = listOf(
-    Account(
-        id = AccountId("p1"),
-        number = AccountNumber("1000123456789"),
-        bankCode = BankCode.TOSS,
-        holderName = "홍길동",
-        balance = Money.of(2_847_320L, Currency.KRW),
-        type = AccountType.CHECKING,
-        nickname = "월급통장",
-    ),
-    Account(
-        id = AccountId("p2"),
-        number = AccountNumber("1000987654321"),
-        bankCode = BankCode.TOSS,
-        holderName = "홍길동",
-        balance = Money.of("3245.80", Currency.USD),
-        type = AccountType.CHECKING,
-        nickname = "외화통장 USD",
-    ),
-)
