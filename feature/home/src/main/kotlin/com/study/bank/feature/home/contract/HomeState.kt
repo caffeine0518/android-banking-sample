@@ -1,4 +1,4 @@
-package com.study.bank.feature.home
+package com.study.bank.feature.home.contract
 
 import com.study.bank.domain.model.account.Account
 

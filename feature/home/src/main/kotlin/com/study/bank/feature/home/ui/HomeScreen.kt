@@ -1,4 +1,4 @@
-package com.study.bank.feature.home
+package com.study.bank.feature.home.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -26,8 +26,10 @@ import com.study.bank.domain.model.account.Account
 import com.study.bank.domain.model.account.AccountId
 import com.study.bank.domain.model.account.AccountNumber
 import com.study.bank.domain.model.account.AccountType
-import com.study.bank.feature.home.ui.AccountListItem
-import com.study.bank.feature.home.ui.TotalBalanceHeader
+import com.study.bank.feature.home.contract.HomeIntent
+import com.study.bank.feature.home.contract.HomeState
+import com.study.bank.feature.home.ui.component.AccountListItem
+import com.study.bank.feature.home.ui.component.TotalBalanceHeader
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -1,4 +1,4 @@
-package com.study.bank.feature.home
+package com.study.bank.feature.home.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,6 +10,9 @@ import com.study.bank.domain.model.account.Account
 import com.study.bank.domain.model.account.AccountId
 import com.study.bank.domain.model.account.AccountNumber
 import com.study.bank.domain.model.account.AccountType
+import com.study.bank.feature.home.contract.HomeEffect
+import com.study.bank.feature.home.contract.HomeIntent
+import com.study.bank.feature.home.contract.HomeState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,6 +30,7 @@ class HomeViewModel : ViewModel() {
                 delay(REFRESH_DELAY_MS)
                 setState { copy(accounts = MOCK_ACCOUNTS, isLoading = false) }
             }
+
             is HomeIntent.AccountClicked ->
                 sendEffect(HomeEffect.NavigateToAccountDetail(intent.accountId))
         }
@@ -52,7 +56,7 @@ class HomeViewModel : ViewModel() {
                 number = AccountNumber("1000123456789"),
                 bankCode = BankCode.TOSS,
                 holderName = "홍길동",
-                balance = Money.of(2_847_320L, Currency.KRW),
+                balance = Money.Companion.of(2_847_320L, Currency.KRW),
                 type = AccountType.CHECKING,
                 nickname = "월급통장",
             ),
@@ -61,7 +65,7 @@ class HomeViewModel : ViewModel() {
                 number = AccountNumber("1000987654321"),
                 bankCode = BankCode.TOSS,
                 holderName = "홍길동",
-                balance = Money.of("3245.80", Currency.USD),
+                balance = Money.Companion.of("3245.80", Currency.USD),
                 type = AccountType.CHECKING,
                 nickname = "외화통장 USD",
             ),
@@ -70,7 +74,7 @@ class HomeViewModel : ViewModel() {
                 number = AccountNumber("1000555544443"),
                 bankCode = BankCode.TOSS,
                 holderName = "홍길동",
-                balance = Money.of(12_000_000L, Currency.KRW),
+                balance = Money.Companion.of(12_000_000L, Currency.KRW),
                 type = AccountType.SAVINGS,
                 nickname = "세이프박스",
             ),
@@ -79,7 +83,7 @@ class HomeViewModel : ViewModel() {
                 number = AccountNumber("110234567890"),
                 bankCode = BankCode.SHINHAN,
                 holderName = "홍길동",
-                balance = Money.of(450_000L, Currency.KRW),
+                balance = Money.Companion.of(450_000L, Currency.KRW),
                 type = AccountType.CHECKING,
                 nickname = null,
             ),

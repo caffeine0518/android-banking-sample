@@ -1,4 +1,4 @@
-package com.study.bank.feature.home.ui
+package com.study.bank.feature.home.ui.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -12,7 +12,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.study.bank.feature.home.ui.money.format
 import com.study.bank.domain.model.Currency
 import com.study.bank.domain.model.Money
 import com.study.bank.domain.model.account.Account

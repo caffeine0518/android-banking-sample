@@ -1,4 +1,4 @@
-package com.study.bank.feature.home
+package com.study.bank.feature.home.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -10,6 +10,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.study.bank.domain.model.account.AccountId
+import com.study.bank.feature.home.contract.HomeEffect
+import com.study.bank.feature.home.ui.HomeViewModel
 
 @Composable
 fun HomeRoute(
