@@ -16,13 +16,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.study.bank.domain.model.account.Account
-import com.study.bank.domain.model.account.AccountType
+import com.study.bank.core.ui.model.format
 import com.study.bank.feature.home.R
+import com.study.bank.feature.home.ui.model.AccountTypeUi
+import com.study.bank.feature.home.ui.model.AccountUi
 
 @Composable
 internal fun AccountListItem(
-    account: Account,
+    account: AccountUi,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -46,7 +47,7 @@ internal fun AccountListItem(
                 Text(
                     text = stringResource(
                         R.string.home_account_subtitle,
-                        account.bankCode.displayName,
+                        account.bankDisplayName,
                         typeLabel,
                     ),
                     style = MaterialTheme.typography.labelMedium,
@@ -68,10 +69,10 @@ internal fun AccountListItem(
 }
 
 @Composable
-private fun AccountType.label(): String = stringResource(
+private fun AccountTypeUi.label(): String = stringResource(
     when (this) {
-        AccountType.CHECKING -> R.string.home_account_type_checking
-        AccountType.SAVINGS -> R.string.home_account_type_savings
-        AccountType.DEPOSIT -> R.string.home_account_type_deposit
+        AccountTypeUi.CHECKING -> R.string.home_account_type_checking
+        AccountTypeUi.SAVINGS -> R.string.home_account_type_savings
+        AccountTypeUi.DEPOSIT -> R.string.home_account_type_deposit
     },
 )

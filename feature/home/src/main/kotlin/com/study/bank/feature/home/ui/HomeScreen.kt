@@ -20,13 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.study.bank.domain.model.account.AccountId
 import com.study.bank.feature.home.R
 import com.study.bank.feature.home.contract.HomeIntent
 import com.study.bank.feature.home.contract.HomeState
 import com.study.bank.feature.home.ui.component.AccountListItem
 import com.study.bank.feature.home.ui.component.TotalBalanceHeader
-import com.study.bank.feature.home.ui.preview.PreviewAccounts
+import com.study.bank.feature.home.ui.preview.PreviewHomeState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,19 +64,19 @@ internal fun HomeScreen(
 @Composable
 private fun HomeContent(
     state: HomeState,
-    onAccountClick: (AccountId) -> Unit,
+    onAccountClick: (String) -> Unit,
 ) {
     LazyColumn(
         contentPadding = PaddingValues(bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
-            TotalBalanceHeader(accounts = state.accounts)
+            TotalBalanceHeader(totalsByCurrency = state.totalsByCurrency)
             if (state.isLoading) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
         }
-        items(state.accounts, key = { it.id.value }) { account ->
+        items(state.accounts, key = { it.id }) { account ->
             AccountListItem(
                 account = account,
                 onClick = { onAccountClick(account.id) },
@@ -92,7 +91,7 @@ private fun HomeContent(
 private fun HomeScreenPreview() {
     MaterialTheme {
         HomeScreen(
-            state = HomeState(accounts = PreviewAccounts),
+            state = PreviewHomeState,
             onIntent = {},
         )
     }

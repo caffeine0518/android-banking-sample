@@ -11,7 +11,6 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.study.bank.domain.model.account.AccountId
 import com.study.bank.feature.home.contract.HomeEffect
-import com.study.bank.feature.home.ui.HomeViewModel
 
 @Composable
 fun HomeRoute(
@@ -27,7 +26,7 @@ fun HomeRoute(
     LaunchedEffect(effects) {
         effects.collect { effect ->
             when (effect) {
-                is HomeEffect.NavigateToAccountDetail -> onAccountClick(effect.accountId)
+                is HomeEffect.NavigateToAccountDetail -> onAccountClick(AccountId(effect.accountId))
             }
         }
     }
