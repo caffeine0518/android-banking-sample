@@ -10,11 +10,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.study.bank.domain.model.Currency
 import com.study.bank.domain.model.Money
 import com.study.bank.domain.model.account.Account
+import com.study.bank.feature.home.R
 
 @Composable
 internal fun TotalBalanceHeader(
@@ -28,7 +30,7 @@ internal fun TotalBalanceHeader(
             .padding(horizontal = 20.dp, vertical = 24.dp),
     ) {
         Text(
-            text = "총 자산",
+            text = stringResource(R.string.home_total_balance_label),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

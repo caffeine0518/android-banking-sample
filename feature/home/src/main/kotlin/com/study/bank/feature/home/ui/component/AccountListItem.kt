@@ -13,10 +13,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.study.bank.domain.model.account.Account
 import com.study.bank.domain.model.account.AccountType
+import com.study.bank.feature.home.R
 
 @Composable
 internal fun AccountListItem(
@@ -40,13 +42,18 @@ internal fun AccountListItem(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Column(modifier = Modifier.weight(1f)) {
+                val typeLabel = account.type.label()
                 Text(
-                    text = "${account.bankCode.displayName} · ${account.type.label()}",
+                    text = stringResource(
+                        R.string.home_account_subtitle,
+                        account.bankCode.displayName,
+                        typeLabel,
+                    ),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    text = account.nickname ?: account.type.label(),
+                    text = account.nickname ?: typeLabel,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -60,8 +67,11 @@ internal fun AccountListItem(
     }
 }
 
-private fun AccountType.label(): String = when (this) {
-    AccountType.CHECKING -> "입출금"
-    AccountType.SAVINGS -> "세이프박스"
-    AccountType.DEPOSIT -> "정기예금"
-}
+@Composable
+private fun AccountType.label(): String = stringResource(
+    when (this) {
+        AccountType.CHECKING -> R.string.home_account_type_checking
+        AccountType.SAVINGS -> R.string.home_account_type_savings
+        AccountType.DEPOSIT -> R.string.home_account_type_deposit
+    },
+)
