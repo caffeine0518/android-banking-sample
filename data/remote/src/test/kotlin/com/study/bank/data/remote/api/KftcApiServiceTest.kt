@@ -14,10 +14,10 @@ import retrofit2.HttpException
 import retrofit2.Retrofit
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 
-class BankApiServiceTest {
+class KftcApiServiceTest {
 
     private lateinit var mockServer: KftcMockServer
-    private lateinit var api: BankApiService
+    private lateinit var api: KftcApiService
 
     @Before
     fun setUp() {
@@ -31,7 +31,7 @@ class BankApiServiceTest {
             .baseUrl(mockServer.baseUrl().toString())
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
-        api = retrofit.create(BankApiService::class.java)
+        api = retrofit.create(KftcApiService::class.java)
     }
 
     @After

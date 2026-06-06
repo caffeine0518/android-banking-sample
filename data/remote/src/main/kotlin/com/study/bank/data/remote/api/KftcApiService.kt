@@ -11,7 +11,7 @@ import retrofit2.http.Query
  * KFTC 스펙대로 계좌 목록과 잔액은 별도 호출이다. Repository 레이어가 목록을 받은 뒤
  * 각 fintech_use_num에 대해 balance/fin_num을 fan-out으로 병렬 호출하는 것을 가정한다.
  */
-interface BankApiService {
+interface KftcApiService {
 
     @GET("v2.0/account/list_finuse")
     suspend fun getAccountList(

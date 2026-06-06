@@ -14,7 +14,7 @@ import org.junit.Test
 /**
  * [KftcMockDispatcher] 라우팅/에러 분기 단독 검증.
  *
- * Retrofit/DTO 직렬화 경로는 [com.study.bank.data.remote.api.BankApiServiceTest]에서 다루므로
+ * Retrofit/DTO 직렬화 경로는 [com.study.bank.data.remote.api.KftcApiServiceTest]에서 다루므로
  * 여기선 raw HTTP body 문자열만 보고 dispatcher 책임(경로 매칭, 시드 조회, [MockError] 분기)에 집중한다.
  */
 class KftcMockDispatcherTest {

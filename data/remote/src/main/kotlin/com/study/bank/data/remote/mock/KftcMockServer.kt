@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
  * KFTC v2.0 mock 서버 라이프사이클 래퍼.
  *
  * 호스트 앱에서는 프로세스 시작 시 [start]로 띄워두고 [baseUrl]을 Retrofit baseUrl로 주입한다.
- * [com.study.bank.data.remote.api.BankApiService]가 실제 네트워크 스택을 그대로 타게 되어
+ * [com.study.bank.data.remote.api.KftcApiService]가 실제 네트워크 스택을 그대로 타게 되어
  * 인터셉터/직렬화/에러 경로까지 in-process로 검증할 수 있다.
  */
 class KftcMockServer {
