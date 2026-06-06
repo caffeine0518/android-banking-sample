@@ -28,6 +28,8 @@ android {
 dependencies {
     implementation(projects.domain)
     implementation(projects.coreUi.mvi)
+    implementation(projects.coreUi.model)
+    implementation(projects.coreUi.mapper)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.material3)
