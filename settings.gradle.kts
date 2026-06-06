@@ -28,7 +28,7 @@ rootProject.name = "bank"
 include(":app")
 include(":domain")
 include(":data")
-include(":data:remote")
+include(":data:remote:kftc")
 include(":data:local")
 include(":data-di")
 include(":core-ui:mvi")

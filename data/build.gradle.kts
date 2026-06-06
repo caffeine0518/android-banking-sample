@@ -22,6 +22,6 @@ android {
 
 dependencies {
     implementation(projects.domain)
-    implementation(projects.data.remote)
+    implementation(projects.data.remote.kftc)
     implementation(projects.data.local)
 }
