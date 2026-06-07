@@ -17,12 +17,12 @@ import javax.inject.Singleton
 @Singleton
 class KeximApiServiceImpl @Inject constructor(
     private val httpApi: KeximHttpApi,
-    @KeximAuthKey private val authKey: String,
+    private val authKey: KeximAuthKey,
 ) : KeximApiService {
 
     override suspend fun getRates(date: LocalDate): List<KeximRateItem> =
         httpApi.getRates(
-            authKey = authKey,
+            authKey = authKey.value,
             searchDate = date.format(DATE_FMT),
         )
 

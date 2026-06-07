@@ -21,7 +21,7 @@ internal fun createKeximApiService(
     json: Json = DefaultTestJson,
 ): KeximApiService = KeximApiServiceImpl(
     httpApi = createKeximHttpApi(baseUrl, json),
-    authKey = authKey,
+    authKey = KeximAuthKey(authKey),
 )
 
 private fun createKeximHttpApi(baseUrl: String, json: Json): KeximHttpApi =

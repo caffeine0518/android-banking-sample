@@ -1,14 +1,19 @@
 package com.study.bank.data.remote.fx.api
 
-import javax.inject.Qualifier
+import com.study.bank.data.remote.fx.BuildConfig
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
- * KEXIM API 인증키 의존성 식별용 JSR-330 qualifier.
+ * Holder for the KEXIM API authentication key.
  *
- * 외부에서 `BuildConfig.KEXIM_API_KEY` 같은 String을 이 qualifier로 노출하면
- * [KeximApiServiceImpl]의 생성자 주입이 정확히 그 String을 받는다.
- * `@Named("...")` 같은 string-typed 키 회피용.
+ * Production wiring goes through the [Inject] constructor which sources
+ * [BuildConfig.KEXIM_API_KEY]. Tests instantiate the primary constructor directly
+ * with an arbitrary value to exercise auth-failure paths.
  */
-@Qualifier
-@Retention(AnnotationRetention.BINARY)
-annotation class KeximAuthKey
+@Singleton
+class KeximAuthKey(val value: String) {
+
+    @Inject
+    constructor() : this(BuildConfig.KEXIM_API_KEY)
+}
