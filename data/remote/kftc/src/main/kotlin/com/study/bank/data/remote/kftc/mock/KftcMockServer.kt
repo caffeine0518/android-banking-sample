@@ -1,23 +1,29 @@
 package com.study.bank.data.remote.kftc.mock
 
 import com.study.bank.data.remote.kftc.mock.dispatcher.KftcMockDispatcher
+import javax.inject.Inject
+import javax.inject.Singleton
 import okhttp3.HttpUrl
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import java.util.concurrent.TimeUnit
 
 /**
- * KFTC v2.0 mock 서버 라이프사이클 래퍼.
+ * Lifecycle wrapper for the KFTC v2.0 mock server.
  *
- * 호스트 앱에서는 프로세스 시작 시 [start]로 띄워두고 [baseUrl]을 Retrofit baseUrl로 주입한다.
- * [com.study.bank.data.remote.kftc.api.KftcApiService]가 실제 네트워크 스택을 그대로 타게 되어
- * 인터셉터/직렬화/에러 경로까지 in-process로 검증할 수 있다.
+ * Lets [com.study.bank.data.remote.kftc.api.KftcApiService] exercise the real network stack so
+ * interceptors, serialization, and error paths are all verified in-process.
  */
-class KftcMockServer {
+@Singleton
+class KftcMockServer @Inject constructor() {
 
     private val server: MockWebServer = MockWebServer()
     private val dispatcher = KftcMockDispatcher()
     private var started: Boolean = false
+
+    init {
+        start()
+    }
 
     fun start() {
         if (started) return
