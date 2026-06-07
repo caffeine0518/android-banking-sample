@@ -4,6 +4,7 @@ import com.study.bank.data.remote.kftc.mock.KftcMockServer
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -27,8 +28,15 @@ class KftcApiServiceTest {
             ignoreUnknownKeys = true
             explicitNulls = false
         }
+        val client = OkHttpClient.Builder()
+            .sslSocketFactory(
+                mockServer.clientCertificates.sslSocketFactory(),
+                mockServer.clientCertificates.trustManager,
+            )
+            .build()
         val retrofit = Retrofit.Builder()
             .baseUrl(mockServer.baseUrl().toString())
+            .client(client)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
         api = retrofit.create(KftcApiService::class.java)
