@@ -6,10 +6,13 @@ import com.study.bank.core.ui.mvi.MviStore
 import com.study.bank.feature.home.contract.HomeEffect
 import com.study.bank.feature.home.contract.HomeIntent
 import com.study.bank.feature.home.contract.HomeState
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
-class HomeViewModel : ViewModel() {
+@HiltViewModel
+class HomeViewModel @Inject constructor() : ViewModel() {
 
     private val store = MviStore<HomeState, HomeIntent, HomeEffect>(
         initialState = HomeState(),
