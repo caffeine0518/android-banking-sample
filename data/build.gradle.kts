@@ -1,7 +1,5 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.hilt)
-    alias(libs.plugins.ksp)
 }
 
 android {
@@ -28,6 +26,5 @@ dependencies {
     implementation(projects.data.local)
 
     implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
+    implementation(libs.javax.inject)
 }
