@@ -38,6 +38,7 @@ dependencies {
 
     // In-process KFTC mock — exposed to :data-di so the running app can boot it.
     implementation(libs.okhttp.mockwebserver)
+    implementation(libs.okhttp.tls)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
