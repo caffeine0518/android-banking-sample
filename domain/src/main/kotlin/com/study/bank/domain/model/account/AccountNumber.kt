@@ -7,16 +7,16 @@ value class AccountNumber(val value: String) {
         require(value.isNotBlank()) {
             "Account number cannot be blank"
         }
-        require(value.all(Char::isDigit)) {
-            "Account number must contain digits only"
+        require(value.length <= MAX_LENGTH) {
+            "Account number must not exceed $MAX_LENGTH characters"
         }
-        require(value.length in MIN_DIGITS..MAX_DIGITS) {
-            "Account number must have $MIN_DIGITS..$MAX_DIGITS digits"
+        require(value.none(Char::isWhitespace)) {
+            "Account number must not contain whitespace"
         }
     }
 
     companion object {
-        private const val MIN_DIGITS = 10
-        private const val MAX_DIGITS = 14
+        // IBAN 최대 34자 + 버퍼. 어떤 결제 시스템도 50자 초과 식별자 안 씀.
+        private const val MAX_LENGTH = 50
     }
 }
