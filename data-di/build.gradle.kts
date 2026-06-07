@@ -26,6 +26,7 @@ dependencies {
     implementation(projects.domain)
     implementation(projects.data)
     implementation(projects.data.remote.kftc)
+    implementation(projects.data.remote.fx)
     implementation(projects.data.local)
 
     implementation(libs.hilt.android)
