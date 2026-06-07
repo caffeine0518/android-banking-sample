@@ -10,9 +10,9 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class NetworkModule {
+internal abstract class NetworkModule {
 
     @Binds
     @Singleton
-    abstract fun bindKftcApiService(impl: KftcApiServiceImpl): KftcApiService
+    internal abstract fun bindKftcApiService(impl: KftcApiServiceImpl): KftcApiService
 }
