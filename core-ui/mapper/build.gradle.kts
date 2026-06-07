@@ -23,4 +23,6 @@ android {
 dependencies {
     api(projects.domain)
     api(projects.coreUi.model)
+
+    implementation(libs.javax.inject)
 }
