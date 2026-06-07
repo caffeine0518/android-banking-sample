@@ -1,19 +1,27 @@
 package com.study.bank.feature.home.ui.model
 
-import com.study.bank.core.ui.mapper.toUi
+import com.study.bank.core.ui.mapper.MoneyUiMapper
 import com.study.bank.domain.model.account.Account
 import com.study.bank.domain.model.account.AccountType
+import javax.inject.Inject
+import javax.inject.Singleton
 
-internal fun Account.toUi(): AccountUi = AccountUi(
-    id = id.value,
-    bankDisplayName = bankCode.displayName,
-    type = type.toUi(),
-    nickname = nickname,
-    balance = balance.toUi(),
-)
+@Singleton
+class AccountUiMapper @Inject constructor(
+    private val moneyUiMapper: MoneyUiMapper,
+) {
 
-internal fun AccountType.toUi(): AccountTypeUi = when (this) {
-    AccountType.CHECKING -> AccountTypeUi.CHECKING
-    AccountType.SAVINGS -> AccountTypeUi.SAVINGS
-    AccountType.DEPOSIT -> AccountTypeUi.DEPOSIT
+    fun map(account: Account): AccountUi = AccountUi(
+        id = account.id.value,
+        bankDisplayName = account.bankCode.displayName,
+        type = mapType(account.type),
+        nickname = account.nickname,
+        balance = moneyUiMapper.map(account.balance),
+    )
+
+    private fun mapType(type: AccountType): AccountTypeUi = when (type) {
+        AccountType.CHECKING -> AccountTypeUi.CHECKING
+        AccountType.SAVINGS -> AccountTypeUi.SAVINGS
+        AccountType.DEPOSIT -> AccountTypeUi.DEPOSIT
+    }
 }

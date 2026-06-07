@@ -8,7 +8,7 @@ import com.study.bank.domain.repository.AccountRepository
 import com.study.bank.feature.home.contract.HomeEffect
 import com.study.bank.feature.home.contract.HomeIntent
 import com.study.bank.feature.home.contract.HomeState
-import com.study.bank.feature.home.ui.model.toUi
+import com.study.bank.feature.home.ui.model.AccountUiMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.catch
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val accountRepository: AccountRepository,
+    private val accountUiMapper: AccountUiMapper,
 ) : ViewModel() {
 
     private val store = MviStore<HomeState, HomeIntent, HomeEffect>(
@@ -53,7 +54,7 @@ class HomeViewModel @Inject constructor(
             .collect { accounts ->
                 setState {
                     copy(
-                        accounts = accounts.map { it.toUi() },
+                        accounts = accounts.map(accountUiMapper::map),
                         isLoading = false,
                     )
                 }
