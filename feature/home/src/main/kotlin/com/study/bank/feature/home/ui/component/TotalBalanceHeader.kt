@@ -18,7 +18,7 @@ import com.study.bank.feature.home.R
 
 @Composable
 internal fun TotalBalanceHeader(
-    totalsByCurrency: List<MoneyUi>,
+    totalAssets: MoneyUi?,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -32,12 +32,10 @@ internal fun TotalBalanceHeader(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(8.dp))
-        totalsByCurrency.forEach { total ->
-            Text(
-                text = total.format(),
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-            )
-        }
+        Text(
+            text = totalAssets?.format().orEmpty(),
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+        )
     }
 }
