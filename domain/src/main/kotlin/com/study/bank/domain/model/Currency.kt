@@ -14,6 +14,10 @@ enum class Currency(val code: String, val exponent: Int) {
     ;
 
     companion object {
+        val DEFAULT: Currency = USD
+
         fun byCode(code: String): Currency? = entries.firstOrNull { it.code == code }
+
+        fun byCodeOrDefault(code: String?): Currency = code?.let(::byCode) ?: DEFAULT
     }
 }
