@@ -14,7 +14,6 @@ import com.study.bank.feature.home.contract.HomeState
 import com.study.bank.feature.home.ui.model.AccountUiMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -26,7 +25,7 @@ class HomeViewModel @Inject constructor(
     private val totalAssetsUseCase: TotalAssetsUseCase,
     private val accountUiMapper: AccountUiMapper,
     private val moneyUiMapper: MoneyUiMapper,
-    private val localeTargetCurrency: LocaleTargetCurrency,
+    localeTargetCurrency: LocaleTargetCurrency,
 ) : ViewModel() {
 
     private val store = MviStore<HomeState, HomeIntent, HomeEffect>(
@@ -34,8 +33,7 @@ class HomeViewModel @Inject constructor(
         scope = viewModelScope,
     ) { intent ->
         when (intent) {
-            HomeIntent.Load -> loadHome()
-            HomeIntent.Refresh -> loadHome()
+            HomeIntent.Refresh -> refresh()
             is HomeIntent.AccountClicked ->
                 sendEffect(HomeEffect.NavigateToAccountDetail(intent.accountId))
         }
@@ -45,44 +43,48 @@ class HomeViewModel @Inject constructor(
     val effect: Flow<HomeEffect> = store.effect
 
     init {
-        store.sendIntent(HomeIntent.Load)
+        collectAccounts()
+        collectTotalAssets(localeTargetCurrency.resolve())
+        store.sendIntent(HomeIntent.Refresh)
     }
 
     fun onIntent(intent: HomeIntent) {
         store.sendIntent(intent)
     }
 
-    private suspend fun MviStore<HomeState, HomeIntent, HomeEffect>.loadHome() {
+    private suspend fun MviStore<HomeState, HomeIntent, HomeEffect>.refresh() {
         setState { copy(isLoading = true) }
-        val target = localeTargetCurrency.resolve()
-        coroutineScope {
-            launch { collectAccounts() }
-            launch { collectTotalAssets(target) }
+        runCatching {
+            accountRepository.refresh()
+        }.onFailure { error ->
+            Log.e(TAG, "refresh failed", error)
         }
         setState { copy(isLoading = false) }
     }
 
-    private suspend fun MviStore<HomeState, HomeIntent, HomeEffect>.collectAccounts() {
-        accountRepository.observeAccounts()
-            .catch { error -> Log.e(TAG, "Failed to load accounts", error) }
-            .collect { accounts ->
-                setState { copy(accounts = accounts.map(accountUiMapper::map)) }
-            }
+    private fun collectAccounts() {
+        viewModelScope.launch {
+            accountRepository.observeAccounts()
+                .catch { error -> Log.e(TAG, "Failed to observe accounts", error) }
+                .collect { accounts ->
+                    store.setState { copy(accounts = accounts.map(accountUiMapper::map)) }
+                }
+        }
     }
 
-    private suspend fun MviStore<HomeState, HomeIntent, HomeEffect>.collectTotalAssets(
-        target: Currency,
-    ) {
-        totalAssetsUseCase(target)
-            .catch { error -> Log.e(TAG, "Failed to load total assets", error) }
-            .collect { totals ->
-                setState {
-                    copy(
-                        totalAssets = moneyUiMapper.map(totals.converted),
-                        unconvertedAssets = totals.unconverted.map(moneyUiMapper::map),
-                    )
+    private fun collectTotalAssets(target: Currency) {
+        viewModelScope.launch {
+            totalAssetsUseCase(target)
+                .catch { error -> Log.e(TAG, "Failed to observe total assets", error) }
+                .collect { totals ->
+                    store.setState {
+                        copy(
+                            totalAssets = moneyUiMapper.map(totals.converted),
+                            unconvertedAssets = totals.unconverted.map(moneyUiMapper::map),
+                        )
+                    }
                 }
-            }
+        }
     }
 
     private companion object {
