@@ -4,4 +4,6 @@
     <string name="money_format_usd" translatable="false">$%1$s</string>
     <string name="money_format_eur" translatable="false">€%1$s</string>
     <string name="money_format_jpy" translatable="false">￥%1$s</string>
+    <string name="money_format_twd" translatable="false">NT$%1$s</string>
+    <string name="money_format_vnd" translatable="false">₫%1$s</string>
 </resources>

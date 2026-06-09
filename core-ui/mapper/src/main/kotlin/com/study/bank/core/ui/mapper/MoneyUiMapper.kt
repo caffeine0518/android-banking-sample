@@ -20,5 +20,7 @@ class MoneyUiMapper @Inject constructor() {
         Currency.USD -> CurrencyUi.USD
         Currency.JPY -> CurrencyUi.JPY
         Currency.EUR -> CurrencyUi.EUR
+        Currency.TWD -> CurrencyUi.TWD
+        Currency.VND -> CurrencyUi.VND
     }
 }

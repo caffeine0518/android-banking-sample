@@ -13,6 +13,8 @@ fun MoneyUi.format(): String {
         CurrencyUi.USD -> R.string.money_format_usd
         CurrencyUi.EUR -> R.string.money_format_eur
         CurrencyUi.JPY -> R.string.money_format_jpy
+        CurrencyUi.TWD -> R.string.money_format_twd
+        CurrencyUi.VND -> R.string.money_format_vnd
     }
     return stringResource(resId, number)
 }
