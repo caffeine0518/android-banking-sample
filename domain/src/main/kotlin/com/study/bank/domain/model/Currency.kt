@@ -11,13 +11,21 @@ enum class Currency(val code: String, val exponent: Int) {
     USD("USD", 2),
     JPY("JPY", 0),
     EUR("EUR", 2),
+    // KEXIM API 미커버 통화 — 사용자는 외화통장으로 보유 가능하지만 환산 불가 경로로 흐름.
+    TWD("TWD", 2),
+    VND("VND", 0),
     ;
 
     companion object {
+        /**
+         * 통화를 결정할 수 없을 때(로케일 해석 실패, 미지원 코드 등) 모든 피쳐가 따를 기본값.
+         * USD는 국제 결제·환율의 사실상 기준 통화라 안전한 fallback.
+         */
         val DEFAULT: Currency = USD
 
         fun byCode(code: String): Currency? = entries.firstOrNull { it.code == code }
 
+        /** [code]가 null이거나 미지원이면 [DEFAULT]로 폴백. */
         fun byCodeOrDefault(code: String?): Currency = code?.let(::byCode) ?: DEFAULT
     }
 }
