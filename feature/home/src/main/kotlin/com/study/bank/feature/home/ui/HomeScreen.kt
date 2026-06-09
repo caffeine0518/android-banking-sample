@@ -71,7 +71,10 @@ private fun HomeContent(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
-            TotalBalanceHeader(totalAssets = state.totalAssets)
+            TotalBalanceHeader(
+                totalAssets = state.totalAssets,
+                unconvertedAssets = state.unconvertedAssets,
+            )
             if (state.isLoading) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }

@@ -3,6 +3,7 @@
     <string name="home_title">내 계좌</string>
     <string name="home_action_refresh">새로고침</string>
     <string name="home_total_balance_label">총 자산</string>
+    <string name="home_unconverted_asset_item" translatable="false">+ %1$s</string>
 
     <string name="home_account_type_checking">입출금</string>
     <string name="home_account_type_savings">세이프박스</string>

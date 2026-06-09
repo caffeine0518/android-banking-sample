@@ -24,7 +24,7 @@ class TotalAssetsUseCaseTest {
 
     // UseCase의 target 파라미터가 실제로 결과를 바꾸는지 (KRW 하드코드 회귀 방지).
     @Test
-    fun `같은 계좌 집합도 target에 따라 다른 통화의 Money를 반환`() = runTest {
+    fun `같은 계좌 집합도 target에 따라 다른 통화의 converted 합계를 반환`() = runTest {
         val accounts = listOf(
             account("acc-1", 1_000_000, Currency.KRW),
             account("acc-2", "1000.00", Currency.USD),
@@ -43,17 +43,17 @@ class TotalAssetsUseCaseTest {
             )),
         )
 
-        val totalKrw = useCase(Currency.KRW).first()
-        val totalUsd = useCase(Currency.USD).first()
+        val krwTotal = useCase(Currency.KRW).first()
+        val usdTotal = useCase(Currency.USD).first()
 
-        assertEquals(Currency.KRW, totalKrw.currency)
-        assertEquals(Currency.USD, totalUsd.currency)
         // KRW total: 1,000,000 + 1000*1350 = 2,350,000
-        assertEquals(Money.of(2_350_000, Currency.KRW), totalKrw)
-        // USD total: 1,000,000*0.00074074 + 1000 ≈ 740.74 + 1000 = 1740.74
+        assertEquals(Money.of(2_350_000, Currency.KRW), krwTotal.converted)
+        assertTrue(krwTotal.unconverted.isEmpty())
+        // USD total: 1,000,000*0.00074074 + 1000 ≈ 1740.74
+        assertEquals(Currency.USD, usdTotal.converted.currency)
         assertTrue(
-            totalUsd.amount > BigDecimal("1740") && totalUsd.amount < BigDecimal("1741"),
-            "USD total: ${totalUsd.amount}",
+            usdTotal.converted.amount > BigDecimal("1740") && usdTotal.converted.amount < BigDecimal("1741"),
+            "USD total: ${usdTotal.converted.amount}",
         )
     }
 
@@ -71,14 +71,15 @@ class TotalAssetsUseCaseTest {
             )),
         )
 
-        val total = useCase(Currency.USD).first()
+        val totals = useCase(Currency.USD).first()
 
-        assertEquals(Money.of(BigDecimal("350.50"), Currency.USD), total)
+        assertEquals(Money.of(BigDecimal("350.50"), Currency.USD), totals.converted)
+        assertTrue(totals.unconverted.isEmpty())
     }
 
     // 빈 입력의 zero가 target에 종속 — 잘못된 통화로 0이 흘러가지 않게.
     @Test
-    fun `계좌가 없으면 어떤 target이든 그 통화의 0`() = runTest {
+    fun `계좌가 없으면 어떤 target이든 그 통화의 0과 빈 unconverted`() = runTest {
         val useCase = TotalAssetsUseCase(
             FakeAccountRepository(emptyList()),
             FakeFxRateRepository(ratesByTarget = mapOf(
@@ -88,32 +89,39 @@ class TotalAssetsUseCaseTest {
             )),
         )
 
-        assertEquals(Money.zero(Currency.KRW), useCase(Currency.KRW).first())
-        assertEquals(Money.zero(Currency.USD), useCase(Currency.USD).first())
-        assertEquals(Money.zero(Currency.EUR), useCase(Currency.EUR).first())
+        listOf(Currency.KRW, Currency.USD, Currency.EUR).forEach { target ->
+            val totals = useCase(target).first()
+            assertEquals(Money.zero(target), totals.converted)
+            assertTrue(totals.unconverted.isEmpty())
+        }
     }
 
-    // ----- 환율 누락 방어 -----
+    // ----- 환산 불가 자산은 unconverted로 분리 -----
 
-    // 환율 누락 한 건이 전체 합계를 깨지 않도록 (방어적 fold).
+    // 환율 누락이 silent drop이 아니라 unconverted 리스트로 노출되는지 (이전엔 합산에서만 빠짐).
     @Test
-    fun `target 환율 시트에 없는 통화 계좌는 합산에서 빠지고 나머지는 그대로`() = runTest {
+    fun `환율 없는 통화 계좌는 unconverted에 원본 통화 그대로 담긴다`() = runTest {
         val accounts = listOf(
             account("acc-1", "100.00", Currency.USD),
-            account("acc-2", "200.00", Currency.EUR), // EUR rate missing in target view
+            account("acc-2", "200.00", Currency.EUR), // EUR rate missing
             account("acc-3", "50.00", Currency.USD),
+            account("acc-4", 30000, Currency.JPY), // JPY rate missing
         )
         val useCase = TotalAssetsUseCase(
             FakeAccountRepository(accounts),
             FakeFxRateRepository(ratesByTarget = mapOf(
-                Currency.USD to mapOf(Currency.USD to BigDecimal.ONE), // EUR 누락
+                Currency.USD to mapOf(Currency.USD to BigDecimal.ONE),
             )),
         )
 
-        val total = useCase(Currency.USD).first()
+        val totals = useCase(Currency.USD).first()
 
-        // EUR 계좌 제외, USD 계좌만: 100 + 50 = 150
-        assertEquals(Money.of(BigDecimal("150.00"), Currency.USD), total)
+        // converted: USD 계좌만 합산 (100 + 50 = 150)
+        assertEquals(Money.of(BigDecimal("150.00"), Currency.USD), totals.converted)
+        // unconverted: EUR/JPY 계좌가 원본 통화 그대로 두 항목
+        assertEquals(2, totals.unconverted.size)
+        assertTrue(totals.unconverted.any { it.currency == Currency.EUR })
+        assertTrue(totals.unconverted.any { it.currency == Currency.JPY })
     }
 
     private fun account(id: String, amount: Long, currency: Currency) = baseAccount(id, Money.of(amount, currency))

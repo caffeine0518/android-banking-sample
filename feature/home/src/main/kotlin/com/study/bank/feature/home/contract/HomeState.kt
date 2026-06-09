@@ -6,5 +6,6 @@ import com.study.bank.feature.home.ui.model.AccountUi
 data class HomeState(
     val accounts: List<AccountUi> = emptyList(),
     val totalAssets: MoneyUi? = null,
+    val unconvertedAssets: List<MoneyUi> = emptyList(),
     val isLoading: Boolean = false,
 )

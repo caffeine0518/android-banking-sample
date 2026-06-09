@@ -75,8 +75,13 @@ class HomeViewModel @Inject constructor(
     ) {
         totalAssetsUseCase(target)
             .catch { error -> Log.e(TAG, "Failed to load total assets", error) }
-            .collect { total ->
-                setState { copy(totalAssets = moneyUiMapper.map(total)) }
+            .collect { totals ->
+                setState {
+                    copy(
+                        totalAssets = moneyUiMapper.map(totals.converted),
+                        unconvertedAssets = totals.unconverted.map(moneyUiMapper::map),
+                    )
+                }
             }
     }
 

@@ -19,6 +19,7 @@ import com.study.bank.feature.home.R
 @Composable
 internal fun TotalBalanceHeader(
     totalAssets: MoneyUi?,
+    unconvertedAssets: List<MoneyUi>,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -37,5 +38,14 @@ internal fun TotalBalanceHeader(
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
         )
+        // 환산 불가 자산을 "+ £1,850.40" 형태의 추가 라인으로 — 총자산에 합산되는 자산임을 시각화.
+        for (money in unconvertedAssets) {
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.home_unconverted_asset_item, money.format()),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }

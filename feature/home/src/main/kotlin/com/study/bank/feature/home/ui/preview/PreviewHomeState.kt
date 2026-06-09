@@ -52,5 +52,10 @@ internal val PreviewHomeState = HomeState(
             balance = MoneyUi(BigDecimal("842.15"), CurrencyUi.EUR),
         ),
     ),
-    totalAssets = MoneyUi(BigDecimal("19957280"), CurrencyUi.KRW),
+    totalAssets = MoneyUi(BigDecimal("15297320"), CurrencyUi.KRW),
+    unconvertedAssets = listOf(
+        MoneyUi(BigDecimal("3245.80"), CurrencyUi.USD),
+        MoneyUi(BigDecimal("128400"), CurrencyUi.JPY),
+        MoneyUi(BigDecimal("842.15"), CurrencyUi.EUR),
+    ),
 )
