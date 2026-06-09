@@ -1,6 +1,7 @@
 package com.study.bank.data.repository.account
 
 import android.util.Log
+import com.study.bank.data.local.dao.AccountDao
 import com.study.bank.data.remote.kftc.api.KftcApiService
 import com.study.bank.domain.model.account.Account
 import com.study.bank.domain.model.account.AccountId
@@ -11,26 +12,31 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
 @Singleton
 class AccountRepositoryImpl @Inject constructor(
     private val api: KftcApiService,
-    private val mapper: AccountMapper,
+    private val dao: AccountDao,
+    private val dtoMapper: AccountMapper,
+    private val entityMapper: AccountEntityMapper,
 ) : AccountRepository {
 
-    override fun observeAccounts(): Flow<List<Account>> = flow {
-        emit(fetchAccounts())
-    }
+    override fun observeAccounts(): Flow<List<Account>> =
+        dao.observeAll().map { entities -> entities.map(entityMapper::toDomain) }
 
     override fun observeAccount(id: AccountId): Flow<Account?> =
-        observeAccounts().map { accounts -> accounts.firstOrNull { it.id == id } }
+        dao.observeById(id.value).map { entity -> entity?.let(entityMapper::toDomain) }
 
     override suspend fun findAccount(id: AccountId): Account? =
-        fetchAccounts().firstOrNull { it.id == id }
+        dao.findById(id.value)?.let(entityMapper::toDomain)
 
-    private suspend fun fetchAccounts(): List<Account> {
+     override suspend fun refresh() {
+        val accounts = fetchFromKftc()
+        dao.replaceAll(accounts.map(entityMapper::toEntity))
+    }
+
+    private suspend fun fetchFromKftc(): List<Account> {
         val listResponse = api.getAccountList(userSeqNo = USER_SEQ_NO)
         return coroutineScope {
             listResponse.resList.map { item ->
@@ -41,7 +47,7 @@ class AccountRepositoryImpl @Inject constructor(
                             fintechUseNum = item.fintechUseNum,
                             tranDtime = TRAN_DTIME,
                         )
-                        mapper.map(item, balance)
+                        dtoMapper.map(item, balance)
                     }.onFailure { error ->
                         Log.e(TAG, "Failed to map account ${item.fintechUseNum}, skipping", error)
                     }.getOrNull()

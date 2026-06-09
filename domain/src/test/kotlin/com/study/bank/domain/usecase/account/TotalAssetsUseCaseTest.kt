@@ -143,6 +143,7 @@ class TotalAssetsUseCaseTest {
             flowOf(accounts.firstOrNull { it.id == id })
         override suspend fun findAccount(id: AccountId): Account? =
             accounts.firstOrNull { it.id == id }
+        override suspend fun refresh() = Unit
     }
 
     private class FakeFxRateRepository(
