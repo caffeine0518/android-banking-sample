@@ -57,5 +57,30 @@ internal object KftcAccountSeed {
             currencyCode = "KRW",
             productName = "신한 주거래 통장",
         ),
+        // KEXIM API가 TWD/VND 환율을 제공하지 않아 자연스럽게 환산 불가 경로로 흐름.
+        SeedAccount(
+            fintechUseNum = "120220112345678901234005",
+            bankCodeStd = "092",
+            bankName = "토스뱅크",
+            accountNumMasked = "1000-77-***3322",
+            accountAlias = "대만 여행자금",
+            accountHolderName = "홍길동",
+            accountType = "1",
+            balanceAmt = "12500.50",
+            currencyCode = "TWD",
+            productName = "토스뱅크 외화통장",
+        ),
+        SeedAccount(
+            fintechUseNum = "120220112345678901234006",
+            bankCodeStd = "092",
+            bankName = "토스뱅크",
+            accountNumMasked = "1000-66-***1144",
+            accountAlias = "베트남 동",
+            accountHolderName = "홍길동",
+            accountType = "1",
+            balanceAmt = "1850000",
+            currencyCode = "VND",
+            productName = "토스뱅크 외화통장",
+        ),
     )
 }
