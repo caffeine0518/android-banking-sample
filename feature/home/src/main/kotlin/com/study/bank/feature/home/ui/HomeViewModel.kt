@@ -8,8 +8,10 @@ import com.study.bank.core.ui.mvi.MviStore
 import com.study.bank.domain.model.Currency
 import com.study.bank.domain.repository.AccountRepository
 import com.study.bank.domain.usecase.account.TotalAssetsUseCase
+import com.study.bank.feature.home.contract.HomeAction
 import com.study.bank.feature.home.contract.HomeEffect
 import com.study.bank.feature.home.contract.HomeIntent
+import com.study.bank.feature.home.contract.HomeInternalAction
 import com.study.bank.feature.home.contract.HomeState
 import com.study.bank.feature.home.ui.model.AccountUiMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,14 +30,37 @@ class HomeViewModel @Inject constructor(
     localeTargetCurrency: LocaleTargetCurrency,
 ) : ViewModel() {
 
-    private val store = MviStore<HomeState, HomeIntent, HomeEffect>(
-        initialState = HomeState(isLoading = true),
+    private val store = MviStore<HomeState, HomeAction, HomeEffect>(
+        initialState = HomeState(),
         scope = viewModelScope,
-    ) { intent ->
-        when (intent) {
-            HomeIntent.Refresh -> refresh()
-            is HomeIntent.AccountClicked ->
-                sendEffect(HomeEffect.NavigateToAccountDetail(intent.accountId))
+    ) { action ->
+        when (action) {
+            HomeIntent.Refresh -> {
+                if (state.isLoading) return@MviStore
+                setState { copy(isLoading = true) }
+                startRefresh()
+            }
+
+            is HomeIntent.AccountClicked -> {
+                sendEffect(HomeEffect.NavigateToAccountDetail(action.accountId))
+            }
+
+            is HomeInternalAction.AccountsUpdated -> {
+                setState {
+                    copy(accounts = action.accounts.map(accountUiMapper::map))
+                }
+            }
+
+            is HomeInternalAction.TotalAssetsUpdated -> {
+                setState {
+                    copy(
+                        totalAssets = moneyUiMapper.map(action.totals.converted),
+                        unconvertedAssets = action.totals.unconverted.map(moneyUiMapper::map),
+                    )
+                }
+            }
+
+            is HomeInternalAction.RefreshFinished -> setState { copy(isLoading = false) }
         }
     }
 
@@ -52,14 +77,13 @@ class HomeViewModel @Inject constructor(
         store.sendIntent(intent)
     }
 
-    private suspend fun MviStore<HomeState, HomeIntent, HomeEffect>.refresh() {
-        setState { copy(isLoading = true) }
-        runCatching {
-            accountRepository.refresh()
-        }.onFailure { error ->
-            Log.e(TAG, "refresh failed", error)
+    private fun startRefresh() {
+        viewModelScope.launch {
+            val error = runCatching { accountRepository.refresh() }
+                .exceptionOrNull()
+                ?.also { Log.e(TAG, "refresh failed", it) }
+            store.sendIntent(HomeInternalAction.RefreshFinished(error))
         }
-        setState { copy(isLoading = false) }
     }
 
     private fun collectAccounts() {
@@ -67,7 +91,7 @@ class HomeViewModel @Inject constructor(
             accountRepository.observeAccounts()
                 .catch { error -> Log.e(TAG, "Failed to observe accounts", error) }
                 .collect { accounts ->
-                    store.setState { copy(accounts = accounts.map(accountUiMapper::map)) }
+                    store.sendIntent(HomeInternalAction.AccountsUpdated(accounts))
                 }
         }
     }
@@ -77,12 +101,7 @@ class HomeViewModel @Inject constructor(
             totalAssetsUseCase(target)
                 .catch { error -> Log.e(TAG, "Failed to observe total assets", error) }
                 .collect { totals ->
-                    store.setState {
-                        copy(
-                            totalAssets = moneyUiMapper.map(totals.converted),
-                            unconvertedAssets = totals.unconverted.map(moneyUiMapper::map),
-                        )
-                    }
+                    store.sendIntent(HomeInternalAction.TotalAssetsUpdated(totals))
                 }
         }
     }
