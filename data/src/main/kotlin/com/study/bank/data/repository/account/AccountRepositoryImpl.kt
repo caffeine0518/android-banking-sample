@@ -12,6 +12,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 @Singleton
@@ -23,10 +24,14 @@ class AccountRepositoryImpl @Inject constructor(
 ) : AccountRepository {
 
     override fun observeAccounts(): Flow<List<Account>> =
-        dao.observeAll().map { entities -> entities.map(entityMapper::toDomain) }
+        dao.observeAll()
+            .map { entities -> entities.map(entityMapper::toDomain) }
+            .distinctUntilChanged()
 
     override fun observeAccount(id: AccountId): Flow<Account?> =
-        dao.observeById(id.value).map { entity -> entity?.let(entityMapper::toDomain) }
+        dao.observeById(id.value)
+            .map { entity -> entity?.let(entityMapper::toDomain) }
+            .distinctUntilChanged()
 
     override suspend fun findAccount(id: AccountId): Account? =
         dao.findById(id.value)?.let(entityMapper::toDomain)
