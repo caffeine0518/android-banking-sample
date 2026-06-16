@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.roborazzi)
 }
 
 android {
@@ -61,6 +62,9 @@ dependencies {
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui.test.junit4)
     testImplementation(libs.robolectric)
+    // Robolectric 렌더를 PNG로 캡처하는 스크린샷(골든) 테스트.
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.compose)
     // createComposeRule()가 띄우는 호스트 ComponentActivity 제공.
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
