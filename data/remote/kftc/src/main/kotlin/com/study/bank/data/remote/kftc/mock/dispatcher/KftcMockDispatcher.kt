@@ -17,7 +17,16 @@ internal class KftcMockDispatcher(
     private val responses: KftcMockResponses = KftcMockResponses(),
 ) : Dispatcher() {
 
+    /**
+     * 테스트 전용 장애 주입 스위치. true면 모든 요청에 [MockError.ServerFault](5xx)를 응답해
+     * "새로고침 실패 → 에러 스낵바" 경로를 E2E에서 재현한다. 여러 스레드(메인/네트워크)가 읽으므로 @Volatile.
+     */
+    @Volatile
+    var faultEnabled: Boolean = false
+
     override fun dispatch(request: RecordedRequest): MockResponse {
+        if (faultEnabled) return responses.error(MockError.ServerFault)
+
         val url = request.requestUrl ?: return responses.error(MockError.InvalidUrl)
 
         return when (url.encodedPath) {

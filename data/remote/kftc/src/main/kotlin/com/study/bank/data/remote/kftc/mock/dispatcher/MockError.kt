@@ -30,4 +30,10 @@ internal sealed interface MockError {
         override val httpCode = HTTP_NOT_FOUND
         override val message = "존재하지 않는 fintech_use_num: $fintechUseNum"
     }
+
+    /** 테스트 전용 장애 주입: 서버 일시 장애(5xx). 새로고침 실패 경로 재현에 쓰인다. */
+    data object ServerFault : MockError {
+        override val httpCode = HTTP_SERVER_ERROR
+        override val message = "서버 일시 장애"
+    }
 }
