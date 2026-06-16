@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.study.bank.core.ui.mapper.MoneyUiMapper
 import com.study.bank.core.ui.mvi.MviStore
+import com.study.bank.domain.coroutine.DispatcherProvider
 import com.study.bank.domain.model.Currency
 import com.study.bank.domain.repository.AccountRepository
 import com.study.bank.domain.usecase.account.TotalAssetsUseCase
@@ -27,12 +28,14 @@ class HomeViewModel @Inject constructor(
     private val totalAssetsUseCase: TotalAssetsUseCase,
     private val accountUiMapper: AccountUiMapper,
     private val moneyUiMapper: MoneyUiMapper,
-    localeTargetCurrency: LocaleTargetCurrency,
+    private val localeTargetCurrency: LocaleTargetCurrency,
+    private val dispatcherProvider: DispatcherProvider,
 ) : ViewModel() {
 
     private val store = MviStore<HomeState, HomeAction, HomeEffect>(
         initialState = HomeState(),
         scope = viewModelScope,
+        dispatcher = dispatcherProvider.default,
     ) { action ->
         when (action) {
             HomeIntent.Refresh -> {

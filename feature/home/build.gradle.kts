@@ -25,6 +25,11 @@ android {
     buildFeatures {
         compose = true
     }
+
+    testOptions {
+        // ViewModel이 android.util.Log를 직접 호출 → JVM 단위 테스트에서 stub(0/false) 반환.
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -45,4 +50,8 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     debugImplementation(libs.androidx.compose.ui.tooling)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
 }
