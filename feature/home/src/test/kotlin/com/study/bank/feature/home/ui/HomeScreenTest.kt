@@ -12,6 +12,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.study.bank.core.ui.model.CurrencyUi
 import com.study.bank.core.ui.model.MoneyUi
+import com.study.bank.feature.home.R
 import com.study.bank.feature.home.contract.HomeIntent
 import com.study.bank.feature.home.contract.HomeState
 import com.study.bank.feature.home.ui.model.AccountTypeUi
@@ -22,6 +23,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 
 /**
  * [HomeScreen]의 화면 단위 테스트.
@@ -38,6 +40,9 @@ class HomeScreenTest {
 
     /** HomeScreen이 방출한 인텐트를 담아 두는 스파이. */
     private val intents = mutableListOf<HomeIntent>()
+
+    /** UI 카피는 이 모듈이 소유한 string 리소스가 정답이므로, 리터럴 중복 대신 리소스를 참조한다. */
+    private fun string(id: Int) = RuntimeEnvironment.getApplication().getString(id)
 
     private fun setHomeScreen(state: HomeState) {
         composeRule.setContent {
@@ -81,7 +86,7 @@ class HomeScreenTest {
     fun `새로고침 버튼을 누르면 Refresh 인텐트가 방출된다`() {
         setHomeScreen(HomeState())
 
-        composeRule.onNodeWithText("새로고침").performClick()
+        composeRule.onNodeWithText(string(R.string.home_action_refresh)).performClick()
 
         assertEquals(listOf(HomeIntent.Refresh), intents)
     }
