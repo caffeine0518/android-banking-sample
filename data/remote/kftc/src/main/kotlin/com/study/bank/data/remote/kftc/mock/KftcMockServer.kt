@@ -8,6 +8,7 @@ import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import okhttp3.tls.HandshakeCertificates
 import okhttp3.tls.HeldCertificate
+import java.net.InetAddress
 import java.util.concurrent.TimeUnit
 
 /**
@@ -45,13 +46,20 @@ class KftcMockServer @Inject constructor() {
             .build()
         server.useHttps(serverCertificates.sslSocketFactory(), false)
         server.dispatcher = dispatcher
-        server.start()
+        // start()는 getByName("localhost")로 이름 해석 → 메인 스레드면 NetworkOnMainThreadException.
+        // raw IPv4 바이트로 바인딩해 해석 없이(메인 스레드 안전) ::1 매칭까지 회피한다.
+        server.start(LOOPBACK_ADDRESS, 0)
         started = true
     }
 
     fun baseUrl(): HttpUrl {
         check(started) { "KftcMockServer가 아직 start되지 않았다" }
-        return server.url("/")
+        // server.url("/")은 canonicalHostName(역DNS)을 타 메인 스레드 네트워크가 된다. 바인딩과 같은 IPv4로 직접 구성.
+        return HttpUrl.Builder()
+            .scheme("https")
+            .host(LOOPBACK_HOST)
+            .port(server.port)
+            .build()
     }
 
     fun shutdown() {
@@ -63,4 +71,10 @@ class KftcMockServer @Inject constructor() {
     /** 테스트 전용: 가장 오래된 수신 요청 1건을 큐에서 꺼낸다. */
     internal fun takeRequest(timeoutMs: Long = 1_000): RecordedRequest? =
         server.takeRequest(timeoutMs, TimeUnit.MILLISECONDS)
+
+    private companion object {
+        const val LOOPBACK_HOST = "127.0.0.1"
+        // 이름 해석 없이 IPv4 루프백 생성(메인 스레드 안전).
+        val LOOPBACK_ADDRESS: InetAddress = InetAddress.getByAddress(byteArrayOf(127, 0, 0, 1))
+    }
 }
