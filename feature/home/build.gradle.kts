@@ -29,6 +29,8 @@ android {
     testOptions {
         // ViewModel이 android.util.Log를 직접 호출 → JVM 단위 테스트에서 stub(0/false) 반환.
         unitTests.isReturnDefaultValues = true
+        // Robolectric이 stringResource 등 머지된 안드로이드 리소스를 읽을 수 있게 한다.
+        unitTests.isIncludeAndroidResources = true
     }
 }
 
@@ -54,4 +56,11 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
+
+    // Compose UI 테스트를 JVM(src/test)에서 Robolectric으로 구동.
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.robolectric)
+    // createComposeRule()가 띄우는 호스트 ComponentActivity 제공.
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
