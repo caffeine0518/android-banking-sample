@@ -1,9 +1,7 @@
 package com.study.bank
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
@@ -56,9 +54,3 @@ class HomeFlowEndToEndTest {
         composeRule.onNodeWithText("세이프박스").assertIsDisplayed()
     }
 }
-
-/** 비동기 로드(네트워크/DB)를 기다렸다가 해당 텍스트 노드가 나타날 때까지 폴링. */
-private fun ComposeContentTestRule.awaitText(text: String, timeoutMillis: Long = 10_000) =
-    waitUntil(timeoutMillis) {
-        onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
-    }
