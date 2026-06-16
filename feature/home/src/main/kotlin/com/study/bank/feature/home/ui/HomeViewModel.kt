@@ -60,7 +60,10 @@ class HomeViewModel @Inject constructor(
                 }
             }
 
-            is HomeInternalAction.RefreshFinished -> setState { copy(isLoading = false) }
+            is HomeInternalAction.RefreshFinished -> {
+                if (action.error != null) sendEffect(HomeEffect.ShowRefreshError)
+                setState { copy(isLoading = false) }
+            }
         }
     }
 
