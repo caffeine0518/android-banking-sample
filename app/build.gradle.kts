@@ -20,7 +20,8 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // @HiltAndroidTest가 HiltTestApplication 위에서 돌도록 커스텀 러너 사용.
+        testInstrumentationRunner = "com.study.bank.HiltTestRunner"
     }
 
     buildTypes {
@@ -63,6 +64,10 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    // 실제 MainActivity+BankNavHost+Hilt 그래프를 띄우는 E2E용 Hilt 테스트.
+    androidTestImplementation(libs.hilt.android.testing)
+    kspAndroidTest(libs.hilt.compiler)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
