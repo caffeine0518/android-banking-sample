@@ -1,4 +1,4 @@
-package com.study.bank.data.di
+package com.study.bank.data.di.local
 
 import android.content.Context
 import androidx.room.Room

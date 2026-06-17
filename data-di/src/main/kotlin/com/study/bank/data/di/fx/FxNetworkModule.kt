@@ -1,4 +1,4 @@
-package com.study.bank.data.di
+package com.study.bank.data.di.fx
 
 import com.study.bank.data.remote.fx.api.KeximApiService
 import com.study.bank.data.remote.fx.api.KeximApiServiceImpl

@@ -1,4 +1,4 @@
-package com.study.bank.data.di
+package com.study.bank.data.di.repository
 
 import com.study.bank.data.repository.account.AccountRepositoryImpl
 import com.study.bank.data.repository.fx.FxRateRepositoryImpl

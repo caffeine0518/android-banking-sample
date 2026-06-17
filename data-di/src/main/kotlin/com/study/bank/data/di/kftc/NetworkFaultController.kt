@@ -1,4 +1,4 @@
-package com.study.bank.data.di
+package com.study.bank.data.di.kftc
 
 /**
  * 테스트가 네트워크 응답을 정상↔장애로 토글하는 seam.

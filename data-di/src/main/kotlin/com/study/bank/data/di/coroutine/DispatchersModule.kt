@@ -1,4 +1,4 @@
-package com.study.bank.data.di
+package com.study.bank.data.di.coroutine
 
 import com.study.bank.domain.coroutine.DispatcherProvider
 import dagger.Module

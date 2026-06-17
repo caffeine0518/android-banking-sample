@@ -1,4 +1,4 @@
-package com.study.bank.data.di
+package com.study.bank.data.di.time
 
 import dagger.Module
 import dagger.Provides

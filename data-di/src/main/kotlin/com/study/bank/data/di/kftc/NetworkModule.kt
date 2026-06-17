@@ -1,4 +1,4 @@
-package com.study.bank.data.di
+package com.study.bank.data.di.kftc
 
 import com.study.bank.data.remote.kftc.api.KftcApiService
 import com.study.bank.data.remote.kftc.api.KftcApiServiceImpl
