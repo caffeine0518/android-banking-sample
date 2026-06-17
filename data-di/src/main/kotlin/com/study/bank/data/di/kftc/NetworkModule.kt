@@ -15,10 +15,4 @@ internal abstract class NetworkModule {
     @Binds
     @Singleton
     internal abstract fun bindKftcApiService(impl: KftcApiServiceImpl): KftcApiService
-
-    @Binds
-    @Singleton
-    internal abstract fun bindNetworkFaultController(
-        impl: KftcNetworkFaultController,
-    ): NetworkFaultController
 }
