@@ -45,7 +45,6 @@ android {
 dependencies {
     implementation(projects.navigation)
     implementation(projects.dataDi)
-    implementation(projects.data.remote.kftc)
     implementation(projects.coreUi.designsystem)
 
     implementation(libs.hilt.android)
