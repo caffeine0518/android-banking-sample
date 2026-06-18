@@ -5,6 +5,7 @@ internal const val PATH_LIST_FINUSE = "/v2.0/account/list_finuse"
 internal const val PATH_BALANCE_FIN_NUM = "/v2.0/account/balance/fin_num"
 internal const val PATH_TRANSACTION_LIST_FIN_NUM = "/v2.0/account/transaction_list/fin_num"
 internal const val PATH_TRANSFER_WITHDRAW_FIN_NUM = "/v2.0/transfer/withdraw/fin_num"
+internal const val PATH_INQUIRY_REAL_NAME = "/v2.0/inquiry/real_name"
 internal const val QUERY_FINTECH_USE_NUM = "fintech_use_num"
 
 internal const val HTTP_OK = 200

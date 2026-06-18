@@ -41,6 +41,11 @@ internal sealed interface MockError {
         override val message = "유효하지 않은 tran_amt: $raw"
     }
 
+    data object MissingInquiryBody : MockError {
+        override val httpCode = HTTP_BAD_REQUEST
+        override val message = "계좌실명조회 요청 본문 누락/파싱 실패"
+    }
+
     /** 테스트 전용 장애 주입: 서버 일시 장애(5xx). 새로고침 실패 경로 재현에 쓰인다. */
     data object ServerFault : MockError {
         override val httpCode = HTTP_SERVER_ERROR

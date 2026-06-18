@@ -19,3 +19,8 @@ internal const val TRAN_TYPE_TRANSFER = "이체"
 // 출금이체 업무 거절 시 bank_rsp_code(은행 응답코드). KFTC는 업무 거절을 HTTP 200 + rsp A0001 + 이 코드로 알린다.
 internal const val BANK_RSP_INSUFFICIENT_FUNDS = "311" // 출금계좌 잔액 부족
 internal const val BANK_RSP_CURRENCY_MISMATCH = "320" // mock 가드: 내부 이체 통화 불일치
+internal const val BANK_RSP_RECIPIENT_NOT_FOUND = "012" // 계좌실명조회: 수취 계좌 없음
+
+// 계좌실명조회 예금주 상태. mock 확장값 — 휴면/해지를 RecipientLookup.Inactive로 구분.
+internal const val ACCOUNT_STATUS_ACTIVE = "ACTIVE"
+internal const val ACCOUNT_STATUS_INACTIVE = "INACTIVE"
