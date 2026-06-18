@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.study.bank.data.local.BankDatabase
 import com.study.bank.data.local.dao.AccountDao
+import com.study.bank.data.local.dao.TransactionDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,4 +27,7 @@ internal object LocalModule {
 
     @Provides
     fun provideAccountDao(database: BankDatabase): AccountDao = database.accountDao()
+
+    @Provides
+    fun provideTransactionDao(database: BankDatabase): TransactionDao = database.transactionDao()
 }
