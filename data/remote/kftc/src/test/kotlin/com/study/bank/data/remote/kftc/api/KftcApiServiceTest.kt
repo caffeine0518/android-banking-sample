@@ -1,5 +1,6 @@
 package com.study.bank.data.remote.kftc.api
 
+import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryRequest
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
 import com.study.bank.data.remote.kftc.mock.KftcMockServer
 import com.study.bank.data.remote.kftc.network.NetworkJson
@@ -240,6 +241,40 @@ class KftcApiServiceTest {
         assertTrue("recv_client_account_num 필드: $body", body.contains("recv_client_account_num"))
         assertTrue("tran_amt 필드: $body", body.contains("tran_amt"))
     }
+
+    // --- 계좌실명조회 E2E ---
+
+    @Test
+    fun `inquireRealName 활성 수취인은 예금주명과 ACTIVE를 돌려준다`() = runTest {
+        val response = api.inquireRealName(realNameRequest(bank = "088", accountNum = "110-555-667788"))
+
+        assertEquals("A0000", response.rspCode)
+        assertEquals("김토스", response.accountHolderName)
+        assertEquals("ACTIVE", response.accountStatus)
+    }
+
+    @Test
+    fun `inquireRealName 휴면 수취인은 INACTIVE를 돌려준다`() = runTest {
+        val response = api.inquireRealName(realNameRequest(bank = "004", accountNum = "004-999-888777"))
+
+        assertEquals("A0000", response.rspCode)
+        assertEquals("INACTIVE", response.accountStatus)
+    }
+
+    @Test
+    fun `inquireRealName 미존재 계좌는 A0001과 bank_rsp_code를 돌려준다`() = runTest {
+        val response = api.inquireRealName(realNameRequest(bank = "092", accountNum = "0000-00-0000000"))
+
+        assertEquals("A0001", response.rspCode)
+        assertEquals("012", response.bankRspCode)
+    }
+
+    private fun realNameRequest(bank: String, accountNum: String) = RealNameInquiryRequest(
+        bankTranId = "M202300001U000099",
+        bankCodeStd = bank,
+        accountNum = accountNum,
+        tranDtime = "20260618103000",
+    )
 
     private fun externalRequest(from: String, amount: String) = WithdrawTransferRequest(
         bankTranId = "M202300001U000001",

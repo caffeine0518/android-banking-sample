@@ -7,6 +7,8 @@ import com.study.bank.data.remote.kftc.dto.account.AccountBalanceResponse
 import com.study.bank.data.remote.kftc.dto.account.AccountListResponse
 import com.study.bank.data.remote.kftc.dto.transaction.TransactionItemDto
 import com.study.bank.data.remote.kftc.dto.transaction.TransactionListResponse
+import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryRequest
+import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryResponse
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferResponse
 import com.study.bank.domain.model.Currency
@@ -269,6 +271,8 @@ class TransactionRepositoryImplTest {
             sortOrder: String,
         ): TransactionListResponse = error("unused")
         override suspend fun withdraw(request: WithdrawTransferRequest): WithdrawTransferResponse =
+            error("unused")
+        override suspend fun inquireRealName(request: RealNameInquiryRequest): RealNameInquiryResponse =
             error("unused")
     }
 }

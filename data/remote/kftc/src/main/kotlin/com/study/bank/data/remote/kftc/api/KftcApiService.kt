@@ -2,6 +2,8 @@ package com.study.bank.data.remote.kftc.api
 
 import com.study.bank.data.remote.kftc.dto.account.AccountBalanceResponse
 import com.study.bank.data.remote.kftc.dto.account.AccountListResponse
+import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryRequest
+import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryResponse
 import com.study.bank.data.remote.kftc.dto.transaction.TransactionListResponse
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferResponse
@@ -46,4 +48,7 @@ interface KftcApiService {
 
     @POST("v2.0/transfer/withdraw/fin_num")
     suspend fun withdraw(@Body request: WithdrawTransferRequest): WithdrawTransferResponse
+
+    @POST("v2.0/inquiry/real_name")
+    suspend fun inquireRealName(@Body request: RealNameInquiryRequest): RealNameInquiryResponse
 }

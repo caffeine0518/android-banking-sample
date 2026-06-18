@@ -7,6 +7,8 @@ import com.study.bank.data.remote.kftc.api.KftcApiService
 import com.study.bank.data.remote.kftc.dto.account.AccountBalanceResponse
 import com.study.bank.data.remote.kftc.dto.account.AccountListResponse
 import com.study.bank.data.remote.kftc.dto.account.FintechAccountDto
+import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryRequest
+import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryResponse
 import com.study.bank.data.remote.kftc.dto.transaction.TransactionListResponse
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferResponse
@@ -272,6 +274,9 @@ class AccountRepositoryImplTest {
 
         override suspend fun withdraw(request: WithdrawTransferRequest): WithdrawTransferResponse =
             error("이 테스트는 출금이체 엔드포인트를 쓰지 않는다")
+
+        override suspend fun inquireRealName(request: RealNameInquiryRequest): RealNameInquiryResponse =
+            error("이 테스트는 계좌실명조회 엔드포인트를 쓰지 않는다")
 
         private fun Seed.toFintechDto() = FintechAccountDto(
             fintechUseNum = fintechUseNum,
