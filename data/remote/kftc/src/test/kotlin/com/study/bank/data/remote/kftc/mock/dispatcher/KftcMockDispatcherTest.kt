@@ -119,6 +119,7 @@ class KftcMockDispatcherTest {
                     fintechUseNum = "TESTFINNUM0000001",
                     bankCodeStd = "092",
                     bankName = "토스뱅크",
+                    accountNum = "100-000-001",
                     accountNumMasked = "100-***-001",
                     accountAlias = "테스트통장",
                     accountHolderName = "테스터",
