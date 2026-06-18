@@ -14,6 +14,7 @@ import okhttp3.mockwebserver.RecordedRequest
 internal class KftcMockDispatcher(
     private val accountHandler: AccountRequestHandler,
     private val transferHandler: TransferRequestHandler,
+    private val inquiryHandler: InquiryRequestHandler,
     private val responses: KftcMockResponses,
 ) : Dispatcher() {
 
@@ -36,6 +37,7 @@ internal class KftcMockDispatcher(
                 accountHandler.transactionList(url.queryParameter(QUERY_FINTECH_USE_NUM))
             // peek()로 본문을 복사 읽어 takeRequest()의 RecordedRequest body를 소비하지 않는다.
             PATH_TRANSFER_WITHDRAW_FIN_NUM -> transferHandler.withdraw(request.body.peek().readUtf8())
+            PATH_INQUIRY_REAL_NAME -> inquiryHandler.realName(request.body.peek().readUtf8())
             else -> responses.error(MockError.UnknownEndpoint(url.encodedPath))
         }
     }

@@ -2,6 +2,7 @@ package com.study.bank.data.remote.kftc.mock.dispatcher
 
 import com.study.bank.data.remote.kftc.mock.KftcAccountSeed
 import com.study.bank.data.remote.kftc.mock.KftcBankState
+import com.study.bank.data.remote.kftc.mock.KftcRecipientSeed
 import com.study.bank.data.remote.kftc.mock.SeedAccount
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -42,6 +43,7 @@ class KftcMockDispatcherTest {
         return KftcMockDispatcher(
             accountHandler = AccountRequestHandler(state, responses),
             transferHandler = TransferRequestHandler(state, responses, MOCK_JSON),
+            inquiryHandler = InquiryRequestHandler(KftcRecipientSeed.directory(seed), responses, MOCK_JSON),
             responses = responses,
         )
     }
@@ -240,6 +242,58 @@ class KftcMockDispatcherTest {
         assertTrue("MissingTransferBody 메시지: $body", body.contains("출금이체 요청 본문"))
     }
 
+    // --- inquiry/real_name 라우팅 ---
+
+    @Test
+    fun `real_name 활성 수취인은 200과 예금주명 + ACTIVE를 돌려준다`() {
+        val (code, body) = post("/v2.0/inquiry/real_name", realNameBody(bank = "088", accountNum = "110-555-667788"))
+
+        assertEquals(200, code)
+        assertEnvelope(body, rspCode = "A0000")
+        assertTrue("예금주명: $body", body.contains("김토스"))
+        assertTrue("활성 상태: $body", body.contains(""""account_status":"ACTIVE""""))
+    }
+
+    @Test
+    fun `real_name은 계좌목록의 본인 계좌도 활성 수취인으로 조회한다`() {
+        // 계좌 시드에서 파생되므로, 예전 하드코딩 목록에 없던 신한 계좌로도 송금(내부이체) 가능해야 한다.
+        val (code, body) = post("/v2.0/inquiry/real_name", realNameBody(bank = "088", accountNum = "110-23-1237890"))
+
+        assertEquals(200, code)
+        assertEnvelope(body, rspCode = "A0000")
+        assertTrue("본인 예금주: $body", body.contains("홍길동"))
+        assertTrue("활성 상태: $body", body.contains(""""account_status":"ACTIVE""""))
+        assertTrue("식별자=해당 계좌 fintech_use_num: $body",
+            body.contains(""""account_id":"120220112345678901234004""""))
+    }
+
+    @Test
+    fun `real_name 휴면 수취인은 INACTIVE 상태를 돌려준다`() {
+        val (code, body) = post("/v2.0/inquiry/real_name", realNameBody(bank = "004", accountNum = "004-999-888777"))
+
+        assertEquals(200, code)
+        assertEnvelope(body, rspCode = "A0000")
+        assertTrue("휴면 상태: $body", body.contains(""""account_status":"INACTIVE""""))
+        assertTrue(body.contains("이휴면"))
+    }
+
+    @Test
+    fun `real_name 미존재 계좌는 200과 A0001 + bank_rsp_code`() {
+        val (code, body) = post("/v2.0/inquiry/real_name", realNameBody(bank = "092", accountNum = "0000-00-0000000"))
+
+        assertEquals(200, code)
+        assertTrue("업무 거절 A0001: $body", body.contains(""""rsp_code":"A0001""""))
+        assertTrue("수취 없음 bank_rsp_code 012: $body", body.contains(""""bank_rsp_code":"012""""))
+    }
+
+    @Test
+    fun `real_name 본문 누락은 400 MissingInquiryBody`() {
+        val (code, body) = post("/v2.0/inquiry/real_name", "")
+
+        assertEquals(400, code)
+        assertTrue("MissingInquiryBody 메시지: $body", body.contains("계좌실명조회 요청 본문"))
+    }
+
     private fun get(path: String): Pair<Int, String> {
         val response = client.newCall(
             Request.Builder().url(server.url(path)).build(),
@@ -267,6 +321,10 @@ class KftcMockDispatcherTest {
             """"tran_dtime":"20260618103000","req_client_name":"홍길동","recv_client_name":"홍길동",""" +
             """"recv_client_bank_code_std":"092","recv_client_account_num":"$toAccountNum",""" +
             """"wd_print_content":"세이프박스로","dps_print_content":"월급통장에서"}"""
+
+    private fun realNameBody(bank: String, accountNum: String): String =
+        """{"bank_tran_id":"M202300001U000099","bank_code_std":"$bank",""" +
+            """"account_num":"$accountNum","tran_dtime":"20260618103000"}"""
 
     private fun assertEnvelope(body: String, rspCode: String) {
         assertTrue("api_tran_id 채움: $body", body.contains(""""api_tran_id""""))

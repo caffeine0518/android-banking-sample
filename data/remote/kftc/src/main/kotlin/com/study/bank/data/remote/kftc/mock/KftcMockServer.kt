@@ -1,6 +1,7 @@
 package com.study.bank.data.remote.kftc.mock
 
 import com.study.bank.data.remote.kftc.mock.dispatcher.AccountRequestHandler
+import com.study.bank.data.remote.kftc.mock.dispatcher.InquiryRequestHandler
 import com.study.bank.data.remote.kftc.mock.dispatcher.KftcMockDispatcher
 import com.study.bank.data.remote.kftc.mock.dispatcher.KftcMockResponses
 import com.study.bank.data.remote.kftc.mock.dispatcher.TransferRequestHandler
@@ -36,6 +37,11 @@ class KftcMockServer @Inject constructor(
     private val dispatcher = KftcMockDispatcher(
         accountHandler = AccountRequestHandler(state, responses),
         transferHandler = TransferRequestHandler(state, responses, networkJson.value),
+        inquiryHandler = InquiryRequestHandler(
+            KftcRecipientSeed.directory(KftcAccountSeed.accounts),
+            responses,
+            networkJson.value,
+        ),
         responses = responses,
     )
     private val localhostCertificate: HeldCertificate = HeldCertificate.Builder()
