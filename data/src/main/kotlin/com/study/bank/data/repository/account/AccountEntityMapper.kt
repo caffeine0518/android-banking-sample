@@ -37,13 +37,16 @@ class AccountEntityMapper @Inject constructor() {
         val currency = checkNotNull(Currency.byCode(entity.balanceCurrency)) {
             "Unsupported currency in DB: ${entity.balanceCurrency}"
         }
+        val type = checkNotNull(AccountType.entries.firstOrNull { it.name == entity.type }) {
+            "Unknown account type in DB: ${entity.type}"
+        }
         return Account(
             id = AccountId(entity.id),
             number = AccountNumber(entity.number),
             bankCode = bank,
             holderName = entity.holderName,
             balance = Money.of(BigDecimal(entity.balanceAmount), currency),
-            type = AccountType.valueOf(entity.type),
+            type = type,
             nickname = entity.nickname,
         )
     }
