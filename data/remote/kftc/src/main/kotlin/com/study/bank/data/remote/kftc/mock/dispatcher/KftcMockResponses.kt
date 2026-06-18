@@ -1,6 +1,9 @@
 package com.study.bank.data.remote.kftc.mock.dispatcher
 
+import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferResponse
 import com.study.bank.data.remote.kftc.mock.SeedAccount
+import com.study.bank.data.remote.kftc.mock.TransactionRecord
+import com.study.bank.data.remote.kftc.mock.WithdrawResult
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
@@ -18,6 +21,9 @@ private val DefaultMockJson: Json = Json {
 
 private val DTM_FORMATTER: DateTimeFormatter =
     DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS")
+
+private val DATE_FORMATTER: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("yyyyMMdd")
 
 /**
  * KFTC mock 응답 빌더.
@@ -37,6 +43,24 @@ internal class KftcMockResponses(
 
     fun balanceFinNum(account: SeedAccount): MockResponse =
         success(account.toBalanceResponse(newApiTranId(), nowDtm(), newBankTranId()))
+
+    fun transactionList(account: SeedAccount, records: List<TransactionRecord>): MockResponse =
+        success(records.toTransactionListResponse(account, newApiTranId(), nowDtm(), newBankTranId()))
+
+    fun withdrawSuccess(result: WithdrawResult.Success): MockResponse =
+        success(result.toResponse(newApiTranId(), nowDtm(), newBankTranId(), nowDate()))
+
+    /** 업무 거절: KFTC대로 HTTP 200 + rsp_code A0001 + 식별용 bank_rsp_code. 성공과 같은 DTO를 재사용. */
+    fun withdrawFailure(bankRspCode: String, message: String): MockResponse =
+        success(
+            WithdrawTransferResponse(
+                apiTranId = newApiTranId(),
+                apiTranDtm = nowDtm(),
+                rspCode = RSP_ERROR,
+                rspMessage = message,
+                bankRspCode = bankRspCode,
+            ),
+        )
 
     fun error(error: MockError): MockResponse = jsonResponse(
         error.httpCode,
@@ -61,6 +85,7 @@ internal class KftcMockResponses(
     private fun newApiTranId(): String = "T%016d".format(apiTranSeq.incrementAndGet())
     private fun newBankTranId(): String = "M202300001U%06d".format(bankTranSeq.incrementAndGet())
     private fun nowDtm(): String = clock().format(DTM_FORMATTER)
+    private fun nowDate(): String = clock().format(DATE_FORMATTER)
 
     @Serializable
     private data class ErrorEnvelope(
