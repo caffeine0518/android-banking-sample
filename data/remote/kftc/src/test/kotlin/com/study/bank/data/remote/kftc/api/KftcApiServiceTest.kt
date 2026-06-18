@@ -1,6 +1,8 @@
 package com.study.bank.data.remote.kftc.api
 
+import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
 import com.study.bank.data.remote.kftc.mock.KftcMockServer
+import com.study.bank.data.remote.kftc.network.NetworkJson
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -22,7 +24,7 @@ class KftcApiServiceTest {
 
     @Before
     fun setUp() {
-        mockServer = KftcMockServer().apply { start() }
+        mockServer = KftcMockServer(NetworkJson()).apply { start() }
 
         val json = Json {
             ignoreUnknownKeys = true
@@ -156,5 +158,116 @@ class KftcApiServiceTest {
             path.contains("include_cancel_yn=N"))
         assertTrue("기본 sort_order=D 쿼리가 함께 가야 한다: $path",
             path.contains("sort_order=D"))
+    }
+
+    // --- 거래내역 조회 / 출금이체 E2E ---
+
+    @Test
+    fun `transaction_list는 초기엔 빈 res_list와 현재 잔액을 돌려준다`() = runTest {
+        val response = api.getTransactionList(
+            bankTranId = "M202300001U000010",
+            fintechUseNum = SALARY,
+            fromDate = "20260601",
+            toDate = "20260618",
+            tranDtime = "20260618103000",
+        )
+
+        assertEquals("A0000", response.rspCode)
+        assertEquals("0", response.resCnt)
+        assertTrue(response.resList.isEmpty())
+        assertEquals("2847320", response.balanceAmt)
+    }
+
+    @Test
+    fun `withdraw 성공 후 getAccountBalance가 차감 잔액을 반영한다`() = runTest {
+        val result = api.withdraw(externalRequest(from = SALARY, amount = "50000"))
+
+        assertEquals("A0000", result.rspCode)
+        assertEquals("2797320", result.afterBalanceAmt)
+
+        val balance = api.getAccountBalance(
+            bankTranId = "M202300001U000011",
+            fintechUseNum = SALARY,
+            tranDtime = "20260618103000",
+        )
+        assertEquals("2797320", balance.balanceAmt)
+    }
+
+    @Test
+    fun `내부 이체 시 수취계좌 잔액과 거래내역이 반영된다`() = runTest {
+        api.withdraw(internalRequest(from = SALARY, toAccountNum = SAFEBOX_NUM, amount = "50000"))
+
+        val balance = api.getAccountBalance(
+            bankTranId = "M202300001U000012",
+            fintechUseNum = SAFEBOX,
+            tranDtime = "20260618103000",
+        )
+        assertEquals("12050000", balance.balanceAmt)
+
+        val tx = api.getTransactionList(
+            bankTranId = "M202300001U000013",
+            fintechUseNum = SAFEBOX,
+            fromDate = "20260601",
+            toDate = "20260618",
+            tranDtime = "20260618103000",
+        )
+        assertEquals("1", tx.resCnt)
+        assertEquals("입금", tx.resList.first().inoutType)
+        assertEquals("50000", tx.resList.first().tranAmt)
+        assertEquals("12050000", tx.resList.first().afterBalanceAmt)
+    }
+
+    @Test
+    fun `잔액부족이면 rsp_code A0001과 bank_rsp_code를 돌려준다`() = runTest {
+        val result = api.withdraw(externalRequest(from = SALARY, amount = "999999999"))
+
+        assertEquals("A0001", result.rspCode)
+        assertEquals("311", result.bankRspCode)
+    }
+
+    @Test
+    fun `withdraw 요청 body가 KFTC 필드명대로 전송된다`() = runTest {
+        api.withdraw(externalRequest(from = SALARY, amount = "50000"))
+
+        val recorded = mockServer.takeRequest()
+        assertNotNull(recorded)
+        assertEquals("POST", recorded!!.method)
+        assertTrue("withdraw 경로: ${recorded.path}",
+            recorded.path.orEmpty().startsWith("/v2.0/transfer/withdraw/fin_num"))
+
+        val body = recorded.body.readUtf8()
+        assertTrue("fintech_use_num 필드: $body", body.contains("fintech_use_num"))
+        assertTrue("recv_client_account_num 필드: $body", body.contains("recv_client_account_num"))
+        assertTrue("tran_amt 필드: $body", body.contains("tran_amt"))
+    }
+
+    private fun externalRequest(from: String, amount: String) = WithdrawTransferRequest(
+        bankTranId = "M202300001U000001",
+        fintechUseNum = from,
+        tranAmt = amount,
+        tranDtime = "20260618103000",
+        reqClientName = "홍길동",
+        recvClientName = "외부수취",
+        recvClientBankCodeStd = "004",
+        recvClientAccountNum = "9999-99-9999999",
+    )
+
+    private fun internalRequest(from: String, toAccountNum: String, amount: String) = WithdrawTransferRequest(
+        bankTranId = "M202300001U000002",
+        fintechUseNum = from,
+        tranAmt = amount,
+        tranDtime = "20260618103000",
+        reqClientName = "홍길동",
+        recvClientName = "홍길동",
+        recvClientBankCodeStd = "092",
+        recvClientAccountNum = toAccountNum,
+        wdPrintContent = "세이프박스로",
+        dpsPrintContent = "월급통장에서",
+    )
+
+    private companion object {
+        const val SALARY = "120220112345678901234001" // 월급통장 KRW 2847320
+        const val SAFEBOX = "120220112345678901234003" // 세이프박스 KRW 12000000
+        const val SAFEBOX_NUM = "1000-55-1114443"
     }
 }

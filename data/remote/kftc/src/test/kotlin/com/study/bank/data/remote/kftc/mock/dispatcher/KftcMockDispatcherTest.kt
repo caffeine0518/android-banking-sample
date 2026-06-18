@@ -1,9 +1,13 @@
 package com.study.bank.data.remote.kftc.mock.dispatcher
 
 import com.study.bank.data.remote.kftc.mock.KftcAccountSeed
+import com.study.bank.data.remote.kftc.mock.KftcBankState
 import com.study.bank.data.remote.kftc.mock.SeedAccount
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -25,10 +29,21 @@ class KftcMockDispatcherTest {
     @Before
     fun setUp() {
         server = MockWebServer().apply {
-            dispatcher = KftcMockDispatcher()
+            dispatcher = newDispatcher()
             start()
         }
         client = OkHttpClient()
+    }
+
+    // 협력자를 명시 주입해 디스패처를 조립한다(구성 책임은 호출 측). responses는 단일 인스턴스 공유.
+    private fun newDispatcher(seed: List<SeedAccount> = KftcAccountSeed.accounts): KftcMockDispatcher {
+        val state = KftcBankState(seed)
+        val responses = KftcMockResponses()
+        return KftcMockDispatcher(
+            accountHandler = AccountRequestHandler(state, responses),
+            transferHandler = TransferRequestHandler(state, responses, MOCK_JSON),
+            responses = responses,
+        )
     }
 
     @After
@@ -113,7 +128,7 @@ class KftcMockDispatcherTest {
     // 생성자 seed 파라미터 DI 동작. dispatcher가 기본 seed 직접 참조하는 회귀를 잡음.
     @Test
     fun `커스텀 seed 주입 시 list_finuse는 그 seed만 돌려준다`() {
-        server.dispatcher = KftcMockDispatcher(
+        server.dispatcher = newDispatcher(
             seed = listOf(
                 SeedAccount(
                     fintechUseNum = "TESTFINNUM0000001",
@@ -152,12 +167,106 @@ class KftcMockDispatcherTest {
         assertEquals(firstSeq + 1, secondSeq)
     }
 
+    // --- transaction_list / withdraw 라우팅 ---
+
+    @Test
+    fun `transaction_list는 200과 envelope + 초기 빈 res_list를 돌려준다`() {
+        val (code, body) = get("/v2.0/account/transaction_list/fin_num?fintech_use_num=$SALARY")
+
+        assertEquals(200, code)
+        assertEnvelope(body, rspCode = "A0000")
+        assertTrue("초기 거래내역 0건: $body", body.contains(""""res_cnt":"0""""))
+        assertTrue("빈 res_list: $body", body.contains(""""res_list":[]"""))
+    }
+
+    @Test
+    fun `transaction_list fintech_use_num 누락은 400`() {
+        val (code, body) = get("/v2.0/account/transaction_list/fin_num")
+
+        assertEquals(400, code)
+        assertTrue("MissingFintechUseNum 메시지: $body", body.contains("fintech_use_num 쿼리 누락"))
+    }
+
+    @Test
+    fun `transaction_list 미존재 fintech_use_num은 404`() {
+        val bogus = "999999999999999999999999"
+
+        val (code, body) = get("/v2.0/account/transaction_list/fin_num?fintech_use_num=$bogus")
+
+        assertEquals(404, code)
+        assertTrue("입력값 echo: $body", body.contains(bogus))
+    }
+
+    @Test
+    fun `withdraw 성공 후 balance fin_num이 차감 잔액을 반영한다`() {
+        val (code, body) = post("/v2.0/transfer/withdraw/fin_num", externalWithdrawBody(from = SALARY, amount = "50000"))
+
+        assertEquals(200, code)
+        assertEnvelope(body, rspCode = "A0000")
+
+        val (_, balance) = get("/v2.0/account/balance/fin_num?fintech_use_num=$SALARY")
+        assertTrue("출금 후 잔액 2797320 반영: $balance", balance.contains(""""balance_amt":"2797320""""))
+    }
+
+    @Test
+    fun `내부 이체 후 수취계좌 transaction_list에 입금이 기록되고 잔액이 는다`() {
+        post(
+            "/v2.0/transfer/withdraw/fin_num",
+            internalWithdrawBody(from = SALARY, toAccountNum = SAFEBOX_NUM, amount = "50000"),
+        )
+
+        val (_, tx) = get("/v2.0/account/transaction_list/fin_num?fintech_use_num=$SAFEBOX")
+        assertTrue("수취계좌 거래 1건: $tx", tx.contains(""""res_cnt":"1""""))
+        assertTrue("입금 기록: $tx", tx.contains(""""inout_type":"입금""""))
+
+        val (_, balance) = get("/v2.0/account/balance/fin_num?fintech_use_num=$SAFEBOX")
+        assertTrue("세이프박스 잔액 12050000: $balance", balance.contains(""""balance_amt":"12050000""""))
+    }
+
+    @Test
+    fun `withdraw 잔액부족은 200과 A0001 + bank_rsp_code`() {
+        val (code, body) = post("/v2.0/transfer/withdraw/fin_num", externalWithdrawBody(from = SALARY, amount = "999999999"))
+
+        assertEquals(200, code)
+        assertTrue("업무 거절 rsp_code A0001: $body", body.contains(""""rsp_code":"A0001""""))
+        assertTrue("잔액부족 bank_rsp_code 311: $body", body.contains(""""bank_rsp_code":"311""""))
+    }
+
+    @Test
+    fun `withdraw 본문 누락은 400 MissingTransferBody`() {
+        val (code, body) = post("/v2.0/transfer/withdraw/fin_num", "")
+
+        assertEquals(400, code)
+        assertTrue("MissingTransferBody 메시지: $body", body.contains("출금이체 요청 본문"))
+    }
+
     private fun get(path: String): Pair<Int, String> {
         val response = client.newCall(
             Request.Builder().url(server.url(path)).build(),
         ).execute()
         return response.use { it.code to (it.body?.string().orEmpty()) }
     }
+
+    private fun post(path: String, body: String): Pair<Int, String> {
+        val response = client.newCall(
+            Request.Builder()
+                .url(server.url(path))
+                .post(body.toRequestBody("application/json".toMediaType()))
+                .build(),
+        ).execute()
+        return response.use { it.code to (it.body?.string().orEmpty()) }
+    }
+
+    private fun externalWithdrawBody(from: String, amount: String): String =
+        """{"bank_tran_id":"M202300001U000001","fintech_use_num":"$from","tran_amt":"$amount",""" +
+            """"tran_dtime":"20260618103000","req_client_name":"홍길동","recv_client_name":"외부수취",""" +
+            """"recv_client_bank_code_std":"004","recv_client_account_num":"9999-99-9999999"}"""
+
+    private fun internalWithdrawBody(from: String, toAccountNum: String, amount: String): String =
+        """{"bank_tran_id":"M202300001U000002","fintech_use_num":"$from","tran_amt":"$amount",""" +
+            """"tran_dtime":"20260618103000","req_client_name":"홍길동","recv_client_name":"홍길동",""" +
+            """"recv_client_bank_code_std":"092","recv_client_account_num":"$toAccountNum",""" +
+            """"wd_print_content":"세이프박스로","dps_print_content":"월급통장에서"}"""
 
     private fun assertEnvelope(body: String, rspCode: String) {
         assertTrue("api_tran_id 채움: $body", body.contains(""""api_tran_id""""))
@@ -174,7 +283,12 @@ class KftcMockDispatcherTest {
     }
 
     private companion object {
+        val MOCK_JSON = Json { ignoreUnknownKeys = true; explicitNulls = false }
         val TRAN_ID_REGEX = Regex(""""api_tran_id":"([^"]+)"""")
         val SEQ_DIGITS_REGEX = Regex("""\d+""")
+
+        const val SALARY = "120220112345678901234001" // 월급통장 KRW 2847320
+        const val SAFEBOX = "120220112345678901234003" // 세이프박스 KRW 12000000
+        const val SAFEBOX_NUM = "1000-55-1114443"
     }
 }

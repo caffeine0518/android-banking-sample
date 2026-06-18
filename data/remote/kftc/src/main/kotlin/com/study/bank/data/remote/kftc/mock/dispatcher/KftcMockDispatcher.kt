@@ -1,7 +1,5 @@
 package com.study.bank.data.remote.kftc.mock.dispatcher
 
-import com.study.bank.data.remote.kftc.mock.KftcAccountSeed
-import com.study.bank.data.remote.kftc.mock.SeedAccount
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
@@ -9,12 +7,14 @@ import okhttp3.mockwebserver.RecordedRequest
 /**
  * KFTC 오픈뱅킹 v2.0 mock 라우터.
  *
- * 책임은 path → 핸들러 분기뿐. envelope 채움/직렬화/MockResponse 조립은 [KftcMockResponses],
- * 시드→DTO 변환은 [SeedAccountMappers]에 위임한다.
+ * 책임은 장애 토글 + path → 핸들러 분기뿐. 엔드포인트별 로직은 [accountHandler]/[transferHandler]가,
+ * 라우팅 레벨 에러(잘못된 URL/미등록 path/장애 주입)만 [responses]가 직접 응답한다.
+ * 협력자는 모두 [com.study.bank.data.remote.kftc.mock.KftcMockServer]가 구성해 주입한다.
  */
 internal class KftcMockDispatcher(
-    private val seed: List<SeedAccount> = KftcAccountSeed.accounts,
-    private val responses: KftcMockResponses = KftcMockResponses(),
+    private val accountHandler: AccountRequestHandler,
+    private val transferHandler: TransferRequestHandler,
+    private val responses: KftcMockResponses,
 ) : Dispatcher() {
 
     /**
@@ -30,18 +30,13 @@ internal class KftcMockDispatcher(
         val url = request.requestUrl ?: return responses.error(MockError.InvalidUrl)
 
         return when (url.encodedPath) {
-            PATH_LIST_FINUSE -> responses.listFinuse(seed)
-            PATH_BALANCE_FIN_NUM -> handleBalance(url.queryParameter(QUERY_FINTECH_USE_NUM))
+            PATH_LIST_FINUSE -> accountHandler.list()
+            PATH_BALANCE_FIN_NUM -> accountHandler.balance(url.queryParameter(QUERY_FINTECH_USE_NUM))
+            PATH_TRANSACTION_LIST_FIN_NUM ->
+                accountHandler.transactionList(url.queryParameter(QUERY_FINTECH_USE_NUM))
+            // peek()로 본문을 복사 읽어 takeRequest()의 RecordedRequest body를 소비하지 않는다.
+            PATH_TRANSFER_WITHDRAW_FIN_NUM -> transferHandler.withdraw(request.body.peek().readUtf8())
             else -> responses.error(MockError.UnknownEndpoint(url.encodedPath))
         }
-    }
-
-    private fun handleBalance(fintechUseNum: String?): MockResponse {
-        if (fintechUseNum.isNullOrBlank()) {
-            return responses.error(MockError.MissingFintechUseNum)
-        }
-        val account = seed.firstOrNull { it.fintechUseNum == fintechUseNum }
-            ?: return responses.error(MockError.UnknownFintechUseNum(fintechUseNum))
-        return responses.balanceFinNum(account)
     }
 }

@@ -1,6 +1,10 @@
 package com.study.bank.data.remote.kftc.mock
 
+import com.study.bank.data.remote.kftc.mock.dispatcher.AccountRequestHandler
 import com.study.bank.data.remote.kftc.mock.dispatcher.KftcMockDispatcher
+import com.study.bank.data.remote.kftc.mock.dispatcher.KftcMockResponses
+import com.study.bank.data.remote.kftc.mock.dispatcher.TransferRequestHandler
+import com.study.bank.data.remote.kftc.network.NetworkJson
 import javax.inject.Inject
 import javax.inject.Singleton
 import okhttp3.HttpUrl
@@ -20,10 +24,20 @@ import java.util.concurrent.TimeUnit
  * [clientCertificates] to trust this CA.
  */
 @Singleton
-class KftcMockServer @Inject constructor() {
+class KftcMockServer @Inject constructor(
+    networkJson: NetworkJson,
+) {
 
     private val server: MockWebServer = MockWebServer()
-    private val dispatcher = KftcMockDispatcher()
+    // Composition root: 디스패처/핸들러가 직접 협력자를 생성하지 않도록 여기서 그래프를 명시 조립해 주입한다.
+    // responses는 단일 인스턴스를 공유해야 api_tran_id 시퀀스가 엔드포인트 전역으로 1씩 증가한다.
+    private val state = KftcBankState(KftcAccountSeed.accounts)
+    private val responses = KftcMockResponses()
+    private val dispatcher = KftcMockDispatcher(
+        accountHandler = AccountRequestHandler(state, responses),
+        transferHandler = TransferRequestHandler(state, responses, networkJson.value),
+        responses = responses,
+    )
     private val localhostCertificate: HeldCertificate = HeldCertificate.Builder()
         .addSubjectAlternativeName("localhost")
         .addSubjectAlternativeName("127.0.0.1")
