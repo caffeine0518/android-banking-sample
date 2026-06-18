@@ -2,7 +2,12 @@ package com.study.bank.data.remote.kftc.api
 
 import com.study.bank.data.remote.kftc.dto.account.AccountBalanceResponse
 import com.study.bank.data.remote.kftc.dto.account.AccountListResponse
+import com.study.bank.data.remote.kftc.dto.transaction.TransactionListResponse
+import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
+import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferResponse
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Query
 
 /**
@@ -26,4 +31,19 @@ interface KftcApiService {
         @Query("fintech_use_num") fintechUseNum: String,
         @Query("tran_dtime") tranDtime: String,
     ): AccountBalanceResponse
+
+    @GET("v2.0/account/transaction_list/fin_num")
+    suspend fun getTransactionList(
+        @Query("bank_tran_id") bankTranId: String,
+        @Query("fintech_use_num") fintechUseNum: String,
+        @Query("from_date") fromDate: String,
+        @Query("to_date") toDate: String,
+        @Query("tran_dtime") tranDtime: String,
+        @Query("inquiry_type") inquiryType: String = "A",
+        @Query("inquiry_base") inquiryBase: String = "D",
+        @Query("sort_order") sortOrder: String = "D",
+    ): TransactionListResponse
+
+    @POST("v2.0/transfer/withdraw/fin_num")
+    suspend fun withdraw(@Body request: WithdrawTransferRequest): WithdrawTransferResponse
 }
