@@ -38,6 +38,7 @@ internal fun List<TransactionRecord>.toTransactionListResponse(
     bankTranId = bankTranId,
     fintechUseNum = account.fintechUseNum,
     balanceAmt = account.balanceAmt,
+    currencyCode = account.currencyCode,
     resCnt = size.toString(),
     resList = map { it.toItemDto() },
 )

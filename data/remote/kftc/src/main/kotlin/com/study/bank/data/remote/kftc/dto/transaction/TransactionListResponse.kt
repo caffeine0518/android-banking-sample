@@ -17,6 +17,7 @@ data class TransactionListResponse(
     @SerialName("bank_tran_id") val bankTranId: String,
     @SerialName("fintech_use_num") val fintechUseNum: String,
     @SerialName("balance_amt") val balanceAmt: String,
+    @SerialName("currency_code") val currencyCode: String,
     @SerialName("res_cnt") val resCnt: String,
     @SerialName("res_list") val resList: List<TransactionItemDto>,
 )
