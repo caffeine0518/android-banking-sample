@@ -6,4 +6,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface TransactionRepository {
     fun observeTransactions(accountId: AccountId): Flow<List<Transaction>>
+
+    suspend fun refresh(accountId: AccountId)
 }
