@@ -1,7 +1,9 @@
 package com.study.bank.data.remote.kftc.mock.dispatcher
 
+import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryResponse
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferResponse
 import com.study.bank.data.remote.kftc.mock.SeedAccount
+import com.study.bank.data.remote.kftc.mock.SeedRecipient
 import com.study.bank.data.remote.kftc.mock.TransactionRecord
 import com.study.bank.data.remote.kftc.mock.WithdrawResult
 import kotlinx.serialization.SerialName
@@ -59,6 +61,22 @@ internal class KftcMockResponses(
                 rspCode = RSP_ERROR,
                 rspMessage = message,
                 bankRspCode = bankRspCode,
+            ),
+        )
+
+    fun realNameFound(recipient: SeedRecipient): MockResponse =
+        success(recipient.toRealNameResponse(newApiTranId(), nowDtm(), newBankTranId(), nowDate()))
+
+    /** 수취 계좌 미존재: HTTP 200 + rsp_code A0001 + bank_rsp_code. */
+    fun realNameNotFound(accountNum: String): MockResponse =
+        success(
+            RealNameInquiryResponse(
+                apiTranId = newApiTranId(),
+                apiTranDtm = nowDtm(),
+                rspCode = RSP_ERROR,
+                rspMessage = "조회된 예금주가 없습니다",
+                bankRspCode = BANK_RSP_RECIPIENT_NOT_FOUND,
+                accountNum = accountNum,
             ),
         )
 
