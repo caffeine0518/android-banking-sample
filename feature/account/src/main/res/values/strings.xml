@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="account_title">계좌</string>
+    <string name="account_action_back">뒤로</string>
+    <string name="account_action_refresh">새로고침</string>
+    <string name="account_action_send">보내기</string>
+    <string name="account_refresh_error">계좌를 새로고침하지 못했어요. 잠시 후 다시 시도해 주세요.</string>
+
+    <string name="account_transactions_label">거래 내역</string>
+    <string name="account_transactions_empty">거래 내역이 없어요</string>
+
+    <string name="account_subtitle" translatable="false">%1$s · %2$s</string>
+    <string name="account_type_checking">입출금</string>
+    <string name="account_type_savings">세이프박스</string>
+    <string name="account_type_deposit">정기예금</string>
+
+    <string name="account_tx_type_deposit">입금</string>
+    <string name="account_tx_type_withdrawal">출금</string>
+    <string name="account_tx_type_transfer_in">이체 입금</string>
+    <string name="account_tx_type_transfer_out">이체 출금</string>
+    <string name="account_tx_amount_inbound" translatable="false">+ %1$s</string>
+    <string name="account_tx_amount_outbound" translatable="false">- %1$s</string>
+</resources>
