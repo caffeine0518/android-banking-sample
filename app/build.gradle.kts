@@ -40,6 +40,13 @@ android {
     buildFeatures {
         compose = true
     }
+
+    testOptions {
+        // android.util.* 직접 호출(Log 등)이 JVM 단위 테스트에서 stub(0/false) 반환.
+        unitTests.isReturnDefaultValues = true
+        // Robolectric이 머지된 안드로이드 리소스/매니페스트를 읽을 수 있게 한다.
+        unitTests.isIncludeAndroidResources = true
+    }
 }
 
 dependencies {
@@ -59,6 +66,12 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     testImplementation(libs.junit)
+    // 데이터 레이어 E2E(L3): 실제 Hilt 그래프(KFTC mock + Room SSOT + 레포)를 JVM(Robolectric)에서 런타임 통합 검증.
+    testImplementation(projects.domain)
+    testImplementation(libs.hilt.android.testing)
+    kspTest(libs.hilt.compiler)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
