@@ -1,4 +1,4 @@
-package com.study.bank.feature.transfer.confirm.ui
+package com.study.bank.feature.transfer.result.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -9,13 +9,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
-import com.study.bank.feature.transfer.confirm.contract.ConfirmEffect
+import com.study.bank.feature.transfer.result.contract.ResultEffect
 
 @Composable
-fun ConfirmRoute(
-    onBack: () -> Unit,
-    onSent: (sourceAccountId: String, recipientAccountId: String, amount: Long) -> Unit,
-    viewModel: ConfirmViewModel = hiltViewModel(),
+fun ResultRoute(
+    onFinish: () -> Unit,
+    viewModel: ResultViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -26,15 +25,13 @@ fun ConfirmRoute(
     LaunchedEffect(effects) {
         effects.collect { effect ->
             when (effect) {
-                ConfirmEffect.NavigateBack -> onBack()
-                is ConfirmEffect.Submit ->
-                    onSent(effect.sourceAccountId, effect.recipientAccountId, effect.amount)
-                // 편집/변경 화면 미구현 — 현재는 무시(placeholder).
-                ConfirmEffect.EditDisplayName -> Unit
-                ConfirmEffect.ChangeSource -> Unit
+                ResultEffect.Finish -> onFinish()
+                // 공유/메모 화면 미구현 — 현재는 무시(placeholder).
+                ResultEffect.Share -> Unit
+                ResultEffect.LeaveMemo -> Unit
             }
         }
     }
 
-    ConfirmScreen(state = state, onIntent = viewModel::onIntent)
+    ResultScreen(state = state, onIntent = viewModel::onIntent)
 }

@@ -55,7 +55,15 @@ class ConfirmViewModel @Inject constructor(
             ConfirmIntent.SourceAccountClicked -> sendEffect(ConfirmEffect.ChangeSource)
 
             ConfirmIntent.SendClicked -> {
-                if (state.detail != null) sendEffect(ConfirmEffect.Submit)
+                if (state.detail != null) {
+                    sendEffect(
+                        ConfirmEffect.Submit(
+                            sourceAccountId = sourceAccountId.value,
+                            recipientAccountId = recipientAccountId.value,
+                            amount = amount,
+                        ),
+                    )
+                }
             }
 
             is ConfirmInternalAction.PartiesLoaded -> {

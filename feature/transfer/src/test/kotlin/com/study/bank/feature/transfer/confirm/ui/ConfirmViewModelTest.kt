@@ -86,7 +86,14 @@ class ConfirmViewModelTest {
 
         vm.effect.test {
             vm.onIntent(ConfirmIntent.SendClicked)
-            assertEquals(ConfirmEffect.Submit, awaitItem())
+            assertEquals(
+                ConfirmEffect.Submit(
+                    sourceAccountId = SOURCE_ID,
+                    recipientAccountId = RECIPIENT_ID,
+                    amount = 2L,
+                ),
+                awaitItem(),
+            )
             cancelAndIgnoreRemainingEvents()
         }
     }

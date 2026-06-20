@@ -10,8 +10,10 @@ import com.study.bank.feature.home.ui.navigation.homeScreen
 import com.study.bank.feature.transfer.navigation.navigateToTransfer
 import com.study.bank.feature.transfer.navigation.navigateToTransferAmount
 import com.study.bank.feature.transfer.navigation.navigateToTransferConfirm
+import com.study.bank.feature.transfer.navigation.navigateToTransferResult
 import com.study.bank.feature.transfer.navigation.transferAmountScreen
 import com.study.bank.feature.transfer.navigation.transferConfirmScreen
+import com.study.bank.feature.transfer.navigation.transferResultScreen
 import com.study.bank.feature.transfer.navigation.transferScreen
 
 @Composable
@@ -43,7 +45,13 @@ fun BankNavHost() {
         )
         transferConfirmScreen(
             onBack = { navController.popBackStack() },
-            onSent = { /* 비밀번호/송금 실행·완료 화면 추가 시 연결 */ },
+            onSent = { sourceId, recipientId, amount ->
+                navController.navigateToTransferResult(sourceId, recipientId, amount)
+            },
+        )
+        transferResultScreen(
+            // 송금 완료 후 "확인"/백 → 송금 플로우 전체를 걷어내고 홈으로 복귀.
+            onFinish = { navController.popBackStack(HOME_ROUTE, inclusive = false) },
         )
     }
 }

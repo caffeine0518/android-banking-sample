@@ -10,6 +10,7 @@ import com.study.bank.domain.model.account.AccountId
 import com.study.bank.feature.transfer.amount.ui.AmountRoute
 import com.study.bank.feature.transfer.confirm.ui.ConfirmRoute
 import com.study.bank.feature.transfer.recipient.ui.RecipientRoute
+import com.study.bank.feature.transfer.result.ui.ResultRoute
 
 const val TRANSFER_ACCOUNT_ID_ARG = "accountId"
 const val TRANSFER_RECIPIENT_ID_ARG = "recipientId"
@@ -24,6 +25,10 @@ const val TRANSFER_AMOUNT_ROUTE = "transfer/{$TRANSFER_ACCOUNT_ID_ARG}/amount/{$
 /** 송금 3번째 화면: 송금 확인. {amount}=출금계좌 통화 정수 금액. */
 const val TRANSFER_CONFIRM_ROUTE =
     "transfer/{$TRANSFER_ACCOUNT_ID_ARG}/confirm/{$TRANSFER_RECIPIENT_ID_ARG}/{$TRANSFER_AMOUNT_ARG}"
+
+/** 송금 4번째 화면: 송금 결과(로딩 → 성공/실패). 진입과 동시에 실제 송금을 실행한다. */
+const val TRANSFER_RESULT_ROUTE =
+    "transfer/{$TRANSFER_ACCOUNT_ID_ARG}/result/{$TRANSFER_RECIPIENT_ID_ARG}/{$TRANSFER_AMOUNT_ARG}"
 
 fun NavController.navigateToTransfer(sourceAccountId: AccountId, navOptions: NavOptions? = null) {
     navigate("transfer/${sourceAccountId.value}", navOptions)
@@ -44,6 +49,15 @@ fun NavController.navigateToTransferConfirm(
     navOptions: NavOptions? = null,
 ) {
     navigate("transfer/$sourceAccountId/confirm/$recipientAccountId/$amount", navOptions)
+}
+
+fun NavController.navigateToTransferResult(
+    sourceAccountId: String,
+    recipientAccountId: String,
+    amount: Long,
+    navOptions: NavOptions? = null,
+) {
+    navigate("transfer/$sourceAccountId/result/$recipientAccountId/$amount", navOptions)
 }
 
 fun NavGraphBuilder.transferScreen(
@@ -80,7 +94,7 @@ fun NavGraphBuilder.transferAmountScreen(
 
 fun NavGraphBuilder.transferConfirmScreen(
     onBack: () -> Unit,
-    onSent: () -> Unit,
+    onSent: (sourceAccountId: String, recipientAccountId: String, amount: Long) -> Unit,
 ) {
     composable(
         route = TRANSFER_CONFIRM_ROUTE,
@@ -91,5 +105,20 @@ fun NavGraphBuilder.transferConfirmScreen(
         ),
     ) {
         ConfirmRoute(onBack = onBack, onSent = onSent)
+    }
+}
+
+fun NavGraphBuilder.transferResultScreen(
+    onFinish: () -> Unit,
+) {
+    composable(
+        route = TRANSFER_RESULT_ROUTE,
+        arguments = listOf(
+            navArgument(TRANSFER_ACCOUNT_ID_ARG) { type = NavType.StringType },
+            navArgument(TRANSFER_RECIPIENT_ID_ARG) { type = NavType.StringType },
+            navArgument(TRANSFER_AMOUNT_ARG) { type = NavType.LongType },
+        ),
+    ) {
+        ResultRoute(onFinish = onFinish)
     }
 }

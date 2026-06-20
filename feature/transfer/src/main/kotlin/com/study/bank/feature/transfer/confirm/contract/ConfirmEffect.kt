@@ -10,8 +10,12 @@ sealed interface ConfirmEffect {
     data object ChangeSource : ConfirmEffect
 
     /**
-     * "보내기" 확정 → 다음 단계(비밀번호/송금 실행·완료)로 진행. 해당 화면 미구현이라 현재는
-     * placeholder로 연결만 되어 있고, 구현 시 송금 payload(출금·수취·금액)를 실어 보낸다.
+     * "보내기" 확정 → 송금 결과 화면으로 진행하며 실제 송금을 실행하게 한다.
+     * 출금·수취 식별자와 금액을 실어 결과 화면이 송금 요청을 구성할 수 있게 한다.
      */
-    data object Submit : ConfirmEffect
+    data class Submit(
+        val sourceAccountId: String,
+        val recipientAccountId: String,
+        val amount: Long,
+    ) : ConfirmEffect
 }
