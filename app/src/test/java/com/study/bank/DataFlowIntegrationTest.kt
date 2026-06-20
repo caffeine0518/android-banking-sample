@@ -115,6 +115,43 @@ class DataFlowIntegrationTest {
         assertEquals(0, safeboxTxns.first().amount.amount.compareTo(BigDecimal("50000")))
     }
 
+    @Test
+    fun `내 계좌로 송금 — 마스킹된 계좌번호로 보내도 수취계좌가 입금된다(앱 실제 플로우)`() = runBlocking {
+        accountRepository.refresh()
+
+        // 앱 실제 플로우: 수취계좌(내 세이프박스)를 레포에서 로드해 그 number로 송금한다.
+        // list_finuse는 마스킹 번호만 주므로 앱이 가진 수취 계좌번호는 마스킹돼 있다(전체번호 모름).
+        val recipient = requireNotNull(accountRepository.observeAccount(SAFEBOX).first())
+        assertTrue(
+            "수취 계좌번호는 마스킹돼 있어야 함: ${recipient.number.value}",
+            recipient.number.value.contains("*"),
+        )
+
+        val salaryBefore = requireNotNull(accountRepository.observeAccount(SALARY).first())
+            .balance.amount
+        val safeboxBefore = recipient.balance.amount
+
+        val outcome = ExecuteTransferUseCase(transferRepository)(
+            TransferRequest(
+                fromAccountId = SALARY,
+                toAccountNumber = recipient.number, // 마스킹 번호 (앱이 실제로 보내는 값)
+                toBankCode = recipient.bankCode,
+                amount = Money.of(30_000L, Currency.KRW),
+                memo = null,
+                idempotencyKey = "itest-internal-masked-1",
+            ),
+        )
+        assertTrue("송금 성공해야 함: $outcome", outcome is TransferOutcome.Success)
+
+        // 출금계좌 차감 + 수취계좌 입금(복식부기) 둘 다 반영돼야 한다 — 회귀: 예전엔 수취계좌가 그대로였음.
+        val salaryAfter = requireNotNull(accountRepository.observeAccount(SALARY).first())
+            .balance.amount
+        val safeboxAfter = requireNotNull(accountRepository.observeAccount(SAFEBOX).first())
+            .balance.amount
+        assertEquals(0, salaryAfter.compareTo(salaryBefore - BigDecimal("30000")))
+        assertEquals(0, safeboxAfter.compareTo(safeboxBefore + BigDecimal("30000")))
+    }
+
     private companion object {
         val SALARY = AccountId("120220112345678901234001") // 월급통장 KRW 2,847,320
         val SAFEBOX = AccountId("120220112345678901234003") // 세이프박스 KRW 12,000,000

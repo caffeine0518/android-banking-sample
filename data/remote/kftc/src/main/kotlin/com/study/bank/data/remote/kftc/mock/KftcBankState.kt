@@ -75,8 +75,11 @@ internal class KftcBankState(
         }
 
         // 수취계좌가 시드에 있으면(내부 이체) 복식부기로 입금까지. 외부면 차감만.
+        // 앱은 list_finuse에서 마스킹 번호만 받으므로 내 계좌→내 계좌 송금 시 마스킹 번호로 보낸다.
+        // 전체/마스킹 번호 둘 다로 매칭한다("*"가 있어 외부 전체번호 입력과 충돌하지 않음).
         val recipient = seed.firstOrNull {
-            it.accountNum == command.recvAccountNum && it.bankCodeStd == command.recvBankCode
+            (it.accountNum == command.recvAccountNum || it.accountNumMasked == command.recvAccountNum) &&
+                it.bankCodeStd == command.recvBankCode
         }
         if (recipient != null && recipient.currencyCode != source.currencyCode) {
             return WithdrawResult.CurrencyMismatch(source.currencyCode, recipient.currencyCode)

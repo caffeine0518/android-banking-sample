@@ -5,7 +5,8 @@ package com.study.bank.data.remote.kftc.mock
  *
  * 한 [SeedAccount]가 KFTC `list_finuse` 항목과 `balance/fin_num` 응답 양쪽을 채운다.
  * `balanceAmt`는 KFTC 그대로 소수점 포함 문자열 (KRW: "2847320", USD: "3245.80").
- * `accountNum`은 비마스킹 전체 계좌번호로, 출금이체 수취계좌 매칭(내부 이체 판정)에만 쓰인다.
+ * `accountNum`(전체)·`accountNumMasked` 둘 다 출금이체 수취계좌 매칭(내부 이체 판정)에 쓰인다 —
+ * 앱은 list_finuse에서 마스킹 번호만 받아 내 계좌끼리도 마스킹 번호로 송금하기 때문.
  */
 internal data class SeedAccount(
     val fintechUseNum: String,
