@@ -14,8 +14,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.study.bank.feature.transfer.R
-import com.study.bank.feature.transfer.recipient.ui.model.AccountTypeUi
 import com.study.bank.feature.transfer.recipient.ui.model.AccountUi
+import com.study.bank.feature.transfer.recipient.ui.model.label
 
 @Composable
 internal fun MyAccountRow(
@@ -48,12 +48,3 @@ internal fun MyAccountRow(
         }
     }
 }
-
-@Composable
-private fun AccountTypeUi.label(): String = stringResource(
-    when (this) {
-        AccountTypeUi.CHECKING -> R.string.transfer_account_type_checking
-        AccountTypeUi.SAVINGS -> R.string.transfer_account_type_savings
-        AccountTypeUi.DEPOSIT -> R.string.transfer_account_type_deposit
-    },
-)
