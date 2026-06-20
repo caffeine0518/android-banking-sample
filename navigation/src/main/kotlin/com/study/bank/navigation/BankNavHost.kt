@@ -8,6 +8,8 @@ import com.study.bank.feature.account.ui.navigation.navigateToAccount
 import com.study.bank.feature.home.ui.navigation.HOME_ROUTE
 import com.study.bank.feature.home.ui.navigation.homeScreen
 import com.study.bank.feature.transfer.navigation.navigateToTransfer
+import com.study.bank.feature.transfer.navigation.navigateToTransferAmount
+import com.study.bank.feature.transfer.navigation.transferAmountScreen
 import com.study.bank.feature.transfer.navigation.transferScreen
 
 @Composable
@@ -27,7 +29,13 @@ fun BankNavHost() {
         transferScreen(
             onBack = { navController.popBackStack() },
             onAccountNumberInput = { /* 계좌번호 입력 화면 추가 시 연결 */ },
-            onContinue = { /* 송금 다음 화면(금액 입력) 추가 시 연결 */ },
+            onAmountInput = { sourceId, recipientId ->
+                navController.navigateToTransferAmount(sourceId, recipientId)
+            },
+        )
+        transferAmountScreen(
+            onBack = { navController.popBackStack() },
+            onNext = { /* 송금 확인 화면 추가 시 연결 */ },
         )
     }
 }

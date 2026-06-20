@@ -67,12 +67,18 @@ class RecipientViewModelTest {
     }
 
     @Test
-    fun `내 계좌를 선택하면 Continue effect를 보낸다`() = runTest {
+    fun `내 계좌를 선택하면 출금·수취 식별자를 실은 NavigateToAmount effect를 보낸다`() = runTest {
         val vm = buildViewModel(FakeAccountRepository())
 
         vm.effect.test {
             vm.onIntent(RecipientIntent.MyAccountClicked("acc-2"))
-            assertEquals(RecipientEffect.Continue, awaitItem())
+            assertEquals(
+                RecipientEffect.NavigateToAmount(
+                    sourceAccountId = SOURCE_ID,
+                    recipientAccountId = "acc-2",
+                ),
+                awaitItem(),
+            )
             cancelAndIgnoreRemainingEvents()
         }
     }

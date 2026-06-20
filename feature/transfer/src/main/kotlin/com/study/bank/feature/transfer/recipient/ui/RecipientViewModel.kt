@@ -47,7 +47,12 @@ class RecipientViewModel @Inject constructor(
                 sendEffect(RecipientEffect.NavigateToAccountNumberInput)
             }
 
-            is RecipientIntent.MyAccountClicked -> sendEffect(RecipientEffect.Continue)
+            is RecipientIntent.MyAccountClicked -> sendEffect(
+                RecipientEffect.NavigateToAmount(
+                    sourceAccountId = sourceAccountId.value,
+                    recipientAccountId = action.accountId,
+                ),
+            )
 
             is RecipientInternalAction.MyAccountsUpdated -> {
                 setState {

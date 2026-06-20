@@ -1,4 +1,4 @@
-package com.study.bank.feature.transfer.recipient.ui
+package com.study.bank.feature.transfer.amount.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -9,14 +9,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
-import com.study.bank.feature.transfer.recipient.contract.RecipientEffect
+import com.study.bank.feature.transfer.amount.contract.AmountEffect
 
 @Composable
-fun RecipientRoute(
+fun AmountRoute(
     onBack: () -> Unit,
-    onAccountNumberInput: () -> Unit,
-    onContinue: (sourceAccountId: String, recipientAccountId: String) -> Unit,
-    viewModel: RecipientViewModel = hiltViewModel(),
+    onNext: () -> Unit,
+    viewModel: AmountViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -27,13 +26,11 @@ fun RecipientRoute(
     LaunchedEffect(effects) {
         effects.collect { effect ->
             when (effect) {
-                RecipientEffect.NavigateBack -> onBack()
-                RecipientEffect.NavigateToAccountNumberInput -> onAccountNumberInput()
-                is RecipientEffect.NavigateToAmount ->
-                    onContinue(effect.sourceAccountId, effect.recipientAccountId)
+                AmountEffect.NavigateBack -> onBack()
+                AmountEffect.NavigateNext -> onNext()
             }
         }
     }
 
-    RecipientScreen(state = state, onIntent = viewModel::onIntent)
+    AmountScreen(state = state, onIntent = viewModel::onIntent)
 }

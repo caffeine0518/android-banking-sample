@@ -7,8 +7,11 @@ sealed interface RecipientEffect {
     data object NavigateToAccountNumberInput : RecipientEffect
 
     /**
-     * 수취 계좌(내 계좌)가 정해져 다음 단계(금액 입력)로 진행. 다음 화면 미구현이라 현재는 placeholder로
-     * 연결만 되어 있고, 화면 구현 시 선택된 수취 정보를 payload로 싣는다.
+     * 수취 계좌(내 계좌)가 정해져 다음 단계(금액 입력)로 진행.
+     * 출금계좌·수취계좌 식별자를 실어 금액 입력 화면이 두 계좌를 조회할 수 있게 한다.
      */
-    data object Continue : RecipientEffect
+    data class NavigateToAmount(
+        val sourceAccountId: String,
+        val recipientAccountId: String,
+    ) : RecipientEffect
 }
