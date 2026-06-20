@@ -86,8 +86,10 @@ class DataFlowIntegrationTest {
         val outcome = ExecuteTransferUseCase(transferRepository)(
             TransferRequest(
                 fromAccountId = SALARY,
+                senderName = "홍길동",
                 toAccountNumber = SAFEBOX_NUMBER,
                 toBankCode = BankCode.TOSS,
+                recipientName = "홍길동",
                 amount = Money.of(50_000L, Currency.KRW),
                 memo = "세이프박스로",
                 idempotencyKey = "itest-transfer-1",
@@ -134,8 +136,10 @@ class DataFlowIntegrationTest {
         val outcome = ExecuteTransferUseCase(transferRepository)(
             TransferRequest(
                 fromAccountId = SALARY,
+                senderName = "홍길동",
                 toAccountNumber = recipient.number, // 마스킹 번호 (앱이 실제로 보내는 값)
                 toBankCode = recipient.bankCode,
+                recipientName = recipient.holderName,
                 amount = Money.of(30_000L, Currency.KRW),
                 memo = null,
                 idempotencyKey = "itest-internal-masked-1",
@@ -150,6 +154,41 @@ class DataFlowIntegrationTest {
             .balance.amount
         assertEquals(0, salaryAfter.compareTo(salaryBefore - BigDecimal("30000")))
         assertEquals(0, safeboxAfter.compareTo(safeboxBefore + BigDecimal("30000")))
+    }
+
+    @Test
+    fun `송금 거래내역의 상대방은 계좌번호가 아니라 명의로 표기된다`() = runBlocking {
+        accountRepository.refresh()
+        val source = requireNotNull(accountRepository.observeAccount(SALARY).first())
+        val recipient = requireNotNull(accountRepository.observeAccount(SAFEBOX).first())
+
+        // 메모 없이 송금 → 통장 인자내용(상대방 표기)이 명의로 채워져야 한다.
+        val outcome = ExecuteTransferUseCase(transferRepository)(
+            TransferRequest(
+                fromAccountId = SALARY,
+                senderName = source.holderName,
+                toAccountNumber = recipient.number,
+                toBankCode = recipient.bankCode,
+                recipientName = recipient.holderName,
+                amount = Money.of(20_000L, Currency.KRW),
+                memo = null,
+                idempotencyKey = "itest-counterparty-1",
+            ),
+        )
+        assertTrue("송금 성공해야 함: $outcome", outcome is TransferOutcome.Success)
+
+        transactionRepository.refresh(SALARY)
+        transactionRepository.refresh(SAFEBOX)
+
+        // 출금계좌 내역의 상대방 = 수취 명의 (예전엔 마스킹 계좌번호가 찍혔다).
+        val outgoing = transactionRepository.observeTransactions(SALARY).first().first()
+        assertEquals(TransactionType.TRANSFER_OUT, outgoing.type)
+        assertEquals(recipient.holderName, outgoing.counterparty?.name)
+
+        // 수취계좌 내역의 상대방 = 출금 명의 (예전엔 비어 있었다).
+        val incoming = transactionRepository.observeTransactions(SAFEBOX).first().first()
+        assertEquals(TransactionType.TRANSFER_IN, incoming.type)
+        assertEquals(source.holderName, incoming.counterparty?.name)
     }
 
     private companion object {

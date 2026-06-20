@@ -112,12 +112,17 @@ class TransferRepositoryImplTest {
         assertEquals("1000-55-1114443", sent?.recvClientAccountNum)
         assertEquals("092", sent?.recvClientBankCodeStd) // BankCode.TOSS
         assertEquals("50000", sent?.tranAmt)
+        // 이름은 계좌번호가 아니라 출금/수취 명의로 전송돼야 한다(거래내역 상대방 표기).
+        assertEquals("홍길동", sent?.reqClientName)
+        assertEquals("김세이프", sent?.recvClientName)
     }
 
     private fun request() = TransferRequest(
         fromAccountId = AccountId("120220112345678901234001"),
+        senderName = "홍길동",
         toAccountNumber = AccountNumber("1000-55-1114443"),
         toBankCode = BankCode.TOSS,
+        recipientName = "김세이프",
         amount = Money.of(50_000, Currency.KRW),
         memo = "세이프박스로",
         idempotencyKey = "idem-1",

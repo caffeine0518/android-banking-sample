@@ -103,8 +103,10 @@ class ResultViewModel @Inject constructor(
 
             val request = TransferRequest(
                 fromAccountId = sourceAccountId,
+                senderName = source.holderName,
                 toAccountNumber = recipient.number,
                 toBankCode = recipient.bankCode,
+                recipientName = recipient.holderName,
                 amount = Money.of(amount, source.balance.currency),
                 memo = null,
                 idempotencyKey = UUID.randomUUID().toString(),
