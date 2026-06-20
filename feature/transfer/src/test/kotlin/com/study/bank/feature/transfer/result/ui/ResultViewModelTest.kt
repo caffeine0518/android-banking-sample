@@ -80,6 +80,23 @@ class ResultViewModelTest {
     }
 
     @Test
+    fun `통화 불일치 실패면 phase는 Failure(CURRENCY_MISMATCH)가 된다`() = runTest {
+        val accounts = FakeAccountRepository().apply {
+            emit(account(SOURCE_ID), account(RECIPIENT_ID))
+        }
+        val vm = buildViewModel(
+            accounts,
+            FakeTransferRepository(TransferOutcome.Failure.CurrencyMismatch),
+            amount = 1,
+        )
+
+        assertEquals(
+            ResultPhase.Failure(ResultFailureUi.CURRENCY_MISMATCH),
+            vm.state.value.phase,
+        )
+    }
+
+    @Test
     fun `실행 중 예외는 UNKNOWN 실패로 매핑된다`() = runTest {
         val accounts = FakeAccountRepository().apply {
             emit(account(SOURCE_ID), account(RECIPIENT_ID))

@@ -8,6 +8,7 @@ import com.study.bank.feature.transfer.R
 enum class ResultFailureUi {
     INSUFFICIENT_FUNDS,
     INVALID_RECIPIENT,
+    CURRENCY_MISMATCH,
     LIMIT_EXCEEDED,
     NETWORK,
     UNKNOWN,
@@ -18,6 +19,7 @@ internal fun ResultFailureUi.message(): String = stringResource(
     when (this) {
         ResultFailureUi.INSUFFICIENT_FUNDS -> R.string.transfer_result_error_insufficient
         ResultFailureUi.INVALID_RECIPIENT -> R.string.transfer_result_error_invalid_recipient
+        ResultFailureUi.CURRENCY_MISMATCH -> R.string.transfer_result_error_currency_mismatch
         ResultFailureUi.LIMIT_EXCEEDED -> R.string.transfer_result_error_limit
         ResultFailureUi.NETWORK -> R.string.transfer_result_error_network
         ResultFailureUi.UNKNOWN -> R.string.transfer_result_error_unknown

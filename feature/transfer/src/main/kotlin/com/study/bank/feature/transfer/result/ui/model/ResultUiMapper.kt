@@ -22,6 +22,7 @@ class ResultUiMapper @Inject constructor(
     fun mapFailure(failure: TransferOutcome.Failure): ResultFailureUi = when (failure) {
         TransferOutcome.Failure.InsufficientFunds -> ResultFailureUi.INSUFFICIENT_FUNDS
         TransferOutcome.Failure.InvalidRecipient -> ResultFailureUi.INVALID_RECIPIENT
+        TransferOutcome.Failure.CurrencyMismatch -> ResultFailureUi.CURRENCY_MISMATCH
         is TransferOutcome.Failure.DailyLimitExceeded -> ResultFailureUi.LIMIT_EXCEEDED
         is TransferOutcome.Failure.PerTransactionLimitExceeded -> ResultFailureUi.LIMIT_EXCEEDED
         is TransferOutcome.Failure.Network -> ResultFailureUi.NETWORK

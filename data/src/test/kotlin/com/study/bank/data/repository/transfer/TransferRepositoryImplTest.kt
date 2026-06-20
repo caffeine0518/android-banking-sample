@@ -77,6 +77,20 @@ class TransferRepositoryImplTest {
     }
 
     @Test
+    fun `통화 불일치(A0001+320)면 CurrencyMismatch이고 SSOT를 갱신하지 않는다`() = runTest {
+        val api = FakeKftcApiService { failureResponse(bankRspCode = "320") }
+        val accounts = FakeAccountRepository()
+        val transactions = FakeTransactionRepository()
+        val repo = TransferRepositoryImpl(api, accounts, transactions, fixedClock)
+
+        val outcome = repo.execute(request())
+
+        assertEquals(TransferOutcome.Failure.CurrencyMismatch, outcome)
+        assertEquals(0, accounts.refreshCount)
+        assertTrue(transactions.refreshedAccounts.isEmpty())
+    }
+
+    @Test
     fun `알 수 없는 업무 거절은 Unknown으로 매핑된다`() = runTest {
         val api = FakeKftcApiService { failureResponse(bankRspCode = "999") }
         val repo = TransferRepositoryImpl(api, FakeAccountRepository(), FakeTransactionRepository(), fixedClock)

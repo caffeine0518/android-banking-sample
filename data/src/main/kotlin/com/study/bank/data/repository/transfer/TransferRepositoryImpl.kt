@@ -84,6 +84,7 @@ class TransferRepositoryImpl @Inject constructor(
 
     private fun toFailure(bankRspCode: String?): TransferOutcome.Failure = when (bankRspCode) {
         BANK_RSP_INSUFFICIENT_FUNDS -> TransferOutcome.Failure.InsufficientFunds
+        BANK_RSP_CURRENCY_MISMATCH -> TransferOutcome.Failure.CurrencyMismatch
         else -> TransferOutcome.Failure.Unknown(
             IllegalStateException("이체 거절: bank_rsp_code=$bankRspCode"),
         )
@@ -94,6 +95,7 @@ class TransferRepositoryImpl @Inject constructor(
         // KFTC 와이어 계약값(:data:remote:kftc의 KftcProtocol과 동일).
         const val RSP_SUCCESS = "A0000"
         const val BANK_RSP_INSUFFICIENT_FUNDS = "311"
+        const val BANK_RSP_CURRENCY_MISMATCH = "320"
         // 데모 고정값. 실서비스는 요청 추적자(tran_dtime)를 동적으로 구성한다.
         const val TRAN_DTIME = "20260603120000"
 

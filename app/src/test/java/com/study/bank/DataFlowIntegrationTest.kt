@@ -191,9 +191,40 @@ class DataFlowIntegrationTest {
         assertEquals(source.holderName, incoming.counterparty?.name)
     }
 
+    @Test
+    fun `다른 통화 내 계좌로 송금하면 CurrencyMismatch로 거절된다`() = runBlocking {
+        accountRepository.refresh()
+        val source = requireNotNull(accountRepository.observeAccount(SALARY).first())     // KRW
+        val recipient = requireNotNull(accountRepository.observeAccount(FX_USD).first())  // USD
+
+        // 앱 실제 플로우대로 출금계좌 통화로 금액을 만들어 다른 통화 계좌에 송금 시도.
+        val outcome = ExecuteTransferUseCase(transferRepository)(
+            TransferRequest(
+                fromAccountId = SALARY,
+                senderName = source.holderName,
+                toAccountNumber = recipient.number,
+                toBankCode = recipient.bankCode,
+                recipientName = recipient.holderName,
+                amount = Money.of(10_000L, source.balance.currency),
+                memo = null,
+                idempotencyKey = "itest-currency-mismatch-1",
+            ),
+        )
+
+        // 통화 불일치는 일반 오류가 아니라 전용 실패로 매핑돼야 한다(결과 화면에서 명확한 안내).
+        assertEquals(TransferOutcome.Failure.CurrencyMismatch, outcome)
+
+        // 거절됐으므로 어느 잔액도 변하지 않아야 한다.
+        val salary = requireNotNull(accountRepository.observeAccount(SALARY).first())
+        val usd = requireNotNull(accountRepository.observeAccount(FX_USD).first())
+        assertEquals(0, salary.balance.amount.compareTo(BigDecimal("2847320")))
+        assertEquals(0, usd.balance.amount.compareTo(BigDecimal("3245.80")))
+    }
+
     private companion object {
         val SALARY = AccountId("120220112345678901234001") // 월급통장 KRW 2,847,320
         val SAFEBOX = AccountId("120220112345678901234003") // 세이프박스 KRW 12,000,000
+        val FX_USD = AccountId("120220112345678901234002") // 외화통장 USD 3,245.80
         val SAFEBOX_NUMBER = AccountNumber("1000-55-1114443")
     }
 }
