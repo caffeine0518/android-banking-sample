@@ -3,8 +3,11 @@ package com.study.bank.domain.usecase.transfer
 import com.study.bank.domain.model.transfer.TransferOutcome
 import com.study.bank.domain.model.transfer.TransferRequest
 import com.study.bank.domain.repository.TransferRepository
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class ExecuteTransferUseCase(
+@Singleton
+class ExecuteTransferUseCase @Inject constructor(
     private val transferRepository: TransferRepository,
 ) {
     suspend operator fun invoke(request: TransferRequest): TransferOutcome =
