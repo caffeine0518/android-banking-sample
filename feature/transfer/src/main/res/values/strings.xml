@@ -19,4 +19,16 @@
     <string name="transfer_amount_fill_balance">잔액 · %1$s 입력</string>
     <string name="transfer_amount_backspace">지우기</string>
     <string name="transfer_amount_next">다음</string>
+
+    <!-- 송금 확인 화면(3/5) -->
+    <string name="transfer_confirm_title_to">님에게</string>
+    <!-- 금액 뒤 목적격 조사. KRW("…원을") 기준. -->
+    <string name="transfer_confirm_title_amount">%1$s을</string>
+    <string name="transfer_confirm_title_question">보낼까요?</string>
+    <string name="transfer_confirm_label_display_name">받는 분에게 표시</string>
+    <string name="transfer_confirm_label_source">출금 계좌</string>
+    <string name="transfer_confirm_label_deposit">입금 계좌</string>
+    <string name="transfer_confirm_source_format">내 %1$s 계좌</string>
+    <string name="transfer_confirm_send">보내기</string>
+    <string name="transfer_confirm_fee_free">평생 수수료 무료</string>
 </resources>
