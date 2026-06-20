@@ -56,7 +56,15 @@ class AmountViewModel @Inject constructor(
             AmountIntent.FillBalanceClicked -> setState { copy(amount = balanceCap(source)) }
 
             AmountIntent.NextClicked -> {
-                if (state.isAmountEntered) sendEffect(AmountEffect.NavigateNext)
+                if (state.isAmountEntered) {
+                    sendEffect(
+                        AmountEffect.NavigateNext(
+                            sourceAccountId = sourceAccountId.value,
+                            recipientAccountId = recipientAccountId.value,
+                            amount = state.amount,
+                        ),
+                    )
+                }
             }
 
             is AmountInternalAction.PartiesLoaded -> setState {

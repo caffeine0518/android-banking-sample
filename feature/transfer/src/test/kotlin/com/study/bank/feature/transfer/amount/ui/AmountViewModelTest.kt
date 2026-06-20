@@ -136,7 +136,14 @@ class AmountViewModelTest {
 
         vm.effect.test {
             vm.onIntent(AmountIntent.NextClicked)
-            assertEquals(AmountEffect.NavigateNext, awaitItem())
+            assertEquals(
+                AmountEffect.NavigateNext(
+                    sourceAccountId = SOURCE_ID,
+                    recipientAccountId = RECIPIENT_ID,
+                    amount = 5L,
+                ),
+                awaitItem(),
+            )
             cancelAndIgnoreRemainingEvents()
         }
     }
