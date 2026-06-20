@@ -9,4 +9,14 @@
     <string name="transfer_account_type_checking">입출금</string>
     <string name="transfer_account_type_savings">세이프박스</string>
     <string name="transfer_account_type_deposit">정기예금</string>
+
+    <!-- 금액 입력 화면(2/5) -->
+    <!-- 조사("에서"/"로") 대신 언어 중립적인 FROM/TO 캡션으로 출금·수취를 구분한다. -->
+    <string name="transfer_amount_from_label" translatable="false">FROM</string>
+    <string name="transfer_amount_to_label" translatable="false">TO</string>
+    <string name="transfer_amount_balance_label">잔액</string>
+    <string name="transfer_amount_hint">얼마나 옮길까요?</string>
+    <string name="transfer_amount_fill_balance">잔액 · %1$s 입력</string>
+    <string name="transfer_amount_backspace">지우기</string>
+    <string name="transfer_amount_next">다음</string>
 </resources>
