@@ -8,6 +8,7 @@ import com.study.bank.data.di.kftc.NetworkFaultController
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import javax.inject.Inject
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -41,6 +42,12 @@ class HomeRefreshErrorEndToEndTest {
     @Before
     fun inject() {
         hiltRule.inject()
+    }
+
+    // mock 서버는 프로세스 전역 @Singleton이라 켜둔 장애가 다음 테스트로 샌다. 명시적으로 정상 복구한다.
+    @After
+    fun clearFault() {
+        faultController.disableFault()
     }
 
     @Test
