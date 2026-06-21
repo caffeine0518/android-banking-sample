@@ -1,4 +1,6 @@
 pluginManagement {
+    // convention plugin을 제공하는 컴포지트 빌드. 모듈이 bank.* 플러그인을 적용할 수 있게 한다.
+    includeBuild("build-logic")
     repositories {
         google {
             content {

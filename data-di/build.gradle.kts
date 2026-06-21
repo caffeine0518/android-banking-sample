@@ -1,25 +1,10 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.hilt)
-    alias(libs.plugins.ksp)
+    id("bank.android.library")
+    id("bank.android.hilt")
 }
 
 android {
     namespace = "com.study.bank.data.di"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
-
-    defaultConfig {
-        minSdk = 26
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
 
     testOptions {
         // android.util.* 직접 호출(Log 등)이 JVM 단위 테스트에서 stub(0/false) 반환.
@@ -37,9 +22,6 @@ dependencies {
     implementation(projects.data.local)
 
     implementation(libs.kotlinx.coroutines.core)
-
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.compiler)
 
     implementation(libs.androidx.room.runtime)
 
