@@ -80,7 +80,7 @@ class DataFlowIntegrationTest {
             toAccountNumber = SAFEBOX_NUMBER,
             toBankCode = BankCode.TOSS,
         )
-        assertEquals(RecipientValidation.Valid("홍길동"), validation)
+        assertEquals(RecipientValidation.Valid(SAFEBOX, "홍길동"), validation)
 
         // 송금(출금이체) 50,000원.
         val outcome = ExecuteTransferUseCase(transferRepository)(

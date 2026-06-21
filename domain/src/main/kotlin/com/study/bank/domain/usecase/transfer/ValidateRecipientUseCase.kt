@@ -6,8 +6,11 @@ import com.study.bank.domain.model.account.AccountNumber
 import com.study.bank.domain.model.transfer.RecipientLookup
 import com.study.bank.domain.model.transfer.RecipientValidation
 import com.study.bank.domain.repository.RecipientRepository
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class ValidateRecipientUseCase(
+@Singleton
+class ValidateRecipientUseCase @Inject constructor(
     private val recipientRepository: RecipientRepository,
 ) {
     suspend operator fun invoke(
@@ -21,7 +24,7 @@ class ValidateRecipientUseCase(
                 if (lookup.accountId == fromAccountId) {
                     RecipientValidation.SelfTransfer
                 } else {
-                    RecipientValidation.Valid(lookup.holderName)
+                    RecipientValidation.Valid(lookup.accountId, lookup.holderName)
                 }
 
             is RecipientLookup.Inactive -> RecipientValidation.Inactive
