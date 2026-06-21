@@ -19,12 +19,17 @@ internal class InquiryRequestHandler(
 ) {
     fun realName(body: String): MockResponse {
         val request = parse(body) ?: return responses.error(MockError.MissingInquiryBody)
+        // 계좌번호는 숫자만 정규화해 비교한다. 실제 KFTC도 account_num을 하이픈 없는 정규 숫자로
+        // 주고받으며(하이픈은 표시용), 앱 입력도 숫자만 받으므로 시드의 하이픈 표기와 매칭된다.
+        val requestDigits = request.accountNum.digitsOnly()
         val match = recipients.firstOrNull {
-            it.accountNum == request.accountNum && it.bankCodeStd == request.bankCodeStd
+            it.accountNum.digitsOnly() == requestDigits && it.bankCodeStd == request.bankCodeStd
         } ?: return responses.realNameNotFound(request.accountNum)
         return responses.realNameFound(match)
     }
 
     private fun parse(body: String): RealNameInquiryRequest? =
         runCatching { json.decodeFromString<RealNameInquiryRequest>(body) }.getOrNull()
+
+    private fun String.digitsOnly(): String = filter(Char::isDigit)
 }

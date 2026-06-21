@@ -268,6 +268,17 @@ class KftcMockDispatcherTest {
     }
 
     @Test
+    fun `real_name은 하이픈 없는 숫자 계좌번호도 시드와 매칭한다`() {
+        // 앱 입력은 숫자만 받으므로(토스 동일), 하이픈 없는 번호가 하이픈 시드와 매칭돼야 한다.
+        val (code, body) = post("/v2.0/inquiry/real_name", realNameBody(bank = "088", accountNum = "110555667788"))
+
+        assertEquals(200, code)
+        assertEnvelope(body, rspCode = "A0000")
+        assertTrue("예금주명: $body", body.contains("김토스"))
+        assertTrue("활성 상태: $body", body.contains(""""account_status":"ACTIVE""""))
+    }
+
+    @Test
     fun `real_name 휴면 수취인은 INACTIVE 상태를 돌려준다`() {
         val (code, body) = post("/v2.0/inquiry/real_name", realNameBody(bank = "004", accountNum = "004-999-888777"))
 
