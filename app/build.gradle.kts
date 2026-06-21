@@ -52,15 +52,6 @@ dependencies {
     // ── Production: Compose / AndroidX ──────────────────────────────────
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-
-    // ── Debug 전용 툴링 (Compose @Preview / 레이아웃 인스펙터) ───────────
-    debugImplementation(libs.androidx.compose.ui.tooling)
 
     // 테스트 의존성은 전용 모듈로 분리:
     //  · L3 데이터 E2E(JVM/Robolectric) → :integration-test

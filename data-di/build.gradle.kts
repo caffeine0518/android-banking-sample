@@ -42,7 +42,6 @@ dependencies {
     ksp(libs.hilt.compiler)
 
     implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
 
     // L3 데이터 E2E: 이 모듈이 조립하는 실제 Hilt 그래프(KFTC mock + Room SSOT + 레포)를
     // Robolectric(JVM)에서 부팅해 끝까지 흐르는지 검증한다. domain 등 피검 타입은 main의 implementation으로 노출됨.

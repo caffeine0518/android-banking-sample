@@ -45,8 +45,6 @@ dependencies {
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui.test.junit4)
-    implementation(libs.androidx.espresso.core)
-    implementation(libs.androidx.junit)
     implementation(libs.androidx.test.runner)
 
     implementation(libs.hilt.android)

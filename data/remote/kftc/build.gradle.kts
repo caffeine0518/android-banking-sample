@@ -26,13 +26,11 @@ android {
 }
 
 dependencies {
-    implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.retrofit.core)
     implementation(libs.retrofit.converter.kotlinx.serialization)
     implementation(libs.okhttp.core)
-    implementation(libs.okhttp.logging.interceptor)
 
     // In-process KFTC mock — exposed to :data-di so the running app can boot it.
     implementation(libs.okhttp.mockwebserver)
