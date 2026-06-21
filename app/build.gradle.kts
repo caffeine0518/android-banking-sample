@@ -50,13 +50,16 @@ android {
 }
 
 dependencies {
+    // ── Production: 모듈 그래프 ──────────────────────────────────────────
     implementation(projects.navigation)
     implementation(projects.dataDi)
     implementation(projects.coreUi.designsystem)
 
+    // ── Production: DI(Hilt) ────────────────────────────────────────────
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
+    // ── Production: Compose / AndroidX ──────────────────────────────────
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
@@ -65,21 +68,29 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+
+    // ── Unit test (JVM, src/test) ───────────────────────────────────────
     testImplementation(libs.junit)
-    // 데이터 레이어 E2E(L3): 실제 Hilt 그래프(KFTC mock + Room SSOT + 레포)를 JVM(Robolectric)에서 런타임 통합 검증.
+    testImplementation(libs.kotlinx.coroutines.test)
+    // L3 데이터 E2E: 실제 Hilt 그래프(KFTC mock + Room SSOT + 레포)를 JVM(Robolectric)에서 런타임 통합 검증.
+    // ↳ release/디버그 APK에 포함되지 않는 test-only 의존성.
     testImplementation(projects.domain)
     testImplementation(libs.hilt.android.testing)
-    kspTest(libs.hilt.compiler)
     testImplementation(libs.robolectric)
-    testImplementation(libs.kotlinx.coroutines.test)
+    kspTest(libs.hilt.compiler)
+
+    // ── Instrumented test (계기, src/androidTest) ───────────────────────
+    // L3 UI E2E: 실제 MainActivity+BankNavHost+Hilt 그래프를 디바이스/에뮬레이터에서 구동.
+    // ↳ 별도 test APK로 빌드되어 앱 release APK에는 포함되지 않음.
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.test.runner)
-    // 실제 MainActivity+BankNavHost+Hilt 그래프를 띄우는 E2E용 Hilt 테스트.
     androidTestImplementation(libs.hilt.android.testing)
     kspAndroidTest(libs.hilt.compiler)
+
+    // ── Debug 전용 툴링 (Compose 테스트 매니페스트 / 미리보기 툴링) ──────
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
