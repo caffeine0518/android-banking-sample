@@ -6,6 +6,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import com.study.bank.domain.model.BankCode
 import com.study.bank.feature.transfer.R
@@ -90,6 +91,7 @@ class AccountInputScreenTest {
         setScreen(AccountInputState(accountNumber = "868369666", error = AccountInputError.NOT_FOUND))
 
         composeRule.onNodeWithText(string(R.string.transfer_account_input_error_not_found))
+            .performScrollTo()
             .assertIsDisplayed()
     }
 

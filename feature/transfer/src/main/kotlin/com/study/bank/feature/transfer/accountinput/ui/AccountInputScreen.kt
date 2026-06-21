@@ -1,6 +1,8 @@
 package com.study.bank.feature.transfer.accountinput.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -44,6 +46,7 @@ import com.study.bank.feature.transfer.accountinput.contract.AccountInputError
 import com.study.bank.feature.transfer.accountinput.contract.AccountInputIntent
 import com.study.bank.feature.transfer.accountinput.contract.AccountInputState
 import com.study.bank.feature.transfer.accountinput.ui.component.BankPickerSheet
+import com.study.bank.feature.transfer.accountinput.ui.debug.AccountInputDebugBar
 import com.study.bank.feature.transfer.accountinput.ui.preview.PreviewAccountInputState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,7 +85,8 @@ internal fun AccountInputScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
+                .padding(innerPadding)
+                .verticalScroll(rememberScrollState()),
         ) {
             Text(
                 text = stringResource(R.string.transfer_account_input_title),
@@ -104,6 +108,15 @@ internal fun AccountInputScreen(
             BankSelector(
                 bank = state.selectedBank,
                 onClick = { onIntent(AccountInputIntent.BankSelectorClicked) },
+            )
+
+            // 디버그 빌드에서만 칩이 보인다(릴리스는 stub → Unit).
+            // 일반 입력과 동일 경로로 채운다(번호는 숫자 필터를 그대로 통과).
+            AccountInputDebugBar(
+                onApplyPreset = { number, bank ->
+                    onIntent(AccountInputIntent.AccountNumberChanged(number))
+                    onIntent(AccountInputIntent.BankSelected(bank))
+                },
             )
 
             state.error?.let { error ->
