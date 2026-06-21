@@ -44,7 +44,7 @@ class RecipientViewModel @Inject constructor(
             RecipientIntent.BackClicked -> sendEffect(RecipientEffect.NavigateBack)
 
             RecipientIntent.AccountNumberInputClicked -> {
-                sendEffect(RecipientEffect.NavigateToAccountNumberInput)
+                sendEffect(RecipientEffect.NavigateToAccountNumberInput(sourceAccountId.value))
             }
 
             is RecipientIntent.MyAccountClicked -> sendEffect(

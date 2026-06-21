@@ -50,7 +50,7 @@ class RecipientViewModelTest {
 
         vm.effect.test {
             vm.onIntent(RecipientIntent.AccountNumberInputClicked)
-            assertEquals(RecipientEffect.NavigateToAccountNumberInput, awaitItem())
+            assertEquals(RecipientEffect.NavigateToAccountNumberInput(SOURCE_ID), awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
     }

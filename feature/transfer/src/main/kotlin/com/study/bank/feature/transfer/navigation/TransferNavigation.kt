@@ -7,6 +7,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.study.bank.domain.model.account.AccountId
+import com.study.bank.feature.transfer.accountinput.ui.AccountInputRoute
 import com.study.bank.feature.transfer.amount.ui.AmountRoute
 import com.study.bank.feature.transfer.confirm.ui.ConfirmRoute
 import com.study.bank.feature.transfer.recipient.ui.RecipientRoute
@@ -18,6 +19,9 @@ const val TRANSFER_AMOUNT_ARG = "amount"
 
 /** 송금 플로우 진입(1번째 화면: 수취인 선택). {accountId}는 출금계좌. */
 const val TRANSFER_ROUTE = "transfer/{$TRANSFER_ACCOUNT_ID_ARG}"
+
+/** 송금 1-b 화면: 계좌번호 입력(외부 수취계좌 직접 입력). {accountId}=출금계좌. */
+const val TRANSFER_ACCOUNT_INPUT_ROUTE = "transfer/{$TRANSFER_ACCOUNT_ID_ARG}/account-input"
 
 /** 송금 2번째 화면: 금액 입력. {accountId}=출금계좌, {recipientId}=수취계좌. */
 const val TRANSFER_AMOUNT_ROUTE = "transfer/{$TRANSFER_ACCOUNT_ID_ARG}/amount/{$TRANSFER_RECIPIENT_ID_ARG}"
@@ -32,6 +36,13 @@ const val TRANSFER_RESULT_ROUTE =
 
 fun NavController.navigateToTransfer(sourceAccountId: AccountId, navOptions: NavOptions? = null) {
     navigate("transfer/${sourceAccountId.value}", navOptions)
+}
+
+fun NavController.navigateToTransferAccountInput(
+    sourceAccountId: String,
+    navOptions: NavOptions? = null,
+) {
+    navigate("transfer/$sourceAccountId/account-input", navOptions)
 }
 
 fun NavController.navigateToTransferAmount(
@@ -62,7 +73,7 @@ fun NavController.navigateToTransferResult(
 
 fun NavGraphBuilder.transferScreen(
     onBack: () -> Unit,
-    onAccountNumberInput: () -> Unit,
+    onAccountNumberInput: (sourceAccountId: String) -> Unit,
     onAmountInput: (sourceAccountId: String, recipientAccountId: String) -> Unit,
 ) {
     composable(
@@ -74,6 +85,18 @@ fun NavGraphBuilder.transferScreen(
             onAccountNumberInput = onAccountNumberInput,
             onContinue = onAmountInput,
         )
+    }
+}
+
+fun NavGraphBuilder.transferAccountInputScreen(
+    onBack: () -> Unit,
+    onResolved: (sourceAccountId: String, recipientAccountId: String) -> Unit,
+) {
+    composable(
+        route = TRANSFER_ACCOUNT_INPUT_ROUTE,
+        arguments = listOf(navArgument(TRANSFER_ACCOUNT_ID_ARG) { type = NavType.StringType }),
+    ) {
+        AccountInputRoute(onBack = onBack, onResolved = onResolved)
     }
 }
 

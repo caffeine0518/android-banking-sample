@@ -8,9 +8,11 @@ import com.study.bank.feature.account.ui.navigation.navigateToAccount
 import com.study.bank.feature.home.ui.navigation.HOME_ROUTE
 import com.study.bank.feature.home.ui.navigation.homeScreen
 import com.study.bank.feature.transfer.navigation.navigateToTransfer
+import com.study.bank.feature.transfer.navigation.navigateToTransferAccountInput
 import com.study.bank.feature.transfer.navigation.navigateToTransferAmount
 import com.study.bank.feature.transfer.navigation.navigateToTransferConfirm
 import com.study.bank.feature.transfer.navigation.navigateToTransferResult
+import com.study.bank.feature.transfer.navigation.transferAccountInputScreen
 import com.study.bank.feature.transfer.navigation.transferAmountScreen
 import com.study.bank.feature.transfer.navigation.transferConfirmScreen
 import com.study.bank.feature.transfer.navigation.transferResultScreen
@@ -32,8 +34,16 @@ fun BankNavHost() {
         )
         transferScreen(
             onBack = { navController.popBackStack() },
-            onAccountNumberInput = { /* 계좌번호 입력 화면 추가 시 연결 */ },
+            onAccountNumberInput = { sourceId ->
+                navController.navigateToTransferAccountInput(sourceId)
+            },
             onAmountInput = { sourceId, recipientId ->
+                navController.navigateToTransferAmount(sourceId, recipientId)
+            },
+        )
+        transferAccountInputScreen(
+            onBack = { navController.popBackStack() },
+            onResolved = { sourceId, recipientId ->
                 navController.navigateToTransferAmount(sourceId, recipientId)
             },
         )

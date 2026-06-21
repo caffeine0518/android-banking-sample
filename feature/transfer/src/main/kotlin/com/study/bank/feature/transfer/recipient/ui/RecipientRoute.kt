@@ -14,7 +14,7 @@ import com.study.bank.feature.transfer.recipient.contract.RecipientEffect
 @Composable
 fun RecipientRoute(
     onBack: () -> Unit,
-    onAccountNumberInput: () -> Unit,
+    onAccountNumberInput: (sourceAccountId: String) -> Unit,
     onContinue: (sourceAccountId: String, recipientAccountId: String) -> Unit,
     viewModel: RecipientViewModel = hiltViewModel(),
 ) {
@@ -28,7 +28,8 @@ fun RecipientRoute(
         effects.collect { effect ->
             when (effect) {
                 RecipientEffect.NavigateBack -> onBack()
-                RecipientEffect.NavigateToAccountNumberInput -> onAccountNumberInput()
+                is RecipientEffect.NavigateToAccountNumberInput ->
+                    onAccountNumberInput(effect.sourceAccountId)
                 is RecipientEffect.NavigateToAmount ->
                     onContinue(effect.sourceAccountId, effect.recipientAccountId)
             }
