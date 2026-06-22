@@ -63,7 +63,7 @@ internal fun ConfirmScreen(
         },
         bottomBar = {
             BottomBar(
-                enabled = state.detail != null,
+                enabled = state.detail != null && !state.submitting,
                 onSend = { onIntent(ConfirmIntent.SendClicked) },
             )
         },

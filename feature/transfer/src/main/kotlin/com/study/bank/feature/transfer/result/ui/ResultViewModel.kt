@@ -48,6 +48,15 @@ class ResultViewModel @Inject constructor(
     private val amount =
         checkNotNull(savedStateHandle.get<Long>(TRANSFER_AMOUNT_ARG)) { "amount 인자 누락" }
 
+    /**
+     * 멱등성 키는 "이 송금 한 건"에 묶여 재시도 내내 동일해야 한다. 재시도마다 새로 만들면
+     * 타임아웃 뒤 재시도가 서버엔 새 거래(=새 bank_tran_id)로 보여 이중출금을 못 막는다.
+     */
+    private val idempotencyKey: String =
+        savedStateHandle.get<String>(IDEMPOTENCY_KEY) ?: UUID.randomUUID().toString().also {
+            savedStateHandle[IDEMPOTENCY_KEY] = it
+        }
+
     private val store = MviStore<ResultState, ResultAction, ResultEffect>(
         initialState = ResultState(),
         scope = viewModelScope,
@@ -61,8 +70,12 @@ class ResultViewModel @Inject constructor(
             ResultIntent.LeaveMemoClicked -> sendEffect(ResultEffect.LeaveMemo)
 
             ResultIntent.RetryClicked -> {
-                setState { copy(phase = ResultPhase.Loading) }
-                execute()
+                // 단발 가드: 이미 재실행 중이면 무시한다. 로딩 중 버튼을 숨기는 UI 가드는 재합성
+                // 타이밍에 의존해 빠른 연타를 못 막으므로, 상태로 직접 재진입을 차단한다.
+                if (state.phase != ResultPhase.Loading) {
+                    setState { copy(phase = ResultPhase.Loading) }
+                    execute()
+                }
             }
 
             is ResultInternalAction.HeaderReady -> setState { copy(header = action.header) }
@@ -109,7 +122,7 @@ class ResultViewModel @Inject constructor(
                 recipientName = recipient.holderName,
                 amount = Money.ofMinor(amount, source.balance.currency),
                 memo = null,
-                idempotencyKey = UUID.randomUUID().toString(),
+                idempotencyKey = idempotencyKey,
             )
             val outcome = runCatching { executeTransfer(request) }
                 .getOrElse { error ->
@@ -127,5 +140,6 @@ class ResultViewModel @Inject constructor(
 
     private companion object {
         const val TAG = "ResultViewModel"
+        const val IDEMPOTENCY_KEY = "transfer_idempotency_key"
     }
 }

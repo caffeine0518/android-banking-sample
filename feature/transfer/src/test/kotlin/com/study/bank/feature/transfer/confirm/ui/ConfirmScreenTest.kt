@@ -90,6 +90,13 @@ class ConfirmScreenTest {
         composeRule.onNodeWithText(string(R.string.transfer_confirm_send)).assertIsNotEnabled()
     }
 
+    @Test
+    fun `submitting이면 보내기 버튼이 비활성이다`() {
+        setScreen(ConfirmState(detail = detail(), submitting = true))
+
+        composeRule.onNodeWithText(string(R.string.transfer_confirm_send)).assertIsNotEnabled()
+    }
+
     private fun detail() = ConfirmDetailUi(
         recipientHolderName = "안성재",
         amount = MoneyUi(BigDecimal.valueOf(2), CurrencyUi.KRW),

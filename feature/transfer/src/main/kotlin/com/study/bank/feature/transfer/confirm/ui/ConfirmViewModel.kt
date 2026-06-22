@@ -55,7 +55,9 @@ class ConfirmViewModel @Inject constructor(
             ConfirmIntent.SourceAccountClicked -> sendEffect(ConfirmEffect.ChangeSource)
 
             ConfirmIntent.SendClicked -> {
-                if (state.detail != null) {
+                // 단발 가드: 첫 탭에서만 Submit. 연타해도 둘째부터는 submitting=true라 무시된다.
+                if (state.detail != null && !state.submitting) {
+                    setState { copy(submitting = true) }
                     sendEffect(
                         ConfirmEffect.Submit(
                             sourceAccountId = sourceAccountId.value,

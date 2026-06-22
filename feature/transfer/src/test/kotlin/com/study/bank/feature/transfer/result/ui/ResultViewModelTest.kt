@@ -30,6 +30,7 @@ import com.study.bank.feature.transfer.result.ui.model.ResultUiMapper
 import com.study.bank.feature.transfer.testutil.MainDispatcherRule
 import java.math.BigDecimal
 import java.time.Instant
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -132,6 +133,72 @@ class ResultViewModelTest {
     }
 
     @Test
+    fun `재시도해도 멱등성 키는 동일하게 유지된다`() = runTest {
+        val accounts = FakeAccountRepository().apply {
+            emit(account(SOURCE_ID), account(RECIPIENT_ID))
+        }
+        // 1차는 네트워크 실패(타임아웃 가정), 재시도는 성공.
+        val transfer = SequencedTransferRepository(
+            TransferOutcome.Failure.Network(RuntimeException("timeout")),
+            success(),
+        )
+        val vm = buildViewModel(accounts, transfer, amount = 1)
+
+        vm.onIntent(ResultIntent.RetryClicked)
+
+        // 같은 논리적 송금이므로 재시도는 첫 시도와 동일한 키로 나가야 한다(서버 dedup → 이중출금 방지).
+        assertEquals(2, transfer.requests.size)
+        assertEquals(transfer.requests[0].idempotencyKey, transfer.requests[1].idempotencyKey)
+    }
+
+    @Test
+    fun `복원 후 자동 재실행돼도 멱등성 키가 보존된다`() = runTest {
+        val accounts = FakeAccountRepository().apply {
+            emit(account(SOURCE_ID), account(RECIPIENT_ID))
+        }
+        val savedStateHandle = SavedStateHandle(
+            mapOf(
+                TRANSFER_ACCOUNT_ID_ARG to SOURCE_ID,
+                TRANSFER_RECIPIENT_ID_ARG to RECIPIENT_ID,
+                TRANSFER_AMOUNT_ARG to 1L,
+            ),
+        )
+        val first = SequencedTransferRepository(TransferOutcome.Failure.Network(RuntimeException("timeout")))
+        buildViewModel(accounts, first, amount = 1, savedStateHandle = savedStateHandle)
+
+        // 같은 SavedStateHandle로 VM 재생성 = 시스템 OOM kill 후 Navigation이 결과 화면을
+        // 복원해 init이 송금을 자동 재실행하는 상황. 키는 그대로여야 한다.
+        val second = SequencedTransferRepository(success())
+        buildViewModel(accounts, second, amount = 1, savedStateHandle = savedStateHandle)
+
+        assertEquals(
+            first.requests.single().idempotencyKey,
+            second.requests.single().idempotencyKey,
+        )
+    }
+
+    @Test
+    fun `재실행 중에는 RetryClicked 연타가 무시된다`() = runTest {
+        val accounts = FakeAccountRepository().apply {
+            emit(account(SOURCE_ID), account(RECIPIENT_ID))
+        }
+        // init은 즉시 실패, 재시도는 release 전까지 멈춰 phase를 Loading으로 붙잡아 둔다.
+        val transfer = GatedTransferRepository(retryOutcome = success())
+        val vm = buildViewModel(accounts, transfer, amount = 1)
+        assertTrue(vm.state.value.phase is ResultPhase.Failure)
+        assertEquals(1, transfer.callCount)
+
+        vm.onIntent(ResultIntent.RetryClicked) // 재실행 시작 → phase=Loading, gate에서 멈춤
+        vm.onIntent(ResultIntent.RetryClicked) // 무시(이미 Loading)
+        vm.onIntent(ResultIntent.RetryClicked) // 무시
+        assertEquals(2, transfer.callCount)
+
+        transfer.release() // 멈춘 재실행 완료
+        assertEquals(ResultPhase.Success, vm.state.value.phase)
+        assertEquals(2, transfer.callCount)
+    }
+
+    @Test
     fun `확인은 Finish effect를 보낸다`() = runTest {
         val accounts = FakeAccountRepository().apply {
             emit(account(SOURCE_ID), account(RECIPIENT_ID))
@@ -165,14 +232,15 @@ class ResultViewModelTest {
         accounts: FakeAccountRepository,
         transfer: TransferRepository,
         amount: Long,
-    ) = ResultViewModel(
-        savedStateHandle = SavedStateHandle(
+        savedStateHandle: SavedStateHandle = SavedStateHandle(
             mapOf(
                 TRANSFER_ACCOUNT_ID_ARG to SOURCE_ID,
                 TRANSFER_RECIPIENT_ID_ARG to RECIPIENT_ID,
                 TRANSFER_AMOUNT_ARG to amount,
             ),
         ),
+    ) = ResultViewModel(
+        savedStateHandle = savedStateHandle,
         accountRepository = accounts,
         executeTransfer = ExecuteTransferUseCase(transfer),
         resultUiMapper = resultUiMapper,
@@ -226,8 +294,33 @@ class ResultViewModelTest {
         private vararg val outcomes: TransferOutcome,
     ) : TransferRepository {
         private var index = 0
-        override suspend fun execute(request: TransferRequest): TransferOutcome =
-            outcomes[index++.coerceAtMost(outcomes.lastIndex)]
+        val requests = mutableListOf<TransferRequest>()
+        override suspend fun execute(request: TransferRequest): TransferOutcome {
+            requests += request
+            return outcomes[index++.coerceAtMost(outcomes.lastIndex)]
+        }
+    }
+
+    /** 첫 호출(init)은 즉시 실패, 이후 호출은 [release] 전까지 멈춰 재실행을 인플라이트로 붙잡아 둔다. */
+    private class GatedTransferRepository(
+        private val retryOutcome: TransferOutcome,
+    ) : TransferRepository {
+        private val gate = CompletableDeferred<Unit>()
+        var callCount = 0
+            private set
+
+        override suspend fun execute(request: TransferRequest): TransferOutcome {
+            callCount++
+            if (callCount == 1) {
+                return TransferOutcome.Failure.Network(RuntimeException("net"))
+            }
+            gate.await()
+            return retryOutcome
+        }
+
+        fun release() {
+            gate.complete(Unit)
+        }
     }
 
     private class TestDispatcherProvider(dispatcher: CoroutineDispatcher) : DispatcherProvider {
