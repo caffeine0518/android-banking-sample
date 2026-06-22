@@ -165,9 +165,9 @@ class KftcBankStateTest {
     )
 
     private companion object {
-        const val SALARY = "120220112345678901234001" // 월급통장 KRW 2847320
-        const val USD = "120220112345678901234002" // 외화통장 USD 3245.80
-        const val SAFEBOX = "120220112345678901234003" // 세이프박스 KRW 12000000
+        const val SALARY = KftcSeedAccountIds.PAYROLL_KRW
+        const val USD = KftcSeedAccountIds.FX_USD
+        const val SAFEBOX = KftcSeedAccountIds.SAFEBOX_KRW
         const val SAFEBOX_NUM = "1000-55-1114443"
         const val USD_NUM = "1000-98-7654321"
     }

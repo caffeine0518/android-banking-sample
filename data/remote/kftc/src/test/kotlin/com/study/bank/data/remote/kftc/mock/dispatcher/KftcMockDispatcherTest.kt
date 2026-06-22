@@ -3,6 +3,7 @@ package com.study.bank.data.remote.kftc.mock.dispatcher
 import com.study.bank.data.remote.kftc.mock.KftcAccountSeed
 import com.study.bank.data.remote.kftc.mock.KftcBankState
 import com.study.bank.data.remote.kftc.mock.KftcRecipientSeed
+import com.study.bank.data.remote.kftc.mock.KftcSeedAccountIds
 import com.study.bank.data.remote.kftc.mock.SeedAccount
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -264,7 +265,7 @@ class KftcMockDispatcherTest {
         assertTrue("본인 예금주: $body", body.contains("홍길동"))
         assertTrue("활성 상태: $body", body.contains(""""account_status":"ACTIVE""""))
         assertTrue("식별자=해당 계좌 fintech_use_num: $body",
-            body.contains(""""account_id":"120220112345678901234004""""))
+            body.contains(""""account_id":"${KftcSeedAccountIds.SHINHAN_KRW}""""))
     }
 
     @Test
@@ -356,8 +357,8 @@ class KftcMockDispatcherTest {
         val TRAN_ID_REGEX = Regex(""""api_tran_id":"([^"]+)"""")
         val SEQ_DIGITS_REGEX = Regex("""\d+""")
 
-        const val SALARY = "120220112345678901234001" // 월급통장 KRW 2847320
-        const val SAFEBOX = "120220112345678901234003" // 세이프박스 KRW 12000000
+        const val SALARY = KftcSeedAccountIds.PAYROLL_KRW
+        const val SAFEBOX = KftcSeedAccountIds.SAFEBOX_KRW
         const val SAFEBOX_NUM = "1000-55-1114443"
     }
 }

@@ -3,6 +3,7 @@ package com.study.bank.data.remote.kftc.api
 import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryRequest
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
 import com.study.bank.data.remote.kftc.mock.KftcMockServer
+import com.study.bank.data.remote.kftc.mock.KftcSeedAccountIds
 import com.study.bank.data.remote.kftc.network.NetworkJson
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
@@ -70,7 +71,7 @@ class KftcApiServiceTest {
 
     @Test
     fun `balance fin_num이 KRW 시드 계좌의 잔액과 통화코드를 정확히 돌려준다`() = runTest {
-        val krwFintechUseNum = "120220112345678901234001"
+        val krwFintechUseNum = KftcSeedAccountIds.PAYROLL_KRW
 
         val balance = api.getAccountBalance(
             bankTranId = "M202300001U000001",
@@ -86,7 +87,7 @@ class KftcApiServiceTest {
 
     @Test
     fun `balance fin_num이 USD 외화통장의 소수점 잔액을 그대로 돌려준다`() = runTest {
-        val usdFintechUseNum = "120220112345678901234002"
+        val usdFintechUseNum = KftcSeedAccountIds.FX_USD
 
         val balance = api.getAccountBalance(
             bankTranId = "M202300001U000002",
@@ -302,8 +303,8 @@ class KftcApiServiceTest {
     )
 
     private companion object {
-        const val SALARY = "120220112345678901234001" // 월급통장 KRW 2847320
-        const val SAFEBOX = "120220112345678901234003" // 세이프박스 KRW 12000000
+        const val SALARY = KftcSeedAccountIds.PAYROLL_KRW
+        const val SAFEBOX = KftcSeedAccountIds.SAFEBOX_KRW
         const val SAFEBOX_NUM = "1000-55-1114443"
     }
 }

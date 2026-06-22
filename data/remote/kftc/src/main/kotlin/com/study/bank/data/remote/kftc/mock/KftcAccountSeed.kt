@@ -11,7 +11,7 @@ internal object KftcAccountSeed {
 
     val accounts: List<SeedAccount> = listOf(
         SeedAccount(
-            fintechUseNum = "120220112345678901234001",
+            fintechUseNum = KftcSeedAccountIds.PAYROLL_KRW,
             bankCodeStd = "092",
             bankName = "토스뱅크",
             accountNum = "1000-12-3456789",
@@ -24,7 +24,7 @@ internal object KftcAccountSeed {
             productName = "토스뱅크 통장",
         ),
         SeedAccount(
-            fintechUseNum = "120220112345678901234002",
+            fintechUseNum = KftcSeedAccountIds.FX_USD,
             bankCodeStd = "092",
             bankName = "토스뱅크",
             accountNum = "1000-98-7654321",
@@ -37,7 +37,7 @@ internal object KftcAccountSeed {
             productName = "토스뱅크 외화통장",
         ),
         SeedAccount(
-            fintechUseNum = "120220112345678901234003",
+            fintechUseNum = KftcSeedAccountIds.SAFEBOX_KRW,
             bankCodeStd = "092",
             bankName = "토스뱅크",
             accountNum = "1000-55-1114443",
@@ -50,7 +50,7 @@ internal object KftcAccountSeed {
             productName = "토스뱅크 세이프박스",
         ),
         SeedAccount(
-            fintechUseNum = "120220112345678901234004",
+            fintechUseNum = KftcSeedAccountIds.SHINHAN_KRW,
             bankCodeStd = "088",
             bankName = "신한은행",
             accountNum = "110-23-1237890",
@@ -64,7 +64,7 @@ internal object KftcAccountSeed {
         ),
         // KEXIM API가 TWD/VND 환율을 제공하지 않아 자연스럽게 환산 불가 경로로 흐름.
         SeedAccount(
-            fintechUseNum = "120220112345678901234005",
+            fintechUseNum = KftcSeedAccountIds.TWD_TRAVEL,
             bankCodeStd = "092",
             bankName = "토스뱅크",
             accountNum = "1000-77-9993322",
@@ -77,7 +77,7 @@ internal object KftcAccountSeed {
             productName = "토스뱅크 외화통장",
         ),
         SeedAccount(
-            fintechUseNum = "120220112345678901234006",
+            fintechUseNum = KftcSeedAccountIds.VND_DONG,
             bankCodeStd = "092",
             bankName = "토스뱅크",
             accountNum = "1000-66-5551144",
@@ -91,7 +91,7 @@ internal object KftcAccountSeed {
         ),
         // 동일 통화(USD) 송금의 수취 짝. '외화통장 USD'와 함께 소수점 보존 E2E를 가능케 한다.
         SeedAccount(
-            fintechUseNum = "120220112345678901234007",
+            fintechUseNum = KftcSeedAccountIds.FX_USD_2,
             bankCodeStd = "092",
             bankName = "토스뱅크",
             accountNum = "1000-98-7778889",
