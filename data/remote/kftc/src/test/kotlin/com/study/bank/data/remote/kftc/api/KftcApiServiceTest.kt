@@ -51,19 +51,19 @@ class KftcApiServiceTest {
     }
 
     @Test
-    fun `list_finuse 응답에 시드된 6개 계좌가 들어있고 잔액 필드는 없다`() = runTest {
+    fun `list_finuse 응답에 시드된 7개 계좌가 들어있고 잔액 필드는 없다`() = runTest {
         val response = api.getAccountList(userSeqNo = "1100000001")
 
         assertEquals("A0000", response.rspCode)
-        assertEquals("6", response.resCnt)
-        assertEquals(6, response.resList.size)
+        assertEquals("7", response.resCnt)
+        assertEquals(7, response.resList.size)
 
         val bankCodes = response.resList.map { it.bankCodeStd }
-        assertEquals(listOf("092", "092", "092", "088", "092", "092"), bankCodes)
+        assertEquals(listOf("092", "092", "092", "088", "092", "092", "092"), bankCodes)
 
         val aliases = response.resList.map { it.accountAlias }
         assertEquals(
-            listOf("월급통장", "외화통장 USD", "세이프박스", null, "대만 여행자금", "베트남 동"),
+            listOf("월급통장", "외화통장 USD", "세이프박스", null, "대만 여행자금", "베트남 동", "외화통장 USD 2"),
             aliases,
         )
     }
@@ -110,7 +110,7 @@ class KftcApiServiceTest {
             )
         }
 
-        assertEquals(6, balances.size)
+        assertEquals(7, balances.size)
         balances.forEach { assertEquals("A0000", it.rspCode) }
 
         val pairs = balances.map { it.currencyCode to it.balanceAmt }.toSet()
@@ -122,6 +122,7 @@ class KftcApiServiceTest {
                 "KRW" to "450000",
                 "TWD" to "12500.50",
                 "VND" to "1850000",
+                "USD" to "5000.00",
             ),
             pairs,
         )
