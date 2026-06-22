@@ -4,7 +4,7 @@ import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
-import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onAllNodesWithTag
 
 /**
  * E2E에서 비동기 로드(네트워크/DB)가 끝나길 기다리는 폴링 헬퍼 모음.
@@ -12,10 +12,16 @@ import androidx.compose.ui.test.onAllNodesWithText
  * 여러 E2E가 공유하므로 한곳에 모은다.
  */
 
-/** 해당 텍스트 노드가 나타날 때까지 폴링. */
-internal fun ComposeContentTestRule.awaitText(text: String, timeoutMillis: Long = 10_000) =
+/**
+ * 해당 testTag 노드가 나타날 때까지 폴링.
+ *
+ * 서버 표시값(계좌명·잔액)이나 앱 카피(버튼·제목 문구)에 의존하지 않고, 동적 항목·정적 화면/컨트롤을
+ * 모두 [com.study.bank.core.ui.testing.BankTestTags] 태그로 식별한다 — 문자열 리소싱 전략이 바뀌어도
+ * 안 깨진다. 로드가 끝나야 등장하는 노드(예: 계좌 상세 헤더)의 태그 등장은 곧 "로딩 완료 + 도착"이다.
+ */
+internal fun ComposeContentTestRule.awaitTag(tag: String, timeoutMillis: Long = 10_000) =
     waitUntil(timeoutMillis) {
-        onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
+        onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty()
     }
 
 /**

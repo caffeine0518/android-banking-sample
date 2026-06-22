@@ -2,9 +2,16 @@ package com.study.bank
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import com.study.bank.core.ui.testing.BankTestTags.DETAIL_BACK
+import com.study.bank.core.ui.testing.BankTestTags.DETAIL_SEND
+import com.study.bank.core.ui.testing.BankTestTags.DETAIL_TX_EMPTY
+import com.study.bank.core.ui.testing.BankTestTags.DETAIL_TX_LABEL
+import com.study.bank.core.ui.testing.BankTestTags.HOME_TOTAL_BALANCE
+import com.study.bank.core.ui.testing.BankTestTags.SCREEN_HOME
+import com.study.bank.core.ui.testing.BankTestTags.accountDetail
+import com.study.bank.core.ui.testing.BankTestTags.accountItem
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
@@ -33,28 +40,29 @@ class AccountDetailFlowEndToEndTest {
 
     @Test
     fun 계좌를_탭하면_상세_화면과_빈_거래내역이_보인다() {
-        composeRule.awaitText("대만 여행자금")
-        composeRule.onNodeWithText("대만 여행자금").performClick()
+        // 표시명이 아니라 안정적 id 태그로 그 계좌 행을 지목해 클릭.
+        composeRule.awaitTag(accountItem(E2eSeedAccounts.TWD_TRAVEL))
+        composeRule.onNodeWithTag(accountItem(E2eSeedAccounts.TWD_TRAVEL)).performClick()
 
-        // 상세 헤더의 마스킹 번호는 이 화면에만 있어, 상세가 떴고 계좌가 로딩됐음을 보장한다.
-        composeRule.awaitText("1000-77-***3322")
-        composeRule.onNodeWithText("거래 내역").assertIsDisplayed()
-        // 시드 직후 원장은 비어 있으므로 빈 거래내역 안내가 보인다.
-        composeRule.onNodeWithText("거래 내역이 없어요").assertIsDisplayed()
+        // 상세 헤더 태그는 계좌 로딩 후에만 등장 → 상세가 떴고 그 계좌가 로딩됐음을 보장한다.
+        composeRule.awaitTag(accountDetail(E2eSeedAccounts.TWD_TRAVEL))
+        composeRule.onNodeWithTag(DETAIL_TX_LABEL).assertIsDisplayed()
+        // 시드 직후 원장은 비어 있으므로 빈 거래내역 슬롯이 보인다(문구 아닌 태그로 확인).
+        composeRule.onNodeWithTag(DETAIL_TX_EMPTY).assertIsDisplayed()
         // 하단 송금 진입 버튼.
-        composeRule.onNodeWithText("보내기").assertIsDisplayed()
+        composeRule.onNodeWithTag(DETAIL_SEND).assertIsDisplayed()
     }
 
     @Test
     fun 상세에서_뒤로가기를_누르면_홈으로_돌아온다() {
-        composeRule.awaitText("대만 여행자금")
-        composeRule.onNodeWithText("대만 여행자금").performClick()
-        composeRule.awaitText("1000-77-***3322")
+        composeRule.awaitTag(accountItem(E2eSeedAccounts.TWD_TRAVEL))
+        composeRule.onNodeWithTag(accountItem(E2eSeedAccounts.TWD_TRAVEL)).performClick()
+        composeRule.awaitTag(accountDetail(E2eSeedAccounts.TWD_TRAVEL))
 
-        // 상단 백 버튼(contentDescription="뒤로") → popBackStack → 홈.
-        composeRule.onNodeWithContentDescription("뒤로").performClick()
+        // 상단 백 버튼 → popBackStack → 홈.
+        composeRule.onNodeWithTag(DETAIL_BACK).performClick()
 
-        composeRule.awaitText("내 계좌")
-        composeRule.onNodeWithText("총 자산").assertIsDisplayed()
+        composeRule.awaitTag(SCREEN_HOME)                                 // 홈 도착
+        composeRule.onNodeWithTag(HOME_TOTAL_BALANCE).assertIsDisplayed()
     }
 }

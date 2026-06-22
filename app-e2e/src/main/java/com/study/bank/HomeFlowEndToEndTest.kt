@@ -2,10 +2,12 @@ package com.study.bank
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.test.platform.app.InstrumentationRegistry
-import com.study.bank.feature.home.R
+import com.study.bank.core.ui.testing.BankTestTags.HOME_REFRESH
+import com.study.bank.core.ui.testing.BankTestTags.HOME_TOTAL_BALANCE
+import com.study.bank.core.ui.testing.BankTestTags.SCREEN_HOME
+import com.study.bank.core.ui.testing.BankTestTags.accountItem
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
@@ -36,21 +38,22 @@ class HomeFlowEndToEndTest {
     @Test
     fun 앱을_켜면_시드된_계좌_목록과_총자산이_보인다() {
         // 네트워크(MockWebServer) 라운드트립 후 계좌 스트림이 도착할 때까지 대기.
-        composeRule.awaitText("월급통장")
-        composeRule.onNodeWithText("내 계좌").assertIsDisplayed()
-        composeRule.onNodeWithText("총 자산").assertIsDisplayed()
+        // 표시명이 아니라 안정적 id 태그로 "그 계좌 행이 렌더됐는지"를 본다.
+        composeRule.awaitTag(accountItem(E2eSeedAccounts.PAYROLL_KRW))
+        composeRule.onNodeWithTag(SCREEN_HOME).assertIsDisplayed()
+        composeRule.onNodeWithTag(HOME_TOTAL_BALANCE).assertIsDisplayed()
 
-        composeRule.onNodeWithText("월급통장").assertIsDisplayed()      // 토스뱅크 KRW 시드
-        composeRule.onNodeWithText("외화통장 USD").assertIsDisplayed()  // 다통화 시드
+        composeRule.onNodeWithTag(accountItem(E2eSeedAccounts.PAYROLL_KRW)).assertIsDisplayed() // KRW 시드
+        composeRule.onNodeWithTag(accountItem(E2eSeedAccounts.FOREIGN_USD)).assertIsDisplayed() // 다통화 시드
     }
 
     @Test
     fun 새로고침을_누르면_갱신_후에도_계좌_목록이_유지된다() {
-        composeRule.awaitText("월급통장")
+        composeRule.awaitTag(accountItem(E2eSeedAccounts.PAYROLL_KRW))
 
-        composeRule.onNodeWithText("새로고침").performClick()
+        composeRule.onNodeWithTag(HOME_REFRESH).performClick()
 
-        composeRule.awaitText("월급통장")
-        composeRule.onNodeWithText("세이프박스").assertIsDisplayed()
+        composeRule.awaitTag(accountItem(E2eSeedAccounts.PAYROLL_KRW))
+        composeRule.onNodeWithTag(accountItem(E2eSeedAccounts.SAFEBOX_KRW)).assertIsDisplayed()
     }
 }

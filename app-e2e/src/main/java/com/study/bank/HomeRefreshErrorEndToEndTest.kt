@@ -2,8 +2,11 @@ package com.study.bank
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import com.study.bank.core.ui.testing.BankTestTags.HOME_REFRESH
+import com.study.bank.core.ui.testing.BankTestTags.HOME_SNACKBAR
+import com.study.bank.core.ui.testing.BankTestTags.accountItem
 import com.study.bank.data.di.kftc.NetworkFaultController
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -52,18 +55,18 @@ class HomeRefreshErrorEndToEndTest {
 
     @Test
     fun 새로고침이_실패하면_에러_스낵바가_뜨고_기존_계좌는_유지된다() {
-        // 앱 부팅 시 자동 Refresh가 성공해 시드 계좌가 뜰 때까지 대기.
-        composeRule.awaitText("월급통장")
+        // 앱 부팅 시 자동 Refresh가 성공해 시드 계좌가 뜰 때까지 대기(표시명이 아닌 id 태그로).
+        composeRule.awaitTag(accountItem(E2eSeedAccounts.PAYROLL_KRW))
         // isLoading=true면 새로고침 인텐트가 무시되므로, 초기 로딩이 끝난 뒤 클릭한다.
         composeRule.awaitNotLoading()
 
         // 서버를 장애로 전환 → 다음 새로고침의 list_finuse가 5xx로 실패한다.
         faultController.enableFault()
-        composeRule.onNodeWithText("새로고침").performClick()
+        composeRule.onNodeWithTag(HOME_REFRESH).performClick()
 
-        // 실패가 ShowRefreshError → 에러 스낵바로 노출(블랙박스: 실제 카피를 그대로 단언).
-        composeRule.awaitText("계좌를 새로고침하지 못했어요. 잠시 후 다시 시도해 주세요.")
-        // refresh 실패 시 dao.replaceAll을 타지 않으므로 직전 성공 데이터는 유지된다.
-        composeRule.onNodeWithText("월급통장").assertIsDisplayed()
+        // 실패가 ShowRefreshError → 에러 스낵바 노출. 문구가 아니라 "스낵바가 떴다"는 사실만 태그로 확인.
+        composeRule.awaitTag(HOME_SNACKBAR)
+        // refresh 실패 시 dao.replaceAll을 타지 않으므로 직전 성공 데이터(그 계좌 행)는 유지된다.
+        composeRule.onNodeWithTag(accountItem(E2eSeedAccounts.PAYROLL_KRW)).assertIsDisplayed()
     }
 }
