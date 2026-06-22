@@ -3,6 +3,7 @@ package com.study.bank
 import com.study.bank.domain.model.BankCode
 import com.study.bank.domain.model.Currency
 import com.study.bank.domain.model.Money
+import com.study.bank.data.remote.kftc.mock.KftcSeedAccountIds
 import com.study.bank.domain.model.account.AccountId
 import com.study.bank.domain.model.account.AccountNumber
 import com.study.bank.domain.model.transaction.TransactionType
@@ -222,9 +223,9 @@ class DataFlowIntegrationTest {
     }
 
     private companion object {
-        val SALARY = AccountId("120220112345678901234001") // 월급통장 KRW 2,847,320
-        val SAFEBOX = AccountId("120220112345678901234003") // 세이프박스 KRW 12,000,000
-        val FX_USD = AccountId("120220112345678901234002") // 외화통장 USD 3,245.80
+        val SALARY = AccountId(KftcSeedAccountIds.PAYROLL_KRW)
+        val SAFEBOX = AccountId(KftcSeedAccountIds.SAFEBOX_KRW)
+        val FX_USD = AccountId(KftcSeedAccountIds.FX_USD)
         val SAFEBOX_NUMBER = AccountNumber("1000-55-1114443")
     }
 }
