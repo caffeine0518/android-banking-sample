@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -96,6 +97,31 @@ class ConfirmViewModelTest {
             )
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun `SendClicked를 연타해도 Submit effect는 한 번만 나간다`() = runTest {
+        val repo = FakeAccountRepository()
+        val vm = buildViewModel(repo, amount = 2)
+        repo.emit(account(SOURCE_ID), account(RECIPIENT_ID))
+
+        vm.effect.test {
+            vm.onIntent(ConfirmIntent.SendClicked)
+            vm.onIntent(ConfirmIntent.SendClicked)
+            vm.onIntent(ConfirmIntent.SendClicked)
+
+            assertEquals(
+                ConfirmEffect.Submit(
+                    sourceAccountId = SOURCE_ID,
+                    recipientAccountId = RECIPIENT_ID,
+                    amount = 2L,
+                ),
+                awaitItem(),
+            )
+            expectNoEvents()
+            cancelAndIgnoreRemainingEvents()
+        }
+        assertTrue(vm.state.value.submitting)
     }
 
     @Test
