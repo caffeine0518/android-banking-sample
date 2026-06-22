@@ -36,7 +36,12 @@ class KftcMockServer @Inject constructor(
     private val responses = KftcMockResponses()
     private val dispatcher = KftcMockDispatcher(
         accountHandler = AccountRequestHandler(state, responses),
-        transferHandler = TransferRequestHandler(state, responses, networkJson.value),
+        transferHandler = TransferRequestHandler(
+            state,
+            responses,
+            networkJson.value,
+            responseDelayMillis = WITHDRAW_RESPONSE_DELAY_MS,
+        ),
         inquiryHandler = InquiryRequestHandler(
             KftcRecipientSeed.directory(KftcAccountSeed.accounts),
             responses,
@@ -109,5 +114,7 @@ class KftcMockServer @Inject constructor(
         const val LOOPBACK_HOST = "127.0.0.1"
         // 이름 해석 없이 IPv4 루프백 생성(메인 스레드 안전).
         val LOOPBACK_ADDRESS: InetAddress = InetAddress.getByAddress(byteArrayOf(127, 0, 0, 1))
+        // 데모/수동 테스트용: 송금 응답을 지연시켜 "보내는 중이에요" 로딩 화면이 최소 1초 보이게 한다.
+        const val WITHDRAW_RESPONSE_DELAY_MS = 1_000L
     }
 }

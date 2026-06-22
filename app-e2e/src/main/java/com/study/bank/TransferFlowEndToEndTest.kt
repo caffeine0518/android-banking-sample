@@ -66,6 +66,29 @@ class TransferFlowEndToEndTest {
     }
 
     @Test
+    fun 송금_성공_후_확인하면_출금계좌_상세로_돌아간다() {
+        openAmountScreen(recipientLabel = "세이프박스")
+        enterDigits("10000")
+
+        composeRule.awaitText("다음")
+        composeRule.onNodeWithText("다음").performClick()
+
+        composeRule.awaitText("보낼까요?")
+        composeRule.onNodeWithText("보내기").performClick()
+
+        composeRule.awaitText("보냈어요")
+
+        // 보낸 뒤에는 시스템 뒤로가기가 차단된다(확인 화면으로 되돌아가 재송금 불가) — 여전히 성공 화면.
+        pressSystemBack()
+        composeRule.onNodeWithText("보냈어요").assertIsDisplayed()
+
+        // "확인" → 송금 플로우(수취인~결과)가 모두 걷히고 출금계좌(월급통장) 상세로 복귀.
+        composeRule.onNodeWithText("확인").performClick()
+        composeRule.awaitText("1000-12-***6789")
+        composeRule.onNodeWithText("보냈어요").assertDoesNotExist()
+    }
+
+    @Test
     fun 같은_USD_계좌로_소수점_금액을_보내면_절삭_없이_송금된다() {
         // 출금=외화통장 USD($3,245.80), 수취=외화통장 USD 2. 동일 통화라 송금이 성립한다.
         openAmountScreen(
@@ -110,5 +133,13 @@ class TransferFlowEndToEndTest {
     /** 커스텀 키패드로 [digits]를 한 자리씩 입력. 각 숫자 키는 화면에서 유일한 동일 텍스트 노드다. */
     private fun enterDigits(digits: String) {
         digits.forEach { composeRule.onNodeWithText(it.toString()).performClick() }
+    }
+
+    /** 시스템 뒤로가기(하드웨어 백/제스처)를 호출한다 — BackHandler 차단 여부를 검증하기 위함. */
+    private fun pressSystemBack() {
+        composeRule.runOnUiThread {
+            composeRule.activity.onBackPressedDispatcher.onBackPressed()
+        }
+        composeRule.waitForIdle()
     }
 }
