@@ -1,5 +1,7 @@
 package com.study.bank.feature.transfer.recipient.contract
 
+import com.study.bank.feature.transfer.navigation.TransferRecipientArg
+
 sealed interface RecipientEffect {
     data object NavigateBack : RecipientEffect
 
@@ -11,10 +13,10 @@ sealed interface RecipientEffect {
 
     /**
      * 수취 계좌(내 계좌)가 정해져 다음 단계(금액 입력)로 진행.
-     * 출금계좌·수취계좌 식별자를 실어 금액 입력 화면이 두 계좌를 조회할 수 있게 한다.
+     * 선택한 내 계좌의 수취인 신원([recipient])을 실어 흐름이 일관되게 한다(외부 입력과 동일 경로).
      */
     data class NavigateToAmount(
         val sourceAccountId: String,
-        val recipientAccountId: String,
+        val recipient: TransferRecipientArg,
     ) : RecipientEffect
 }

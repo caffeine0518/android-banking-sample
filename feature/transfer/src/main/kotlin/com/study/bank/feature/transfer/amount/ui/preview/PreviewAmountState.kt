@@ -15,10 +15,9 @@ internal val PreviewAmountState = AmountState(
         balance = MoneyUi(BigDecimal.valueOf(284_797), CurrencyUi.KRW),
     ),
     recipient = AmountRecipientUi(
-        nickname = "종합매매 계좌",
-        type = AccountTypeUi.CHECKING,
+        holderName = "김토스",
         bankDisplayName = "신한은행",
-        numberMasked = "110-503-685417",
+        accountNumber = "110-503-685417",
     ),
     amount = 0L,
 )

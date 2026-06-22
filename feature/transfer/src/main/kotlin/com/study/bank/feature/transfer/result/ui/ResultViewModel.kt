@@ -6,15 +6,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.study.bank.core.ui.mvi.MviStore
 import com.study.bank.domain.coroutine.DispatcherProvider
+import com.study.bank.domain.model.BankCode
 import com.study.bank.domain.model.Money
 import com.study.bank.domain.model.account.AccountId
+import com.study.bank.domain.model.account.AccountNumber
 import com.study.bank.domain.model.transfer.TransferOutcome
 import com.study.bank.domain.model.transfer.TransferRequest
 import com.study.bank.domain.repository.AccountRepository
 import com.study.bank.domain.usecase.transfer.ExecuteTransferUseCase
-import com.study.bank.feature.transfer.navigation.TRANSFER_ACCOUNT_ID_ARG
-import com.study.bank.feature.transfer.navigation.TRANSFER_AMOUNT_ARG
-import com.study.bank.feature.transfer.navigation.TRANSFER_RECIPIENT_ID_ARG
+import com.study.bank.feature.transfer.navigation.ARG_AMOUNT
+import com.study.bank.feature.transfer.navigation.ARG_SOURCE_ACCOUNT_ID
+import com.study.bank.feature.transfer.navigation.transferRecipientArg
 import com.study.bank.feature.transfer.result.contract.ResultAction
 import com.study.bank.feature.transfer.result.contract.ResultEffect
 import com.study.bank.feature.transfer.result.contract.ResultInternalAction
@@ -40,13 +42,11 @@ class ResultViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val sourceAccountId = AccountId(
-        checkNotNull(savedStateHandle.get<String>(TRANSFER_ACCOUNT_ID_ARG)) { "accountId 인자 누락" },
+        checkNotNull(savedStateHandle.get<String>(ARG_SOURCE_ACCOUNT_ID)) { "accountId 인자 누락" },
     )
-    private val recipientAccountId = AccountId(
-        checkNotNull(savedStateHandle.get<String>(TRANSFER_RECIPIENT_ID_ARG)) { "recipientId 인자 누락" },
-    )
-    private val amount =
-        checkNotNull(savedStateHandle.get<Long>(TRANSFER_AMOUNT_ARG)) { "amount 인자 누락" }
+    // 수취인은 라우트 신원(외부 계좌는 출금계좌 저장소에 없으므로 식별자 재조회 없이 그대로 송금에 쓴다).
+    private val recipient = savedStateHandle.transferRecipientArg()
+    private val amount = checkNotNull(savedStateHandle.get<Long>(ARG_AMOUNT)) { "amount 인자 누락" }
 
     /**
      * 멱등성 키는 "이 송금 한 건"에 묶여 재시도 내내 동일해야 한다. 재시도마다 새로 만들면
@@ -99,9 +99,9 @@ class ResultViewModel @Inject constructor(
     private fun execute() {
         viewModelScope.launch {
             val source = accountRepository.findAccount(sourceAccountId)
-            val recipient = accountRepository.findAccount(recipientAccountId)
-            if (source == null || recipient == null) {
-                Log.e(TAG, "출금/수취 계좌 조회 실패 (source=$source, recipient=$recipient)")
+            val toBankCode = BankCode.byCode(recipient.bankCode)
+            if (source == null || toBankCode == null) {
+                Log.e(TAG, "출금계좌/수취 은행 조회 실패 (source=$source, bank=${recipient.bankCode})")
                 store.sendIntent(
                     ResultInternalAction.Finished(ResultPhase.Failure(ResultFailureUi.UNKNOWN)),
                 )
@@ -110,15 +110,15 @@ class ResultViewModel @Inject constructor(
 
             store.sendIntent(
                 ResultInternalAction.HeaderReady(
-                    resultUiMapper.mapHeader(recipient, amount, source.balance.currency),
+                    resultUiMapper.mapHeader(recipient.holderName, amount, source.balance.currency),
                 ),
             )
 
             val request = TransferRequest(
                 fromAccountId = sourceAccountId,
                 senderName = source.holderName,
-                toAccountNumber = recipient.number,
-                toBankCode = recipient.bankCode,
+                toAccountNumber = AccountNumber(recipient.accountNumber),
+                toBankCode = toBankCode,
                 recipientName = recipient.holderName,
                 amount = Money.ofMinor(amount, source.balance.currency),
                 memo = null,

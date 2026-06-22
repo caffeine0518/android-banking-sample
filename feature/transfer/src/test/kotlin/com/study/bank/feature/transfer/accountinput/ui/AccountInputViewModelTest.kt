@@ -12,7 +12,7 @@ import com.study.bank.domain.usecase.transfer.ValidateRecipientUseCase
 import com.study.bank.feature.transfer.accountinput.contract.AccountInputEffect
 import com.study.bank.feature.transfer.accountinput.contract.AccountInputError
 import com.study.bank.feature.transfer.accountinput.contract.AccountInputIntent
-import com.study.bank.feature.transfer.navigation.TRANSFER_ACCOUNT_ID_ARG
+import com.study.bank.feature.transfer.navigation.TransferRecipientArg
 import com.study.bank.feature.transfer.testutil.MainDispatcherRule
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -71,7 +71,7 @@ class AccountInputViewModelTest {
     }
 
     @Test
-    fun `유효한 계좌면 확인 시 해석된 식별자로 NavigateToAmount effect를 보낸다`() = runTest {
+    fun `유효한 계좌면 확인 시 실명조회로 확정된 수취인 신원을 실은 NavigateToAmount effect를 보낸다`() = runTest {
         val vm = buildViewModel(RecipientLookup.Active(AccountId("acc-2"), "김토스"))
         vm.onIntent(AccountInputIntent.AccountNumberChanged("868369666"))
 
@@ -80,7 +80,12 @@ class AccountInputViewModelTest {
             assertEquals(
                 AccountInputEffect.NavigateToAmount(
                     sourceAccountId = SOURCE_ID,
-                    recipientAccountId = "acc-2",
+                    // 입력한 번호·기본 은행(KAKAO=090) + 조회된 예금주명. 합성 식별자가 아니라 실제 신원이 흐른다.
+                    recipient = TransferRecipientArg(
+                        bankCode = "090",
+                        accountNumber = "868369666",
+                        holderName = "김토스",
+                    ),
                 ),
                 awaitItem(),
             )
@@ -131,7 +136,7 @@ class AccountInputViewModelTest {
     }
 
     private fun buildViewModel(lookup: RecipientLookup) = AccountInputViewModel(
-        savedStateHandle = SavedStateHandle(mapOf(TRANSFER_ACCOUNT_ID_ARG to SOURCE_ID)),
+        savedStateHandle = SavedStateHandle(mapOf("sourceAccountId" to SOURCE_ID)),
         validateRecipient = ValidateRecipientUseCase(FakeRecipientRepository(lookup)),
         dispatcherProvider = TestDispatcherProvider(mainDispatcherRule.testDispatcher),
     )

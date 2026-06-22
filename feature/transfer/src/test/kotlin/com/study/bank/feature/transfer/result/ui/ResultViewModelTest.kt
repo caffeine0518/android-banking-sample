@@ -19,9 +19,6 @@ import com.study.bank.domain.model.transfer.TransferResult
 import com.study.bank.domain.repository.AccountRepository
 import com.study.bank.domain.repository.TransferRepository
 import com.study.bank.domain.usecase.transfer.ExecuteTransferUseCase
-import com.study.bank.feature.transfer.navigation.TRANSFER_ACCOUNT_ID_ARG
-import com.study.bank.feature.transfer.navigation.TRANSFER_AMOUNT_ARG
-import com.study.bank.feature.transfer.navigation.TRANSFER_RECIPIENT_ID_ARG
 import com.study.bank.feature.transfer.result.contract.ResultEffect
 import com.study.bank.feature.transfer.result.contract.ResultIntent
 import com.study.bank.feature.transfer.result.contract.ResultPhase
@@ -108,10 +105,39 @@ class ResultViewModelTest {
     }
 
     @Test
-    fun `계좌를 찾지 못하면 UNKNOWN 실패가 된다`() = runTest {
+    fun `출금계좌를 찾지 못하면 UNKNOWN 실패가 된다`() = runTest {
         val vm = buildViewModel(FakeAccountRepository(), FakeTransferRepository(success()), amount = 1)
 
         assertEquals(ResultPhase.Failure(ResultFailureUi.UNKNOWN), vm.state.value.phase)
+    }
+
+    @Test
+    fun `외부 수취인은 출금계좌 저장소에 없어도 라우트 신원으로 송금된다`() = runTest {
+        // 출금계좌만 저장소에 있고, 외부(타행) 수취인은 라우트 신원으로만 전달된다(재조회 없음).
+        val accounts = FakeAccountRepository().apply { emit(account(SOURCE_ID, holder = "강남규")) }
+        val transfer = SequencedTransferRepository(success())
+        val vm = buildViewModel(
+            accounts,
+            transfer,
+            amount = 1,
+            savedStateHandle = SavedStateHandle(
+                mapOf(
+                    "sourceAccountId" to SOURCE_ID,
+                    "recipientBankCode" to "088",
+                    "recipientAccountNumber" to "110-555-667788",
+                    "recipientHolderName" to "김토스",
+                    "amount" to 1L,
+                ),
+            ),
+        )
+
+        assertEquals(ResultPhase.Success, vm.state.value.phase)
+        assertEquals("김토스", vm.state.value.header?.recipientName)
+        // 라우트 신원이 그대로 송금 요청으로 나간다(회귀: 예전엔 식별자 미해석으로 실행조차 안 됐다).
+        val request = transfer.requests.single()
+        assertEquals("110-555-667788", request.toAccountNumber.value)
+        assertEquals(BankCode.SHINHAN, request.toBankCode)
+        assertEquals("김토스", request.recipientName)
     }
 
     @Test
@@ -158,9 +184,11 @@ class ResultViewModelTest {
         }
         val savedStateHandle = SavedStateHandle(
             mapOf(
-                TRANSFER_ACCOUNT_ID_ARG to SOURCE_ID,
-                TRANSFER_RECIPIENT_ID_ARG to RECIPIENT_ID,
-                TRANSFER_AMOUNT_ARG to 1L,
+                "sourceAccountId" to SOURCE_ID,
+                "recipientBankCode" to "088",
+                "recipientAccountNumber" to "110-503-685417",
+                "recipientHolderName" to "안성재",
+                "amount" to 1L,
             ),
         )
         val first = SequencedTransferRepository(TransferOutcome.Failure.Network(RuntimeException("timeout")))
@@ -234,9 +262,11 @@ class ResultViewModelTest {
         amount: Long,
         savedStateHandle: SavedStateHandle = SavedStateHandle(
             mapOf(
-                TRANSFER_ACCOUNT_ID_ARG to SOURCE_ID,
-                TRANSFER_RECIPIENT_ID_ARG to RECIPIENT_ID,
-                TRANSFER_AMOUNT_ARG to amount,
+                "sourceAccountId" to SOURCE_ID,
+                "recipientBankCode" to "088",
+                "recipientAccountNumber" to "110-503-685417",
+                "recipientHolderName" to "안성재",
+                "amount" to amount,
             ),
         ),
     ) = ResultViewModel(

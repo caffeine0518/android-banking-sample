@@ -3,7 +3,6 @@ package com.study.bank.feature.transfer.result.ui.model
 import com.study.bank.core.ui.mapper.MoneyUiMapper
 import com.study.bank.domain.model.Currency
 import com.study.bank.domain.model.Money
-import com.study.bank.domain.model.account.Account
 import com.study.bank.domain.model.transfer.TransferOutcome
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -14,9 +13,9 @@ class ResultUiMapper @Inject constructor(
 ) {
 
     /** [amount]는 출금계좌 통화 최소단위(minor unit) 정수(키패드 입력). */
-    fun mapHeader(recipient: Account, amount: Long, currency: Currency): ResultHeaderUi =
+    fun mapHeader(recipientName: String, amount: Long, currency: Currency): ResultHeaderUi =
         ResultHeaderUi(
-            recipientName = recipient.holderName,
+            recipientName = recipientName,
             amount = moneyUiMapper.map(Money.ofMinor(amount, currency)),
         )
 

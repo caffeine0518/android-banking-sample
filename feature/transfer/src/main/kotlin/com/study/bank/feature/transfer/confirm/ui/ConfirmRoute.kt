@@ -10,11 +10,13 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
 import com.study.bank.feature.transfer.confirm.contract.ConfirmEffect
+import com.study.bank.feature.transfer.navigation.TransferResultRoute
+import com.study.bank.feature.transfer.navigation.resultRoute
 
 @Composable
 fun ConfirmRoute(
     onBack: () -> Unit,
-    onSent: (sourceAccountId: String, recipientAccountId: String, amount: Long) -> Unit,
+    onSent: (TransferResultRoute) -> Unit,
     viewModel: ConfirmViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -28,7 +30,7 @@ fun ConfirmRoute(
             when (effect) {
                 ConfirmEffect.NavigateBack -> onBack()
                 is ConfirmEffect.Submit ->
-                    onSent(effect.sourceAccountId, effect.recipientAccountId, effect.amount)
+                    onSent(resultRoute(effect.sourceAccountId, effect.recipient, effect.amount))
                 // 편집/변경 화면 미구현 — 현재는 무시(placeholder).
                 ConfirmEffect.EditDisplayName -> Unit
                 ConfirmEffect.ChangeSource -> Unit

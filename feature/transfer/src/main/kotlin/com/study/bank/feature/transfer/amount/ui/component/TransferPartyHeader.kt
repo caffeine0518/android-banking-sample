@@ -59,12 +59,12 @@ private fun SourceParty(source: AmountSourceUi) {
 @Composable
 private fun RecipientParty(recipient: AmountRecipientUi) {
     PartyLabel(stringResource(R.string.transfer_amount_to_label))
-    PartyName(recipient.nickname ?: recipient.type.label())
+    PartyName(recipient.holderName)
     Text(
         text = stringResource(
             R.string.transfer_account_subtitle,
             recipient.bankDisplayName,
-            recipient.numberMasked,
+            recipient.accountNumber,
         ),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,

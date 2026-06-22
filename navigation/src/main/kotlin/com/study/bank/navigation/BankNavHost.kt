@@ -37,27 +37,19 @@ fun BankNavHost() {
             onAccountNumberInput = { sourceId ->
                 navController.navigateToTransferAccountInput(sourceId)
             },
-            onAmountInput = { sourceId, recipientId ->
-                navController.navigateToTransferAmount(sourceId, recipientId)
-            },
+            onAmountInput = { route -> navController.navigateToTransferAmount(route) },
         )
         transferAccountInputScreen(
             onBack = { navController.popBackStack() },
-            onResolved = { sourceId, recipientId ->
-                navController.navigateToTransferAmount(sourceId, recipientId)
-            },
+            onResolved = { route -> navController.navigateToTransferAmount(route) },
         )
         transferAmountScreen(
             onBack = { navController.popBackStack() },
-            onNext = { sourceId, recipientId, amount ->
-                navController.navigateToTransferConfirm(sourceId, recipientId, amount)
-            },
+            onNext = { route -> navController.navigateToTransferConfirm(route) },
         )
         transferConfirmScreen(
             onBack = { navController.popBackStack() },
-            onSent = { sourceId, recipientId, amount ->
-                navController.navigateToTransferResult(sourceId, recipientId, amount)
-            },
+            onSent = { route -> navController.navigateToTransferResult(route) },
         )
         transferResultScreen(
             // 송금 완료 후 "확인"/백 → 송금 플로우 전체를 걷어내고 홈으로 복귀.

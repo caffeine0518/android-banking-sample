@@ -15,9 +15,7 @@ import com.study.bank.domain.repository.AccountRepository
 import com.study.bank.feature.transfer.confirm.contract.ConfirmEffect
 import com.study.bank.feature.transfer.confirm.contract.ConfirmIntent
 import com.study.bank.feature.transfer.confirm.ui.model.ConfirmUiMapper
-import com.study.bank.feature.transfer.navigation.TRANSFER_ACCOUNT_ID_ARG
-import com.study.bank.feature.transfer.navigation.TRANSFER_AMOUNT_ARG
-import com.study.bank.feature.transfer.navigation.TRANSFER_RECIPIENT_ID_ARG
+import com.study.bank.feature.transfer.navigation.TransferRecipientArg
 import com.study.bank.feature.transfer.testutil.MainDispatcherRule
 import java.math.BigDecimal
 import kotlinx.coroutines.CoroutineDispatcher
@@ -45,10 +43,8 @@ class ConfirmViewModelTest {
         val repo = FakeAccountRepository()
         val vm = buildViewModel(repo, amount = 2)
 
-        repo.emit(
-            account(SOURCE_ID, holder = "강남규", nickname = "U드림 저축예금", balance = 284_797),
-            account(RECIPIENT_ID, holder = "안성재", bank = BankCode.SHINHAN, number = "110-503-685417"),
-        )
+        // 수취인은 라우트로 확정돼 들어온다(아래 buildViewModel 참고). 출금계좌만 로딩하면 확정 정보가 채워진다.
+        repo.emit(account(SOURCE_ID, holder = "강남규", nickname = "U드림 저축예금", balance = 284_797))
 
         val detail = vm.state.value.detail!!
         assertEquals("안성재", detail.recipientHolderName)
@@ -60,12 +56,11 @@ class ConfirmViewModelTest {
     }
 
     @Test
-    fun `한쪽 계좌만 로딩되면 detail은 아직 null이다`() = runTest {
+    fun `출금계좌 로딩 전에는 detail이 아직 null이다`() = runTest {
         val repo = FakeAccountRepository()
         val vm = buildViewModel(repo, amount = 2)
 
-        repo.emit(account(SOURCE_ID))
-
+        // 출금계좌 미로딩. 수취인은 라우트로 있지만 출금계좌가 없으면 확정 정보를 만들 수 없다.
         assertNull(vm.state.value.detail)
     }
 
@@ -90,7 +85,11 @@ class ConfirmViewModelTest {
             assertEquals(
                 ConfirmEffect.Submit(
                     sourceAccountId = SOURCE_ID,
-                    recipientAccountId = RECIPIENT_ID,
+                    recipient = TransferRecipientArg(
+                        bankCode = "088",
+                        accountNumber = "110-503-685417",
+                        holderName = "안성재",
+                    ),
                     amount = 2L,
                 ),
                 awaitItem(),
@@ -113,7 +112,11 @@ class ConfirmViewModelTest {
             assertEquals(
                 ConfirmEffect.Submit(
                     sourceAccountId = SOURCE_ID,
-                    recipientAccountId = RECIPIENT_ID,
+                    recipient = TransferRecipientArg(
+                        bankCode = "088",
+                        accountNumber = "110-503-685417",
+                        holderName = "안성재",
+                    ),
                     amount = 2L,
                 ),
                 awaitItem(),
@@ -151,9 +154,11 @@ class ConfirmViewModelTest {
     private fun buildViewModel(repo: FakeAccountRepository, amount: Long) = ConfirmViewModel(
         savedStateHandle = SavedStateHandle(
             mapOf(
-                TRANSFER_ACCOUNT_ID_ARG to SOURCE_ID,
-                TRANSFER_RECIPIENT_ID_ARG to RECIPIENT_ID,
-                TRANSFER_AMOUNT_ARG to amount,
+                "sourceAccountId" to SOURCE_ID,
+                "recipientBankCode" to "088",
+                "recipientAccountNumber" to "110-503-685417",
+                "recipientHolderName" to "안성재",
+                "amount" to amount,
             ),
         ),
         accountRepository = repo,

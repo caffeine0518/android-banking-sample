@@ -1,11 +1,11 @@
 package com.study.bank.feature.transfer.amount.ui.model
 
-import com.study.bank.feature.transfer.recipient.ui.model.AccountTypeUi
-
-/** 수취계좌("내 ...로") 표시용. 현재 송금 플로우는 내 계좌 수취만 지원한다. */
+/**
+ * 수취계좌("받는 분") 표시용. 본인 계좌·외부(타행) 계좌를 모두 표현하므로, 본인 계좌 전용 개념인
+ * 별명/계좌종류 대신 실명조회로 확정된 예금주명·은행·계좌번호를 보여준다.
+ */
 data class AmountRecipientUi(
-    val nickname: String?,
-    val type: AccountTypeUi,
+    val holderName: String,
     val bankDisplayName: String,
-    val numberMasked: String,
+    val accountNumber: String,
 )

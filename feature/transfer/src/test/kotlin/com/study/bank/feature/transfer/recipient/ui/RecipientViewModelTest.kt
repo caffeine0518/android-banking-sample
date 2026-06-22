@@ -11,7 +11,7 @@ import com.study.bank.domain.model.account.AccountId
 import com.study.bank.domain.model.account.AccountNumber
 import com.study.bank.domain.model.account.AccountType
 import com.study.bank.domain.repository.AccountRepository
-import com.study.bank.feature.transfer.navigation.TRANSFER_ACCOUNT_ID_ARG
+import com.study.bank.feature.transfer.navigation.TransferRecipientArg
 import com.study.bank.feature.transfer.recipient.contract.RecipientEffect
 import com.study.bank.feature.transfer.recipient.contract.RecipientIntent
 import com.study.bank.feature.transfer.testutil.MainDispatcherRule
@@ -67,15 +67,22 @@ class RecipientViewModelTest {
     }
 
     @Test
-    fun `내 계좌를 선택하면 출금·수취 식별자를 실은 NavigateToAmount effect를 보낸다`() = runTest {
-        val vm = buildViewModel(FakeAccountRepository())
+    fun `내 계좌를 선택하면 그 계좌의 수취인 신원을 실은 NavigateToAmount effect를 보낸다`() = runTest {
+        val repo = FakeAccountRepository()
+        val vm = buildViewModel(repo)
+        // 선택할 계좌가 목록에 있어야 그 신원(번호·은행·명의)을 구성할 수 있다.
+        repo.emit(account(SOURCE_ID), account("acc-2"))
 
         vm.effect.test {
             vm.onIntent(RecipientIntent.MyAccountClicked("acc-2"))
             assertEquals(
                 RecipientEffect.NavigateToAmount(
                     sourceAccountId = SOURCE_ID,
-                    recipientAccountId = "acc-2",
+                    recipient = TransferRecipientArg(
+                        bankCode = BankCode.TOSS.code,
+                        accountNumber = "1000-12-3456789",
+                        holderName = "홍길동",
+                    ),
                 ),
                 awaitItem(),
             )
@@ -84,7 +91,7 @@ class RecipientViewModelTest {
     }
 
     private fun buildViewModel(repo: FakeAccountRepository) = RecipientViewModel(
-        savedStateHandle = SavedStateHandle(mapOf(TRANSFER_ACCOUNT_ID_ARG to SOURCE_ID)),
+        savedStateHandle = SavedStateHandle(mapOf("sourceAccountId" to SOURCE_ID)),
         accountRepository = repo,
         accountUiMapper = accountUiMapper,
         dispatcherProvider = TestDispatcherProvider(mainDispatcherRule.testDispatcher),
