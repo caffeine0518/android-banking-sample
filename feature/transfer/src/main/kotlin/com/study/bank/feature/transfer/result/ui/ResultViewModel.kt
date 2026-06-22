@@ -107,7 +107,7 @@ class ResultViewModel @Inject constructor(
                 toAccountNumber = recipient.number,
                 toBankCode = recipient.bankCode,
                 recipientName = recipient.holderName,
-                amount = Money.of(amount, source.balance.currency),
+                amount = Money.ofMinor(amount, source.balance.currency),
                 memo = null,
                 idempotencyKey = UUID.randomUUID().toString(),
             )

@@ -94,9 +94,15 @@ class AmountViewModel @Inject constructor(
         return next.coerceAtMost(cap)
     }
 
-    /** 출금계좌 잔액(통화 정수). 계좌 로딩 전이면 입력을 막지 않도록 상한 없음. */
-    private fun balanceCap(source: AmountSourceUi?): Long =
-        source?.balance?.amount?.toLong() ?: Long.MAX_VALUE
+    /**
+     * 출금계좌 잔액을 통화 최소단위(minor unit) 정수로 환산한 입력 상한.
+     * 예) USD 3,245.80 → 324580센트. `toLong()`으로 절삭하면 외화 소수점이 사라지므로
+     * exponent만큼 소수점을 밀어 손실 없이 환산한다. 계좌 로딩 전이면 상한 없음.
+     */
+    private fun balanceCap(source: AmountSourceUi?): Long {
+        val balance = source?.balance ?: return Long.MAX_VALUE
+        return balance.amount.movePointRight(balance.currency.exponent).longValueExact()
+    }
 
     private fun collectParties() {
         viewModelScope.launch {

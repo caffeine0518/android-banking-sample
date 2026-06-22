@@ -12,10 +12,10 @@ class ConfirmUiMapper @Inject constructor(
     private val moneyUiMapper: MoneyUiMapper,
 ) {
 
-    /** 금액은 출금계좌 통화 정수(키패드 입력)로 해석한다. */
+    /** 금액은 출금계좌 통화 최소단위(minor unit) 정수(키패드 입력)로 해석한다. */
     fun map(source: Account, recipient: Account, amount: Long): ConfirmDetailUi = ConfirmDetailUi(
         recipientHolderName = recipient.holderName,
-        amount = moneyUiMapper.map(Money.of(amount, source.balance.currency)),
+        amount = moneyUiMapper.map(Money.ofMinor(amount, source.balance.currency)),
         displayName = source.holderName,
         sourceNickname = source.nickname,
         sourceType = source.type.toAccountTypeUi(),

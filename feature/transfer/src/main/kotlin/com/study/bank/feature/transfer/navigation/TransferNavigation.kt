@@ -26,7 +26,7 @@ const val TRANSFER_ACCOUNT_INPUT_ROUTE = "transfer/{$TRANSFER_ACCOUNT_ID_ARG}/ac
 /** 송금 2번째 화면: 금액 입력. {accountId}=출금계좌, {recipientId}=수취계좌. */
 const val TRANSFER_AMOUNT_ROUTE = "transfer/{$TRANSFER_ACCOUNT_ID_ARG}/amount/{$TRANSFER_RECIPIENT_ID_ARG}"
 
-/** 송금 3번째 화면: 송금 확인. {amount}=출금계좌 통화 정수 금액. */
+/** 송금 3번째 화면: 송금 확인. {amount}=출금계좌 통화 최소단위(minor unit) 정수 금액. */
 const val TRANSFER_CONFIRM_ROUTE =
     "transfer/{$TRANSFER_ACCOUNT_ID_ARG}/confirm/{$TRANSFER_RECIPIENT_ID_ARG}/{$TRANSFER_AMOUNT_ARG}"
 

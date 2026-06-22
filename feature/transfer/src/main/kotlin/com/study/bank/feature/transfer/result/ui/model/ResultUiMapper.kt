@@ -13,10 +13,11 @@ class ResultUiMapper @Inject constructor(
     private val moneyUiMapper: MoneyUiMapper,
 ) {
 
+    /** [amount]는 출금계좌 통화 최소단위(minor unit) 정수(키패드 입력). */
     fun mapHeader(recipient: Account, amount: Long, currency: Currency): ResultHeaderUi =
         ResultHeaderUi(
             recipientName = recipient.holderName,
-            amount = moneyUiMapper.map(Money.of(amount, currency)),
+            amount = moneyUiMapper.map(Money.ofMinor(amount, currency)),
         )
 
     fun mapFailure(failure: TransferOutcome.Failure): ResultFailureUi = when (failure) {

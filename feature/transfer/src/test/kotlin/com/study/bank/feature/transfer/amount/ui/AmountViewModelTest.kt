@@ -118,6 +118,39 @@ class AmountViewModelTest {
     }
 
     @Test
+    fun `외화 잔액 전액 입력은 소수점을 절삭하지 않는다`() = runTest {
+        val repo = FakeAccountRepository()
+        val vm = buildViewModel(repo)
+        repo.emit(
+            account(SOURCE_ID, balanceMoney = Money.of("3245.80", Currency.USD)),
+            account(RECIPIENT_ID),
+        )
+
+        vm.onIntent(AmountIntent.FillBalanceClicked)
+
+        // $3,245.80 → 324,580센트. (회귀: 예전엔 toLong()이 3245센트로 절삭해 80센트가 사라졌다)
+        assertEquals(324_580L, vm.state.value.amount)
+    }
+
+    @Test
+    fun `외화는 센트 단위로 입력되고 잔액 최소단위로 클램프된다`() = runTest {
+        val repo = FakeAccountRepository()
+        val vm = buildViewModel(repo)
+        repo.emit(
+            account(SOURCE_ID, balanceMoney = Money.of("100.50", Currency.USD)),
+            account(RECIPIENT_ID),
+        )
+
+        // $100.50 = 10,050센트를 키패드로 입력
+        "10050".forEach { vm.onIntent(AmountIntent.DigitAppended(it.toString())) }
+        assertEquals(10_050L, vm.state.value.amount)
+
+        // 잔액(10,050센트) 초과 입력은 잔액으로 클램프된다
+        vm.onIntent(AmountIntent.DigitAppended("9"))
+        assertEquals(10_050L, vm.state.value.amount)
+    }
+
+    @Test
     fun `금액이 0이면 NextClicked는 effect를 보내지 않는다`() = runTest {
         val vm = buildViewModel(FakeAccountRepository())
 
@@ -185,13 +218,15 @@ class AmountViewModelTest {
         id: String,
         nickname: String? = "통장 $id",
         balance: Long = 1_000_000,
+        currency: Currency = Currency.KRW,
         bank: BankCode = BankCode.TOSS,
+        balanceMoney: Money = Money.of(balance, currency),
     ) = Account(
         id = AccountId(id),
         number = AccountNumber("1000-12-3456789"),
         bankCode = bank,
         holderName = "홍길동",
-        balance = Money.of(balance, Currency.KRW),
+        balance = balanceMoney,
         type = AccountType.CHECKING,
         nickname = nickname,
     )
