@@ -3,6 +3,7 @@ package com.study.bank.feature.transfer.result.ui
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.study.bank.core.ui.model.CurrencyUi
@@ -42,11 +43,14 @@ class ResultScreenTest {
     }
 
     @Test
-    fun `로딩 상태는 안내 문구를 보이고 하단 버튼은 없다`() {
+    fun `로딩 상태는 안내 문구를 보이고 하단 버튼과 백 버튼은 없다`() {
         setScreen(ResultState(header = null, phase = ResultPhase.Loading))
 
         composeRule.onNodeWithText(string(R.string.transfer_result_loading)).assertIsDisplayed()
         composeRule.onNodeWithText(string(R.string.transfer_result_confirm)).assertDoesNotExist()
+        // 송금 진행 중에는 상단 백 버튼이 숨겨진다(중도 이탈 방지).
+        composeRule.onNodeWithContentDescription(string(R.string.transfer_action_back))
+            .assertDoesNotExist()
     }
 
     @Test
@@ -54,6 +58,9 @@ class ResultScreenTest {
         setScreen(ResultState(header = header(), phase = ResultPhase.Success))
 
         composeRule.onNodeWithText("안성재", substring = true).assertIsDisplayed()
+        // 로딩이 끝나면 백 버튼이 다시 노출된다.
+        composeRule.onNodeWithContentDescription(string(R.string.transfer_action_back))
+            .assertIsDisplayed()
         composeRule.onNodeWithText(string(R.string.transfer_result_success_sent)).assertIsDisplayed()
         composeRule.onNodeWithText(string(R.string.transfer_result_leave_memo)).assertIsDisplayed()
         composeRule.onNodeWithText(string(R.string.transfer_result_share)).assertIsDisplayed()
