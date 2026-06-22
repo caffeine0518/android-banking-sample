@@ -1,5 +1,7 @@
 plugins {
     id("bank.android.feature")
+    // 타입세이프 네비게이션의 @Serializable 라우트 클래스용.
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
