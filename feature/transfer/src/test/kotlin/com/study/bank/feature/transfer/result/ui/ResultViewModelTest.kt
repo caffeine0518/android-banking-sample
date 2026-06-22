@@ -132,6 +132,51 @@ class ResultViewModelTest {
     }
 
     @Test
+    fun `재시도해도 멱등성 키는 동일하게 유지된다`() = runTest {
+        val accounts = FakeAccountRepository().apply {
+            emit(account(SOURCE_ID), account(RECIPIENT_ID))
+        }
+        // 1차는 네트워크 실패(타임아웃 가정), 재시도는 성공.
+        val transfer = SequencedTransferRepository(
+            TransferOutcome.Failure.Network(RuntimeException("timeout")),
+            success(),
+        )
+        val vm = buildViewModel(accounts, transfer, amount = 1)
+
+        vm.onIntent(ResultIntent.RetryClicked)
+
+        // 같은 논리적 송금이므로 재시도는 첫 시도와 동일한 키로 나가야 한다(서버 dedup → 이중출금 방지).
+        assertEquals(2, transfer.requests.size)
+        assertEquals(transfer.requests[0].idempotencyKey, transfer.requests[1].idempotencyKey)
+    }
+
+    @Test
+    fun `복원 후 자동 재실행돼도 멱등성 키가 보존된다`() = runTest {
+        val accounts = FakeAccountRepository().apply {
+            emit(account(SOURCE_ID), account(RECIPIENT_ID))
+        }
+        val savedStateHandle = SavedStateHandle(
+            mapOf(
+                TRANSFER_ACCOUNT_ID_ARG to SOURCE_ID,
+                TRANSFER_RECIPIENT_ID_ARG to RECIPIENT_ID,
+                TRANSFER_AMOUNT_ARG to 1L,
+            ),
+        )
+        val first = SequencedTransferRepository(TransferOutcome.Failure.Network(RuntimeException("timeout")))
+        buildViewModel(accounts, first, amount = 1, savedStateHandle = savedStateHandle)
+
+        // 같은 SavedStateHandle로 VM 재생성 = 시스템 OOM kill 후 Navigation이 결과 화면을
+        // 복원해 init이 송금을 자동 재실행하는 상황. 키는 그대로여야 한다.
+        val second = SequencedTransferRepository(success())
+        buildViewModel(accounts, second, amount = 1, savedStateHandle = savedStateHandle)
+
+        assertEquals(
+            first.requests.single().idempotencyKey,
+            second.requests.single().idempotencyKey,
+        )
+    }
+
+    @Test
     fun `확인은 Finish effect를 보낸다`() = runTest {
         val accounts = FakeAccountRepository().apply {
             emit(account(SOURCE_ID), account(RECIPIENT_ID))
@@ -165,14 +210,15 @@ class ResultViewModelTest {
         accounts: FakeAccountRepository,
         transfer: TransferRepository,
         amount: Long,
-    ) = ResultViewModel(
-        savedStateHandle = SavedStateHandle(
+        savedStateHandle: SavedStateHandle = SavedStateHandle(
             mapOf(
                 TRANSFER_ACCOUNT_ID_ARG to SOURCE_ID,
                 TRANSFER_RECIPIENT_ID_ARG to RECIPIENT_ID,
                 TRANSFER_AMOUNT_ARG to amount,
             ),
         ),
+    ) = ResultViewModel(
+        savedStateHandle = savedStateHandle,
         accountRepository = accounts,
         executeTransfer = ExecuteTransferUseCase(transfer),
         resultUiMapper = resultUiMapper,
@@ -226,8 +272,11 @@ class ResultViewModelTest {
         private vararg val outcomes: TransferOutcome,
     ) : TransferRepository {
         private var index = 0
-        override suspend fun execute(request: TransferRequest): TransferOutcome =
-            outcomes[index++.coerceAtMost(outcomes.lastIndex)]
+        val requests = mutableListOf<TransferRequest>()
+        override suspend fun execute(request: TransferRequest): TransferOutcome {
+            requests += request
+            return outcomes[index++.coerceAtMost(outcomes.lastIndex)]
+        }
     }
 
     private class TestDispatcherProvider(dispatcher: CoroutineDispatcher) : DispatcherProvider {
