@@ -30,6 +30,7 @@ import com.study.bank.feature.transfer.result.ui.model.ResultUiMapper
 import com.study.bank.feature.transfer.testutil.MainDispatcherRule
 import java.math.BigDecimal
 import java.time.Instant
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -177,6 +178,27 @@ class ResultViewModelTest {
     }
 
     @Test
+    fun `재실행 중에는 RetryClicked 연타가 무시된다`() = runTest {
+        val accounts = FakeAccountRepository().apply {
+            emit(account(SOURCE_ID), account(RECIPIENT_ID))
+        }
+        // init은 즉시 실패, 재시도는 release 전까지 멈춰 phase를 Loading으로 붙잡아 둔다.
+        val transfer = GatedTransferRepository(retryOutcome = success())
+        val vm = buildViewModel(accounts, transfer, amount = 1)
+        assertTrue(vm.state.value.phase is ResultPhase.Failure)
+        assertEquals(1, transfer.callCount)
+
+        vm.onIntent(ResultIntent.RetryClicked) // 재실행 시작 → phase=Loading, gate에서 멈춤
+        vm.onIntent(ResultIntent.RetryClicked) // 무시(이미 Loading)
+        vm.onIntent(ResultIntent.RetryClicked) // 무시
+        assertEquals(2, transfer.callCount)
+
+        transfer.release() // 멈춘 재실행 완료
+        assertEquals(ResultPhase.Success, vm.state.value.phase)
+        assertEquals(2, transfer.callCount)
+    }
+
+    @Test
     fun `확인은 Finish effect를 보낸다`() = runTest {
         val accounts = FakeAccountRepository().apply {
             emit(account(SOURCE_ID), account(RECIPIENT_ID))
@@ -276,6 +298,28 @@ class ResultViewModelTest {
         override suspend fun execute(request: TransferRequest): TransferOutcome {
             requests += request
             return outcomes[index++.coerceAtMost(outcomes.lastIndex)]
+        }
+    }
+
+    /** 첫 호출(init)은 즉시 실패, 이후 호출은 [release] 전까지 멈춰 재실행을 인플라이트로 붙잡아 둔다. */
+    private class GatedTransferRepository(
+        private val retryOutcome: TransferOutcome,
+    ) : TransferRepository {
+        private val gate = CompletableDeferred<Unit>()
+        var callCount = 0
+            private set
+
+        override suspend fun execute(request: TransferRequest): TransferOutcome {
+            callCount++
+            if (callCount == 1) {
+                return TransferOutcome.Failure.Network(RuntimeException("net"))
+            }
+            gate.await()
+            return retryOutcome
+        }
+
+        fun release() {
+            gate.complete(Unit)
         }
     }
 
