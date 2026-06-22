@@ -16,6 +16,7 @@ import com.study.bank.core.ui.testing.BankTestTags.SCREEN_CONFIRM
 import com.study.bank.core.ui.testing.BankTestTags.SCREEN_RECIPIENT
 import com.study.bank.core.ui.testing.BankTestTags.accountDetail
 import com.study.bank.core.ui.testing.BankTestTags.accountItem
+import com.study.bank.domain.model.Currency
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
@@ -47,7 +48,8 @@ class TransferFlowEndToEndTest {
 
     @Test
     fun 같은_통화_내_계좌로_송금하면_성공_화면이_보인다() {
-        openAmountScreen(recipientId = E2eSeedAccounts.SAFEBOX_KRW)
+        val (source, recipient) = E2eAccounts.sameCurrencyPair(Currency.KRW)
+        openAmountScreen(sourceId = source, recipientId = recipient)
         enterDigits("10000")
 
         composeRule.awaitTag(AMOUNT_NEXT)
@@ -63,7 +65,8 @@ class TransferFlowEndToEndTest {
 
     @Test
     fun 통화가_다른_계좌로는_송금이_거절된다() {
-        openAmountScreen(recipientId = E2eSeedAccounts.FOREIGN_USD)
+        val (source, recipient) = E2eAccounts.crossCurrencyPair(from = Currency.KRW, to = Currency.USD)
+        openAmountScreen(sourceId = source, recipientId = recipient)
         enterDigits("10000")
 
         composeRule.awaitTag(AMOUNT_NEXT)
@@ -78,7 +81,8 @@ class TransferFlowEndToEndTest {
 
     @Test
     fun 송금_성공_후_확인하면_출금계좌_상세로_돌아간다() {
-        openAmountScreen(recipientId = E2eSeedAccounts.SAFEBOX_KRW)
+        val (source, recipient) = E2eAccounts.sameCurrencyPair(Currency.KRW)
+        openAmountScreen(sourceId = source, recipientId = recipient)
         enterDigits("10000")
 
         composeRule.awaitTag(AMOUNT_NEXT)
@@ -93,20 +97,18 @@ class TransferFlowEndToEndTest {
         pressSystemBack()
         composeRule.onNodeWithTag(RESULT_SUCCESS).assertIsDisplayed()
 
-        // "확인" → 송금 플로우(수취인~결과)가 모두 걷히고 출금계좌(월급통장) 상세로 복귀.
-        // 마스킹 번호 문자열이 아니라 출금계좌 id의 상세 태그로 "그 계좌 상세에 복귀"를 확인한다.
+        // "확인" → 송금 플로우(수취인~결과)가 모두 걷히고 출금계좌 상세로 복귀.
+        // 마스킹 번호 문자열이 아니라 출금계좌(source) id의 상세 태그로 "그 계좌 상세에 복귀"를 확인한다.
         composeRule.onNodeWithTag(RESULT_CONFIRM).performClick()
-        composeRule.awaitTag(accountDetail(E2eSeedAccounts.PAYROLL_KRW))
+        composeRule.awaitTag(accountDetail(source))
         composeRule.onNodeWithTag(RESULT_SUCCESS).assertDoesNotExist()
     }
 
     @Test
     fun 같은_USD_계좌로_소수점_금액을_보내면_절삭_없이_송금된다() {
-        // 출금=외화통장 USD($3,245.80), 수취=외화통장 USD 2. 동일 통화라 송금이 성립한다.
-        openAmountScreen(
-            recipientId = E2eSeedAccounts.FOREIGN_USD_2,
-            sourceId = E2eSeedAccounts.FOREIGN_USD,
-        )
+        // 출금·수취 모두 USD(소수점 통화). 동일 통화라 송금이 성립하고, 소수점 보존을 검증한다.
+        val (source, recipient) = E2eAccounts.sameCurrencyPair(Currency.USD)
+        openAmountScreen(sourceId = source, recipientId = recipient)
         // $100.50 = 10,050센트를 키패드로 입력(소수점 키 없이 최소단위 누적).
         enterDigits("10050")
 
@@ -124,10 +126,7 @@ class TransferFlowEndToEndTest {
     }
 
     /** 홈 → [sourceId] 상세 → 보내기 → 수취인 [recipientId] 선택 → 금액 화면 진입까지. 계좌는 모두 id 태그로 지목. */
-    private fun openAmountScreen(
-        recipientId: String,
-        sourceId: String = E2eSeedAccounts.PAYROLL_KRW,
-    ) {
+    private fun openAmountScreen(sourceId: String, recipientId: String) {
         composeRule.awaitTag(accountItem(sourceId))
         composeRule.onNodeWithTag(accountItem(sourceId)).performClick()
 

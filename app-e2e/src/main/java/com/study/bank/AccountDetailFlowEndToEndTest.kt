@@ -12,6 +12,7 @@ import com.study.bank.core.ui.testing.BankTestTags.HOME_TOTAL_BALANCE
 import com.study.bank.core.ui.testing.BankTestTags.SCREEN_HOME
 import com.study.bank.core.ui.testing.BankTestTags.accountDetail
 import com.study.bank.core.ui.testing.BankTestTags.accountItem
+import com.study.bank.domain.model.Currency
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
@@ -40,12 +41,14 @@ class AccountDetailFlowEndToEndTest {
 
     @Test
     fun 계좌를_탭하면_상세_화면과_빈_거래내역이_보인다() {
+        // 이 테스트는 통화 무관 — 아무 계좌나 하나 열어 상세·빈 거래내역을 본다.
+        val account = E2eAccounts.firstOf(Currency.KRW)
         // 표시명이 아니라 안정적 id 태그로 그 계좌 행을 지목해 클릭.
-        composeRule.awaitTag(accountItem(E2eSeedAccounts.TWD_TRAVEL))
-        composeRule.onNodeWithTag(accountItem(E2eSeedAccounts.TWD_TRAVEL)).performClick()
+        composeRule.awaitTag(accountItem(account))
+        composeRule.onNodeWithTag(accountItem(account)).performClick()
 
         // 상세 헤더 태그는 계좌 로딩 후에만 등장 → 상세가 떴고 그 계좌가 로딩됐음을 보장한다.
-        composeRule.awaitTag(accountDetail(E2eSeedAccounts.TWD_TRAVEL))
+        composeRule.awaitTag(accountDetail(account))
         composeRule.onNodeWithTag(DETAIL_TX_LABEL).assertIsDisplayed()
         // 시드 직후 원장은 비어 있으므로 빈 거래내역 슬롯이 보인다(문구 아닌 태그로 확인).
         composeRule.onNodeWithTag(DETAIL_TX_EMPTY).assertIsDisplayed()
@@ -55,9 +58,10 @@ class AccountDetailFlowEndToEndTest {
 
     @Test
     fun 상세에서_뒤로가기를_누르면_홈으로_돌아온다() {
-        composeRule.awaitTag(accountItem(E2eSeedAccounts.TWD_TRAVEL))
-        composeRule.onNodeWithTag(accountItem(E2eSeedAccounts.TWD_TRAVEL)).performClick()
-        composeRule.awaitTag(accountDetail(E2eSeedAccounts.TWD_TRAVEL))
+        val account = E2eAccounts.firstOf(Currency.KRW)
+        composeRule.awaitTag(accountItem(account))
+        composeRule.onNodeWithTag(accountItem(account)).performClick()
+        composeRule.awaitTag(accountDetail(account))
 
         // 상단 백 버튼 → popBackStack → 홈.
         composeRule.onNodeWithTag(DETAIL_BACK).performClick()
