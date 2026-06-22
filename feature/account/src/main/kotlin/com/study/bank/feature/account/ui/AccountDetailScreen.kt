@@ -29,9 +29,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.study.bank.core.ui.testing.BankTestTags
 import com.study.bank.feature.account.R
 import com.study.bank.feature.account.contract.AccountDetailIntent
 import com.study.bank.feature.account.contract.AccountDetailState
@@ -54,7 +56,10 @@ internal fun AccountDetailScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.account_title)) },
                 navigationIcon = {
-                    IconButton(onClick = { onIntent(AccountDetailIntent.BackClicked) }) {
+                    IconButton(
+                        onClick = { onIntent(AccountDetailIntent.BackClicked) },
+                        modifier = Modifier.testTag(BankTestTags.DETAIL_BACK),
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.account_action_back),
@@ -90,7 +95,9 @@ internal fun AccountDetailScreen(
                 text = stringResource(R.string.account_transactions_label),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                modifier = Modifier
+                    .testTag(BankTestTags.DETAIL_TX_LABEL)
+                    .padding(horizontal = 20.dp, vertical = 8.dp),
             )
 
             // 트랜잭션 리스트 (가운데, 스크롤)
@@ -113,7 +120,9 @@ internal fun AccountDetailScreen(
 @Composable
 private fun EmptyTransactions(modifier: Modifier = Modifier) {
     Box(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag(BankTestTags.DETAIL_TX_EMPTY),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -137,6 +146,7 @@ private fun SendButton(
             enabled = enabled,
             modifier = Modifier
                 .fillMaxWidth()
+                .testTag(BankTestTags.DETAIL_SEND)
                 .navigationBarsPadding()
                 .padding(horizontal = 20.dp, vertical = 12.dp),
         ) {

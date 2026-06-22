@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -41,6 +42,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.study.bank.core.ui.model.format
+import com.study.bank.core.ui.testing.BankTestTags
 import com.study.bank.feature.transfer.R
 import com.study.bank.feature.transfer.result.contract.ResultIntent
 import com.study.bank.feature.transfer.result.contract.ResultPhase
@@ -93,6 +95,7 @@ internal fun ResultScreen(
                     header = state.header,
                     lastLine = stringResource(R.string.transfer_result_success_sent),
                     reason = null,
+                    testTag = BankTestTags.RESULT_SUCCESS,
                     chip = {
                         MemoChip(onClick = { onIntent(ResultIntent.LeaveMemoClicked) })
                     },
@@ -103,6 +106,7 @@ internal fun ResultScreen(
                     header = state.header,
                     lastLine = stringResource(R.string.transfer_result_failure_title),
                     reason = phase.reason.message(),
+                    testTag = BankTestTags.RESULT_FAILURE,
                     chip = null,
                 )
             }
@@ -130,9 +134,14 @@ private fun OutcomeContent(
     header: ResultHeaderUi?,
     lastLine: String,
     reason: String?,
+    testTag: String,
     chip: (@Composable () -> Unit)?,
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        // 성공/실패 결과 화면을 문구가 아니라 안정 태그로 식별.
+        modifier = Modifier.testTag(testTag),
+    ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
@@ -233,7 +242,9 @@ private fun BottomBar(phase: ResultPhase, onIntent: (ResultIntent) -> Unit) {
             }
             Button(
                 onClick = { onIntent(ResultIntent.ConfirmClicked) },
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .testTag(BankTestTags.RESULT_CONFIRM),
             ) {
                 Text(stringResource(R.string.transfer_result_confirm))
             }

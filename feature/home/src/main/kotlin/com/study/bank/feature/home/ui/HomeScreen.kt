@@ -11,6 +11,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -20,9 +21,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.study.bank.core.ui.testing.BankTestTags
 import com.study.bank.feature.home.R
 import com.study.bank.feature.home.contract.HomeIntent
 import com.study.bank.feature.home.contract.HomeState
@@ -40,12 +43,20 @@ internal fun HomeScreen(
 ) {
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = {
+            // 에러는 문구가 아니라 "스낵바가 떴다"는 사실로 검증하므로 안정 태그를 부여한다.
+            SnackbarHost(snackbarHostState) { data ->
+                Snackbar(snackbarData = data, modifier = Modifier.testTag(BankTestTags.HOME_SNACKBAR))
+            }
+        },
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.home_title)) },
                 actions = {
-                    TextButton(onClick = { onIntent(HomeIntent.Refresh) }) {
+                    TextButton(
+                        onClick = { onIntent(HomeIntent.Refresh) },
+                        modifier = Modifier.testTag(BankTestTags.HOME_REFRESH),
+                    ) {
                         Text(stringResource(R.string.home_action_refresh))
                     }
                 },
@@ -55,7 +66,8 @@ internal fun HomeScreen(
         Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
+                .padding(innerPadding)
+                .testTag(BankTestTags.SCREEN_HOME),
             color = MaterialTheme.colorScheme.background,
         ) {
             HomeContent(

@@ -21,10 +21,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.study.bank.core.ui.testing.BankTestTags
 import com.study.bank.feature.transfer.R
 import com.study.bank.feature.transfer.recipient.contract.RecipientIntent
 import com.study.bank.feature.transfer.recipient.contract.RecipientState
@@ -67,6 +69,7 @@ internal fun RecipientScreen(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .fillMaxWidth()
+                        .testTag(BankTestTags.SCREEN_RECIPIENT)
                         .padding(horizontal = 20.dp, vertical = 16.dp),
                 )
             }

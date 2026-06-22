@@ -21,12 +21,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.study.bank.core.ui.model.MoneyUi
 import com.study.bank.core.ui.model.format
+import com.study.bank.core.ui.testing.BankTestTags
 import com.study.bank.feature.transfer.R
 import com.study.bank.feature.transfer.amount.contract.AmountIntent
 import com.study.bank.feature.transfer.amount.contract.AmountState
@@ -70,7 +72,8 @@ internal fun AmountScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(top = 16.dp),
+                .padding(top = 16.dp)
+                .testTag(BankTestTags.SCREEN_AMOUNT),
         ) {
             TransferPartyHeader(source = state.source, recipient = state.recipient)
             Spacer(Modifier.height(28.dp))
@@ -144,6 +147,7 @@ private fun BottomBar(
                     onClick = onNext,
                     modifier = Modifier
                         .fillMaxWidth()
+                        .testTag(BankTestTags.AMOUNT_NEXT)
                         .padding(horizontal = 20.dp, vertical = 12.dp),
                 ) {
                     Text(stringResource(R.string.transfer_amount_next))

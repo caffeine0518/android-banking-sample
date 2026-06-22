@@ -9,11 +9,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.study.bank.core.ui.model.MoneyUi
 import com.study.bank.core.ui.model.format
+import com.study.bank.core.ui.testing.BankTestTags
 import com.study.bank.feature.home.R
 
 @Composable
@@ -25,6 +27,7 @@ internal fun TotalBalanceHeader(
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .testTag(BankTestTags.HOME_TOTAL_BALANCE)
             .padding(horizontal = 20.dp, vertical = 24.dp),
     ) {
         Text(

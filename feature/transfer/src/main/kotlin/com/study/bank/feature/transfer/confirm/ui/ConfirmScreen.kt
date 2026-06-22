@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -31,6 +32,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.study.bank.core.ui.model.format
+import com.study.bank.core.ui.testing.BankTestTags
 import com.study.bank.feature.transfer.R
 import com.study.bank.feature.transfer.confirm.contract.ConfirmIntent
 import com.study.bank.feature.transfer.confirm.contract.ConfirmState
@@ -115,7 +117,10 @@ private fun ColumnScope.TitleBlock(detail: ConfirmDetailUi) {
         style = MaterialTheme.typography.headlineMedium,
         fontWeight = FontWeight.Bold,
         textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth(),
+        // detail 로딩 후에만 그려지는 제목 → 확인 화면 도착 마커.
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag(BankTestTags.SCREEN_CONFIRM),
     )
 }
 
@@ -158,7 +163,9 @@ private fun BottomBar(enabled: Boolean, onSend: () -> Unit) {
             Button(
                 onClick = onSend,
                 enabled = enabled,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(BankTestTags.CONFIRM_SEND),
             ) {
                 Text(stringResource(R.string.transfer_confirm_send))
             }

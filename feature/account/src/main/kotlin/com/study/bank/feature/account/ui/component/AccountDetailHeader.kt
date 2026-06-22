@@ -9,10 +9,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.study.bank.core.ui.model.format
+import com.study.bank.core.ui.testing.BankTestTags
 import com.study.bank.feature.account.R
 import com.study.bank.feature.account.ui.model.AccountTypeUi
 import com.study.bank.feature.account.ui.model.AccountUi
@@ -25,6 +27,8 @@ internal fun AccountDetailHeader(
     Column(
         modifier = modifier
             .fillMaxWidth()
+            // 헤더는 계좌 로딩 완료 후에만 그려지므로, 이 태그의 등장 = "해당 id 상세에 도착(로딩 완료)"이다.
+            .testTag(BankTestTags.accountDetail(account.id))
             .padding(horizontal = 20.dp, vertical = 24.dp),
     ) {
         val typeLabel = account.type.label()

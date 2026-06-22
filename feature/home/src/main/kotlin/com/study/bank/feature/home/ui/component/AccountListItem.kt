@@ -13,10 +13,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.study.bank.core.ui.model.format
+import com.study.bank.core.ui.testing.BankTestTags
 import com.study.bank.feature.home.R
 import com.study.bank.feature.home.ui.model.AccountTypeUi
 import com.study.bank.feature.home.ui.model.AccountUi
@@ -30,6 +32,8 @@ internal fun AccountListItem(
     Card(
         modifier = modifier
             .fillMaxWidth()
+            // 표시명("월급통장")이 아니라 안정적 id로 테스트가 지목 — 서버가 이름을 바꿔도 안 깨짐.
+            .testTag(BankTestTags.accountItem(account.id))
             .clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
