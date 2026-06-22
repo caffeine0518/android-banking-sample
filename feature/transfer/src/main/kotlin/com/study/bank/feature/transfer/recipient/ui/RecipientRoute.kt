@@ -9,13 +9,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
+import com.study.bank.feature.transfer.navigation.TransferAmountRoute
+import com.study.bank.feature.transfer.navigation.amountRoute
 import com.study.bank.feature.transfer.recipient.contract.RecipientEffect
 
 @Composable
 fun RecipientRoute(
     onBack: () -> Unit,
     onAccountNumberInput: (sourceAccountId: String) -> Unit,
-    onContinue: (sourceAccountId: String, recipientAccountId: String) -> Unit,
+    onContinue: (TransferAmountRoute) -> Unit,
     viewModel: RecipientViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -31,7 +33,7 @@ fun RecipientRoute(
                 is RecipientEffect.NavigateToAccountNumberInput ->
                     onAccountNumberInput(effect.sourceAccountId)
                 is RecipientEffect.NavigateToAmount ->
-                    onContinue(effect.sourceAccountId, effect.recipientAccountId)
+                    onContinue(amountRoute(effect.sourceAccountId, effect.recipient))
             }
         }
     }

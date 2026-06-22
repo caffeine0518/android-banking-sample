@@ -10,11 +10,13 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
 import com.study.bank.feature.transfer.amount.contract.AmountEffect
+import com.study.bank.feature.transfer.navigation.TransferConfirmRoute
+import com.study.bank.feature.transfer.navigation.confirmRoute
 
 @Composable
 fun AmountRoute(
     onBack: () -> Unit,
-    onNext: (sourceAccountId: String, recipientAccountId: String, amount: Long) -> Unit,
+    onNext: (TransferConfirmRoute) -> Unit,
     viewModel: AmountViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -28,7 +30,7 @@ fun AmountRoute(
             when (effect) {
                 AmountEffect.NavigateBack -> onBack()
                 is AmountEffect.NavigateNext ->
-                    onNext(effect.sourceAccountId, effect.recipientAccountId, effect.amount)
+                    onNext(confirmRoute(effect.sourceAccountId, effect.recipient, effect.amount))
             }
         }
     }

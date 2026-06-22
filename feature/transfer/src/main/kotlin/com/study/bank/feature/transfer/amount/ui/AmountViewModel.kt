@@ -15,14 +15,13 @@ import com.study.bank.feature.transfer.amount.contract.AmountIntent
 import com.study.bank.feature.transfer.amount.contract.AmountState
 import com.study.bank.feature.transfer.amount.ui.model.AmountSourceUi
 import com.study.bank.feature.transfer.amount.ui.model.AmountUiMapper
-import com.study.bank.feature.transfer.navigation.TRANSFER_ACCOUNT_ID_ARG
-import com.study.bank.feature.transfer.navigation.TRANSFER_RECIPIENT_ID_ARG
+import com.study.bank.feature.transfer.navigation.ARG_SOURCE_ACCOUNT_ID
+import com.study.bank.feature.transfer.navigation.transferRecipientArg
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -34,14 +33,14 @@ class AmountViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val sourceAccountId = AccountId(
-        checkNotNull(savedStateHandle.get<String>(TRANSFER_ACCOUNT_ID_ARG)) { "accountId 인자 누락" },
-    )
-    private val recipientAccountId = AccountId(
-        checkNotNull(savedStateHandle.get<String>(TRANSFER_RECIPIENT_ID_ARG)) { "recipientId 인자 누락" },
+        checkNotNull(savedStateHandle.get<String>(ARG_SOURCE_ACCOUNT_ID)) { "accountId 인자 누락" },
     )
 
+    // 수취인은 라우트로 확정돼(외부·내 계좌 동일) 화면 동안 고정이다 — 재조회하지 않고 초기 상태에 한 번 반영한다.
+    private val recipient = savedStateHandle.transferRecipientArg()
+
     private val store = MviStore<AmountState, AmountAction, AmountEffect>(
-        initialState = AmountState(),
+        initialState = AmountState(recipient = amountUiMapper.mapRecipient(recipient)),
         scope = viewModelScope,
         dispatcher = dispatcherProvider.default,
     ) { action ->
@@ -60,18 +59,15 @@ class AmountViewModel @Inject constructor(
                     sendEffect(
                         AmountEffect.NavigateNext(
                             sourceAccountId = sourceAccountId.value,
-                            recipientAccountId = recipientAccountId.value,
+                            recipient = recipient,
                             amount = state.amount,
                         ),
                     )
                 }
             }
 
-            is AmountInternalAction.PartiesLoaded -> setState {
-                copy(
-                    source = action.source?.let(amountUiMapper::mapSource),
-                    recipient = action.recipient?.let(amountUiMapper::mapRecipient),
-                )
+            is AmountInternalAction.SourceUpdated -> setState {
+                copy(source = action.source?.let(amountUiMapper::mapSource))
             }
         }
     }
@@ -80,7 +76,7 @@ class AmountViewModel @Inject constructor(
     val effect: Flow<AmountEffect> = store.effect
 
     init {
-        collectParties()
+        collectSource()
     }
 
     fun onIntent(intent: AmountIntent) {
@@ -104,16 +100,11 @@ class AmountViewModel @Inject constructor(
         return balance.amount.movePointRight(balance.currency.exponent).longValueExact()
     }
 
-    private fun collectParties() {
+    private fun collectSource() {
         viewModelScope.launch {
-            combine(
-                accountRepository.observeAccount(sourceAccountId),
-                accountRepository.observeAccount(recipientAccountId),
-            ) { source, recipient -> source to recipient }
-                .catch { error -> Log.e(TAG, "Failed to observe transfer parties", error) }
-                .collect { (source, recipient) ->
-                    store.sendIntent(AmountInternalAction.PartiesLoaded(source, recipient))
-                }
+            accountRepository.observeAccount(sourceAccountId)
+                .catch { error -> Log.e(TAG, "출금계좌 관찰 실패", error) }
+                .collect { source -> store.sendIntent(AmountInternalAction.SourceUpdated(source)) }
         }
     }
 

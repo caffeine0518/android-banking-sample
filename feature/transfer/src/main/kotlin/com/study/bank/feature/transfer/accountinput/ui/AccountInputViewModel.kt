@@ -17,7 +17,8 @@ import com.study.bank.feature.transfer.accountinput.contract.AccountInputError
 import com.study.bank.feature.transfer.accountinput.contract.AccountInputInternalAction
 import com.study.bank.feature.transfer.accountinput.contract.AccountInputIntent
 import com.study.bank.feature.transfer.accountinput.contract.AccountInputState
-import com.study.bank.feature.transfer.navigation.TRANSFER_ACCOUNT_ID_ARG
+import com.study.bank.feature.transfer.navigation.ARG_SOURCE_ACCOUNT_ID
+import com.study.bank.feature.transfer.navigation.TransferRecipientArg
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
@@ -33,7 +34,7 @@ class AccountInputViewModel @Inject constructor(
 
     // 출금계좌(보내는 쪽). 실명조회 시 자기이체 판별에 쓴다.
     private val sourceAccountId = AccountId(
-        checkNotNull(savedStateHandle.get<String>(TRANSFER_ACCOUNT_ID_ARG)) { "accountId 인자 누락" },
+        checkNotNull(savedStateHandle.get<String>(ARG_SOURCE_ACCOUNT_ID)) { "accountId 인자 누락" },
     )
 
     private val store = MviStore<AccountInputState, AccountInputAction, AccountInputEffect>(
@@ -69,7 +70,12 @@ class AccountInputViewModel @Inject constructor(
                 is RecipientValidation.Valid -> sendEffect(
                     AccountInputEffect.NavigateToAmount(
                         sourceAccountId = sourceAccountId.value,
-                        recipientAccountId = validation.accountId.value,
+                        // 실명조회로 확정된 수취인 신원: 사용자가 입력한 번호·은행 + 조회된 예금주명.
+                        recipient = TransferRecipientArg(
+                            bankCode = state.selectedBank.code,
+                            accountNumber = state.accountNumber,
+                            holderName = validation.holderName,
+                        ),
                     ),
                 )
 

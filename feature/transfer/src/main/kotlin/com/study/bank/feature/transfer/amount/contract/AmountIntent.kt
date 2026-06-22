@@ -21,8 +21,6 @@ sealed interface AmountIntent : AmountAction {
 }
 
 internal sealed interface AmountInternalAction : AmountAction {
-    data class PartiesLoaded(
-        val source: Account?,
-        val recipient: Account?,
-    ) : AmountInternalAction
+    /** 출금계좌 잔액 갱신. 수취인은 라우트로 확정돼 고정이라 여기 싣지 않는다. */
+    data class SourceUpdated(val source: Account?) : AmountInternalAction
 }

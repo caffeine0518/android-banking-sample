@@ -14,15 +14,14 @@ import com.study.bank.feature.transfer.confirm.contract.ConfirmInternalAction
 import com.study.bank.feature.transfer.confirm.contract.ConfirmIntent
 import com.study.bank.feature.transfer.confirm.contract.ConfirmState
 import com.study.bank.feature.transfer.confirm.ui.model.ConfirmUiMapper
-import com.study.bank.feature.transfer.navigation.TRANSFER_ACCOUNT_ID_ARG
-import com.study.bank.feature.transfer.navigation.TRANSFER_AMOUNT_ARG
-import com.study.bank.feature.transfer.navigation.TRANSFER_RECIPIENT_ID_ARG
+import com.study.bank.feature.transfer.navigation.ARG_AMOUNT
+import com.study.bank.feature.transfer.navigation.ARG_SOURCE_ACCOUNT_ID
+import com.study.bank.feature.transfer.navigation.transferRecipientArg
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -34,13 +33,11 @@ class ConfirmViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val sourceAccountId = AccountId(
-        checkNotNull(savedStateHandle.get<String>(TRANSFER_ACCOUNT_ID_ARG)) { "accountId 인자 누락" },
+        checkNotNull(savedStateHandle.get<String>(ARG_SOURCE_ACCOUNT_ID)) { "accountId 인자 누락" },
     )
-    private val recipientAccountId = AccountId(
-        checkNotNull(savedStateHandle.get<String>(TRANSFER_RECIPIENT_ID_ARG)) { "recipientId 인자 누락" },
-    )
-    private val amount =
-        checkNotNull(savedStateHandle.get<Long>(TRANSFER_AMOUNT_ARG)) { "amount 인자 누락" }
+    // 수취인·금액은 라우트로 확정돼 화면 동안 고정이다.
+    private val recipient = savedStateHandle.transferRecipientArg()
+    private val amount = checkNotNull(savedStateHandle.get<Long>(ARG_AMOUNT)) { "amount 인자 누락" }
 
     private val store = MviStore<ConfirmState, ConfirmAction, ConfirmEffect>(
         initialState = ConfirmState(),
@@ -61,17 +58,17 @@ class ConfirmViewModel @Inject constructor(
                     sendEffect(
                         ConfirmEffect.Submit(
                             sourceAccountId = sourceAccountId.value,
-                            recipientAccountId = recipientAccountId.value,
+                            recipient = recipient,
                             amount = amount,
                         ),
                     )
                 }
             }
 
-            is ConfirmInternalAction.PartiesLoaded -> {
+            // 수취인·금액은 라우트로 확정돼 고정이므로, 출금계좌가 로딩되면 확정 정보를 채운다.
+            is ConfirmInternalAction.SourceUpdated -> {
                 val source = action.source
-                val recipient = action.recipient
-                if (source != null && recipient != null) {
+                if (source != null) {
                     setState { copy(detail = confirmUiMapper.map(source, recipient, amount)) }
                 }
             }
@@ -82,23 +79,18 @@ class ConfirmViewModel @Inject constructor(
     val effect: Flow<ConfirmEffect> = store.effect
 
     init {
-        collectParties()
+        collectSource()
     }
 
     fun onIntent(intent: ConfirmIntent) {
         store.sendIntent(intent)
     }
 
-    private fun collectParties() {
+    private fun collectSource() {
         viewModelScope.launch {
-            combine(
-                accountRepository.observeAccount(sourceAccountId),
-                accountRepository.observeAccount(recipientAccountId),
-            ) { source, recipient -> source to recipient }
-                .catch { error -> Log.e(TAG, "Failed to observe transfer parties", error) }
-                .collect { (source, recipient) ->
-                    store.sendIntent(ConfirmInternalAction.PartiesLoaded(source, recipient))
-                }
+            accountRepository.observeAccount(sourceAccountId)
+                .catch { error -> Log.e(TAG, "출금계좌 관찰 실패", error) }
+                .collect { source -> store.sendIntent(ConfirmInternalAction.SourceUpdated(source)) }
         }
     }
 

@@ -15,8 +15,7 @@ import com.study.bank.domain.repository.AccountRepository
 import com.study.bank.feature.transfer.amount.contract.AmountEffect
 import com.study.bank.feature.transfer.amount.contract.AmountIntent
 import com.study.bank.feature.transfer.amount.ui.model.AmountUiMapper
-import com.study.bank.feature.transfer.navigation.TRANSFER_ACCOUNT_ID_ARG
-import com.study.bank.feature.transfer.navigation.TRANSFER_RECIPIENT_ID_ARG
+import com.study.bank.feature.transfer.navigation.TransferRecipientArg
 import com.study.bank.feature.transfer.testutil.MainDispatcherRule
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -42,14 +41,12 @@ class AmountViewModelTest {
         val repo = FakeAccountRepository()
         val vm = buildViewModel(repo)
 
-        repo.emit(
-            account(SOURCE_ID, nickname = "U드림 저축예금", balance = 284_797),
-            account(RECIPIENT_ID, nickname = "종합매매 계좌", bank = BankCode.SHINHAN),
-        )
+        repo.emit(account(SOURCE_ID, nickname = "U드림 저축예금", balance = 284_797))
 
         val state = vm.state.value
         assertEquals("U드림 저축예금", state.source?.nickname)
-        assertEquals("종합매매 계좌", state.recipient?.nickname)
+        // 수취인은 라우트로 확정돼 들어온다(예금주명·은행 표시). 별명/종류가 아니다.
+        assertEquals("안성재", state.recipient?.holderName)
         assertEquals("신한은행", state.recipient?.bankDisplayName)
     }
 
@@ -172,7 +169,11 @@ class AmountViewModelTest {
             assertEquals(
                 AmountEffect.NavigateNext(
                     sourceAccountId = SOURCE_ID,
-                    recipientAccountId = RECIPIENT_ID,
+                    recipient = TransferRecipientArg(
+                        bankCode = "088",
+                        accountNumber = "110-503-685417",
+                        holderName = "안성재",
+                    ),
                     amount = 5L,
                 ),
                 awaitItem(),
@@ -205,8 +206,10 @@ class AmountViewModelTest {
     private fun buildViewModel(repo: FakeAccountRepository) = AmountViewModel(
         savedStateHandle = SavedStateHandle(
             mapOf(
-                TRANSFER_ACCOUNT_ID_ARG to SOURCE_ID,
-                TRANSFER_RECIPIENT_ID_ARG to RECIPIENT_ID,
+                "sourceAccountId" to SOURCE_ID,
+                "recipientBankCode" to "088",
+                "recipientAccountNumber" to "110-503-685417",
+                "recipientHolderName" to "안성재",
             ),
         ),
         accountRepository = repo,
