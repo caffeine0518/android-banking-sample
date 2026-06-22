@@ -63,7 +63,8 @@ class ResultViewModel @Inject constructor(
         dispatcher = dispatcherProvider.default,
     ) { action ->
         when (action) {
-            ResultIntent.BackClicked, ResultIntent.ConfirmClicked -> sendEffect(ResultEffect.Finish)
+            ResultIntent.BackClicked, ResultIntent.ConfirmClicked ->
+                sendEffect(ResultEffect.Finish(sourceAccountId.value))
 
             ResultIntent.ShareClicked -> sendEffect(ResultEffect.Share)
 

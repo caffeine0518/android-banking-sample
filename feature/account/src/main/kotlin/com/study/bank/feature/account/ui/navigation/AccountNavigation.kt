@@ -12,8 +12,14 @@ import com.study.bank.feature.account.ui.AccountDetailRoute
 const val ACCOUNT_ID_ARG = "accountId"
 const val ACCOUNT_ROUTE = "account/{$ACCOUNT_ID_ARG}"
 
+/**
+ * [accountId] 상세 화면의 인자 채워진 구체 라우트. 진입(navigate)과 복귀(popBackStack) 양쪽에서 같은
+ * 규칙으로 만들어, 백스택의 동일 목적지를 식별할 수 있게 한다.
+ */
+fun accountRoute(accountId: String): String = "account/$accountId"
+
 fun NavController.navigateToAccount(accountId: AccountId, navOptions: NavOptions? = null) {
-    navigate("account/${accountId.value}", navOptions)
+    navigate(accountRoute(accountId.value), navOptions)
 }
 
 fun NavGraphBuilder.accountScreen(

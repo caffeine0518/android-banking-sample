@@ -227,7 +227,7 @@ class ResultViewModelTest {
     }
 
     @Test
-    fun `확인은 Finish effect를 보낸다`() = runTest {
+    fun `확인은 출금계좌로 복귀하는 Finish effect를 보낸다`() = runTest {
         val accounts = FakeAccountRepository().apply {
             emit(account(SOURCE_ID), account(RECIPIENT_ID))
         }
@@ -235,7 +235,7 @@ class ResultViewModelTest {
 
         vm.effect.test {
             vm.onIntent(ResultIntent.ConfirmClicked)
-            assertEquals(ResultEffect.Finish, awaitItem())
+            assertEquals(ResultEffect.Finish(SOURCE_ID), awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
     }

@@ -162,7 +162,7 @@ fun NavGraphBuilder.transferConfirmScreen(
 }
 
 fun NavGraphBuilder.transferResultScreen(
-    onFinish: () -> Unit,
+    onFinish: (sourceAccountId: String) -> Unit,
 ) {
     composable<TransferResultRoute> {
         ResultRoute(onFinish = onFinish)
