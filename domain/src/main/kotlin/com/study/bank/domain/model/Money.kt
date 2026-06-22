@@ -62,6 +62,14 @@ class Money private constructor(
         fun of(amount: String, currency: Currency): Money =
             of(BigDecimal(amount), currency)
 
+        /**
+         * 통화의 최소단위(minor unit) 정수로부터 [Money]를 만든다. 소수점 키 없이 정수만
+         * 누적하는 키패드 입력에서 통화별 소수 자릿수를 복원하는 표준 변환이다.
+         * 예) `ofMinor(10050, USD)` → `$100.50`, `ofMinor(100, KRW)` → `₩100`.
+         */
+        fun ofMinor(minorAmount: Long, currency: Currency): Money =
+            of(BigDecimal.valueOf(minorAmount).movePointLeft(currency.exponent), currency)
+
         fun zero(currency: Currency): Money = of(BigDecimal.ZERO, currency)
     }
 }

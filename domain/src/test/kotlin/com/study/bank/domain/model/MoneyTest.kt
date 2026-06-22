@@ -64,6 +64,30 @@ class MoneyTest {
     }
 
     @Nested
+    inner class OfMinor {
+
+        @Test
+        fun `USD minor units are read as cents`() {
+            assertEquals(Money.of("100.50", Currency.USD), Money.ofMinor(10_050, Currency.USD))
+        }
+
+        @Test
+        fun `USD sub-dollar minor units keep the cents`() {
+            assertEquals(Money.of("0.05", Currency.USD), Money.ofMinor(5, Currency.USD))
+        }
+
+        @Test
+        fun `KRW minor unit equals its major unit`() {
+            assertEquals(Money.of(100, Currency.KRW), Money.ofMinor(100, Currency.KRW))
+        }
+
+        @Test
+        fun `EUR minor units are read as cents`() {
+            assertEquals(Money.of("3245.80", Currency.EUR), Money.ofMinor(324_580, Currency.EUR))
+        }
+    }
+
+    @Nested
     inner class Plus {
 
         @Test
