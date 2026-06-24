@@ -91,7 +91,7 @@ private fun AmountValue(state: AmountState, onFillBalance: () -> Unit) {
     val entered = state.isAmountEntered && source != null
     val amountText = if (entered) {
         // state.amount는 통화 최소단위(minor unit) 정수 → exponent만큼 소수점을 밀어 표시 금액 복원.
-        val currency = source!!.balance.currency
+        val currency = source.balance.currency
         val displayAmount = BigDecimal.valueOf(state.amount).movePointLeft(currency.exponent)
         MoneyUi(displayAmount, currency).format()
     } else {

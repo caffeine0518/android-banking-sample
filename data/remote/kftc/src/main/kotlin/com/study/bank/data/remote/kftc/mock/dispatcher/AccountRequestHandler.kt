@@ -23,7 +23,7 @@ internal class AccountRequestHandler(
 
     fun transactionList(fintechUseNum: String?): MockResponse {
         val account = resolveAccount(fintechUseNum) ?: return missingOrUnknown(fintechUseNum)
-        return responses.transactionList(account, state.transactions(fintechUseNum!!))
+        return responses.transactionList(account, state.transactions(account.fintechUseNum))
     }
 
     private fun resolveAccount(fintechUseNum: String?): SeedAccount? {
