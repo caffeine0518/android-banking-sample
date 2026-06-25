@@ -66,24 +66,29 @@ internal class KftcBankState(
     /** 부수효과 없는 검증. 통과하면 실행에 필요한 출금/수취 계좌·금액을 묶어 돌려주고, 아니면 거절 결과를 담는다. */
     private fun planWithdrawal(command: WithdrawCommand): WithdrawPlan {
         val source = seed.firstOrNull { it.fintechUseNum == command.fintechUseNum }
-            ?: return WithdrawPlan.Reject(WithdrawResult.UnknownSender(command.fintechUseNum))
+        if (source == null) {
+            return WithdrawPlan.Reject(WithdrawResult.UnknownSender(command.fintechUseNum))
+        }
 
-        val amount = command.tranAmt.toBigDecimalOrNull()
-        if (amount == null || amount.signum() <= 0) {
+        val amount = command.tranAmt.toBigDecimalOrNull()?.takeIf { it.signum() > 0 }
+        if (amount == null) {
             return WithdrawPlan.Reject(WithdrawResult.InvalidAmount(command.tranAmt))
         }
-        if (balances.getValue(source.fintechUseNum) < amount) {
-            return WithdrawPlan.Reject(
-                WithdrawResult.InsufficientFunds(
-                    balance = formatBalance(source.fintechUseNum),
-                    attempted = format(amount, scaleOf(source.fintechUseNum)),
-                ),
+
+        val isInsufficientFunds = balances.getValue(source.fintechUseNum) < amount
+        if (isInsufficientFunds) {
+            val insufficientFunds = WithdrawResult.InsufficientFunds(
+                balance = formatBalance(source.fintechUseNum),
+                attempted = format(amount, scaleOf(source.fintechUseNum)),
             )
+            return WithdrawPlan.Reject(insufficientFunds)
         }
 
         val recipient = internalRecipientFor(command)
-        if (recipient != null && recipient.currencyCode != source.currencyCode) {
-            return WithdrawPlan.Reject(WithdrawResult.CurrencyMismatch(source.currencyCode, recipient.currencyCode))
+        val isCurrencyMismatch = recipient != null && recipient.currencyCode != source.currencyCode
+        if (isCurrencyMismatch) {
+            val currencyMismatch = WithdrawResult.CurrencyMismatch(source.currencyCode, recipient.currencyCode)
+            return WithdrawPlan.Reject(currencyMismatch)
         }
         return WithdrawPlan.Approved(source, amount, recipient)
     }
