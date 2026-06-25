@@ -57,84 +57,126 @@ internal class KftcBankState(
     }
 
     fun withdraw(command: WithdrawCommand): WithdrawResult = synchronized(lock) {
+        when (val plan = planWithdrawal(command)) {
+            is WithdrawPlan.Reject -> plan.result
+            is WithdrawPlan.Approved -> applyTransfer(plan, command)
+        }
+    }
+
+    /** 부수효과 없는 검증. 통과하면 실행에 필요한 출금/수취 계좌·금액을 묶어 돌려주고, 아니면 거절 결과를 담는다. */
+    private fun planWithdrawal(command: WithdrawCommand): WithdrawPlan {
         val source = seed.firstOrNull { it.fintechUseNum == command.fintechUseNum }
-            ?: return WithdrawResult.UnknownSender(command.fintechUseNum)
+            ?: return WithdrawPlan.Reject(WithdrawResult.UnknownSender(command.fintechUseNum))
 
         val amount = command.tranAmt.toBigDecimalOrNull()
         if (amount == null || amount.signum() <= 0) {
-            return WithdrawResult.InvalidAmount(command.tranAmt)
+            return WithdrawPlan.Reject(WithdrawResult.InvalidAmount(command.tranAmt))
         }
-
-        val sourceBalance = balances.getValue(source.fintechUseNum)
-        val sourceScale = scaleOf(source.fintechUseNum)
-        if (sourceBalance < amount) {
-            return WithdrawResult.InsufficientFunds(
-                balance = formatBalance(source.fintechUseNum),
-                attempted = format(amount, sourceScale),
-            )
-        }
-
-        // 수취계좌가 시드에 있으면(내부 이체) 복식부기로 입금까지. 외부면 차감만.
-        // 앱은 list_finuse에서 마스킹 번호만 받으므로 내 계좌→내 계좌 송금 시 마스킹 번호로 보낸다.
-        // 전체/마스킹 번호 둘 다로 매칭한다("*"가 있어 외부 전체번호 입력과 충돌하지 않음).
-        val recipient = seed.firstOrNull {
-            (it.accountNum == command.recvAccountNum || it.accountNumMasked == command.recvAccountNum) &&
-                it.bankCodeStd == command.recvBankCode
-        }
-        if (recipient != null && recipient.currencyCode != source.currencyCode) {
-            return WithdrawResult.CurrencyMismatch(source.currencyCode, recipient.currencyCode)
-        }
-
-        val now = clock()
-        val tranDate = now.format(DATE_FORMATTER)
-        val tranTime = now.format(TIME_FORMATTER)
-        val amountText = format(amount, sourceScale)
-
-        val newSource = sourceBalance - amount
-        balances[source.fintechUseNum] = newSource
-        prepend(
-            source.fintechUseNum,
-            TransactionRecord(
-                tranDate = tranDate,
-                tranTime = tranTime,
-                direction = TransactionDirection.WITHDRAWAL,
-                printContent = command.wdPrintContent ?: command.recvName,
-                tranAmt = amountText,
-                afterBalanceAmt = format(newSource, sourceScale),
-                counterpartyName = command.recvName,
-            ),
-        )
-
-        if (recipient != null) {
-            val recipientScale = scaleOf(recipient.fintechUseNum)
-            val newRecipient = balances.getValue(recipient.fintechUseNum) + amount
-            balances[recipient.fintechUseNum] = newRecipient
-            prepend(
-                recipient.fintechUseNum,
-                TransactionRecord(
-                    tranDate = tranDate,
-                    tranTime = tranTime,
-                    direction = TransactionDirection.DEPOSIT,
-                    printContent = command.dpsPrintContent ?: command.reqName,
-                    tranAmt = format(amount, recipientScale),
-                    afterBalanceAmt = format(newRecipient, recipientScale),
-                    counterpartyName = command.reqName,
+        if (balances.getValue(source.fintechUseNum) < amount) {
+            return WithdrawPlan.Reject(
+                WithdrawResult.InsufficientFunds(
+                    balance = formatBalance(source.fintechUseNum),
+                    attempted = format(amount, scaleOf(source.fintechUseNum)),
                 ),
             )
         }
 
-        WithdrawResult.Success(
+        val recipient = internalRecipientFor(command)
+        if (recipient != null && recipient.currencyCode != source.currencyCode) {
+            return WithdrawPlan.Reject(WithdrawResult.CurrencyMismatch(source.currencyCode, recipient.currencyCode))
+        }
+        return WithdrawPlan.Approved(source, amount, recipient)
+    }
+
+    /** 검증 통과분에 복식부기를 적용한다 — 출금계좌 차감, 내부 수취면 같은 시각으로 입금까지(외부면 차감만). */
+    private fun applyTransfer(plan: WithdrawPlan.Approved, command: WithdrawCommand): WithdrawResult.Success {
+        val (source, amount, recipient) = plan
+        val now = clock()
+        val afterSource = post(
+            fintechUseNum = source.fintechUseNum,
+            direction = TransactionDirection.WITHDRAWAL,
+            amount = amount,
+            printContent = command.wdPrintContent ?: command.recvName,
+            counterpartyName = command.recvName,
+            at = now,
+        )
+        if (recipient != null) {
+            post(
+                fintechUseNum = recipient.fintechUseNum,
+                direction = TransactionDirection.DEPOSIT,
+                amount = amount,
+                printContent = command.dpsPrintContent ?: command.reqName,
+                counterpartyName = command.reqName,
+                at = now,
+            )
+        }
+        return successFor(source, amount, afterSource)
+    }
+
+    private fun successFor(source: SeedAccount, amount: BigDecimal, afterBalance: BigDecimal): WithdrawResult.Success {
+        val scale = scaleOf(source.fintechUseNum)
+        return WithdrawResult.Success(
             fintechUseNum = source.fintechUseNum,
             bankCodeStd = source.bankCodeStd,
             accountNumMasked = source.accountNumMasked,
             accountHolderName = source.accountHolderName,
-            tranAmt = amountText,
-            afterBalanceAmt = format(newSource, sourceScale),
+            tranAmt = format(amount, scale),
+            afterBalanceAmt = format(afterBalance, scale),
         )
     }
 
-    private fun prepend(fintechUseNum: String, record: TransactionRecord) {
-        ledger.getValue(fintechUseNum).add(0, record)
+    /** [planWithdrawal]의 판정 결과 — 거절(이유 포함)이거나, 실행에 필요한 입력을 묶은 승인. */
+    private sealed interface WithdrawPlan {
+        data class Reject(val result: WithdrawResult) : WithdrawPlan
+        data class Approved(
+            val source: SeedAccount,
+            val amount: BigDecimal,
+            val recipient: SeedAccount?,
+        ) : WithdrawPlan
+    }
+
+    /**
+     * 수취계좌가 내 시드에 있으면 그 계좌(내부 이체 → 복식부기 대상), 외부면 null.
+     * 앱은 list_finuse에서 마스킹 번호만 받으므로 내 계좌→내 계좌 송금 시 마스킹 번호로 온다.
+     * 전체/마스킹 번호 둘 다로 매칭한다("*"가 있어 외부 전체번호 입력과 충돌하지 않음).
+     */
+    private fun internalRecipientFor(command: WithdrawCommand): SeedAccount? =
+        seed.firstOrNull {
+            (it.accountNum == command.recvAccountNum || it.accountNumMasked == command.recvAccountNum) &&
+                it.bankCodeStd == command.recvBankCode
+        }
+
+    /**
+     * 한 계좌에 입출 1건을 적용한다 — 잔액을 [direction]대로 갱신하고 원장 맨 앞에 레코드를 얹은 뒤,
+     * 갱신된 잔액을 돌려준다. 호출자가 이미 [lock]을 쥔 단일 임계구역([withdraw]) 안에서만 부른다.
+     */
+    private fun post(
+        fintechUseNum: String,
+        direction: TransactionDirection,
+        amount: BigDecimal,
+        printContent: String,
+        counterpartyName: String?,
+        at: LocalDateTime,
+    ): BigDecimal {
+        val scale = scaleOf(fintechUseNum)
+        val newBalance = when (direction) {
+            TransactionDirection.WITHDRAWAL -> balances.getValue(fintechUseNum) - amount
+            TransactionDirection.DEPOSIT -> balances.getValue(fintechUseNum) + amount
+        }
+        balances[fintechUseNum] = newBalance
+        ledger.getValue(fintechUseNum).add(
+            0,
+            TransactionRecord(
+                tranDate = at.format(DATE_FORMATTER),
+                tranTime = at.format(TIME_FORMATTER),
+                direction = direction,
+                printContent = printContent,
+                tranAmt = format(amount, scale),
+                afterBalanceAmt = format(newBalance, scale),
+                counterpartyName = counterpartyName,
+            ),
+        )
+        return newBalance
     }
 
     private fun scaleOf(fintechUseNum: String): Int = scales.getValue(fintechUseNum)
