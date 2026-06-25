@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.study.bank.core.ui.mvi.MviStore
 import com.study.bank.domain.coroutine.DispatcherProvider
+import com.study.bank.domain.coroutine.cancellableCatching
 import com.study.bank.domain.model.BankCode
 import com.study.bank.domain.model.account.AccountId
 import com.study.bank.domain.model.account.AccountNumber
@@ -104,7 +105,7 @@ class AccountInputViewModel @Inject constructor(
     /** (계좌번호, 은행)으로 실명조회를 돌려 결과를 내부 액션으로 되돌린다. 입력값은 호출 시점 스냅샷. */
     private fun resolve(accountNumber: String, bank: BankCode) {
         viewModelScope.launch {
-            runCatching {
+            cancellableCatching {
                 validateRecipient(
                     fromAccountId = sourceAccountId,
                     toAccountNumber = AccountNumber(accountNumber),

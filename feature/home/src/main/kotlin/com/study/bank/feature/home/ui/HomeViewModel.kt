@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.study.bank.core.ui.mapper.MoneyUiMapper
 import com.study.bank.core.ui.mvi.MviStore
 import com.study.bank.domain.coroutine.DispatcherProvider
+import com.study.bank.domain.coroutine.cancellableCatching
 import com.study.bank.domain.model.Currency
 import com.study.bank.domain.repository.AccountRepository
 import com.study.bank.domain.usecase.account.TotalAssetsUseCase
@@ -85,7 +86,7 @@ class HomeViewModel @Inject constructor(
 
     private fun startRefresh() {
         viewModelScope.launch {
-            val error = runCatching { accountRepository.refresh() }
+            val error = cancellableCatching { accountRepository.refresh() }
                 .exceptionOrNull()
                 ?.also { Log.e(TAG, "refresh failed", it) }
             store.sendIntent(HomeInternalAction.RefreshFinished(error))

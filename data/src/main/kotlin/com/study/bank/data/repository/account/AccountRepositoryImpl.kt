@@ -3,6 +3,7 @@ package com.study.bank.data.repository.account
 import android.util.Log
 import com.study.bank.data.local.dao.AccountDao
 import com.study.bank.data.remote.kftc.api.KftcApiService
+import com.study.bank.domain.coroutine.cancellableCatching
 import com.study.bank.domain.model.account.Account
 import com.study.bank.domain.model.account.AccountId
 import com.study.bank.domain.repository.AccountRepository
@@ -46,7 +47,7 @@ class AccountRepositoryImpl @Inject constructor(
         return coroutineScope {
             listResponse.resList.map { item ->
                 async {
-                    runCatching {
+                    cancellableCatching {
                         val balance = api.getAccountBalance(
                             bankTranId = bankTranIdFor(item.fintechUseNum),
                             fintechUseNum = item.fintechUseNum,

@@ -2,6 +2,7 @@ package com.study.bank.data.repository.fx
 
 import android.util.Log
 import com.study.bank.data.remote.fx.api.KeximApiService
+import com.study.bank.domain.coroutine.cancellableCatching
 import com.study.bank.domain.model.Currency
 import com.study.bank.domain.repository.FxRateRepository
 import java.math.BigDecimal
@@ -31,7 +32,7 @@ class FxRateRepositoryImpl @Inject constructor(
     private suspend fun fetchRates(target: Currency): Map<Currency, BigDecimal> {
         var date = LocalDate.now(clock).minusDays(1)
         repeat(MAX_WALKBACK) {
-            val items = runCatching { keximApi.getRates(date) }
+            val items = cancellableCatching { keximApi.getRates(date) }
                 .onFailure { Log.w(TAG, "KEXIM call failed for $date", it) }
                 .getOrNull()
                 .orEmpty()

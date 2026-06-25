@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.study.bank.core.ui.mvi.MviStore
 import com.study.bank.domain.coroutine.DispatcherProvider
+import com.study.bank.domain.coroutine.cancellableCatching
 import com.study.bank.domain.model.BankCode
 import com.study.bank.domain.model.Money
 import com.study.bank.domain.model.account.AccountId
@@ -125,7 +126,7 @@ class ResultViewModel @Inject constructor(
                 memo = null,
                 idempotencyKey = idempotencyKey,
             )
-            val outcome = runCatching { executeTransfer(request) }
+            val outcome = cancellableCatching { executeTransfer(request) }
                 .getOrElse { error ->
                     Log.e(TAG, "송금 실행 중 예외", error)
                     TransferOutcome.Failure.Unknown(error)
