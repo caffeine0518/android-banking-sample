@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.study.bank.core.ui.mvi.MviStore
 import com.study.bank.domain.coroutine.DispatcherProvider
+import com.study.bank.domain.coroutine.cancellableCatching
 import com.study.bank.domain.model.account.AccountId
 import com.study.bank.domain.repository.AccountRepository
 import com.study.bank.domain.repository.TransactionRepository
@@ -89,7 +90,7 @@ class AccountDetailViewModel @Inject constructor(
 
     private fun startRefresh() {
         viewModelScope.launch {
-            val error = runCatching {
+            val error = cancellableCatching {
                 accountRepository.refresh()
                 transactionRepository.refresh(accountId)
             }.exceptionOrNull()?.also { Log.e(TAG, "refresh failed", it) }

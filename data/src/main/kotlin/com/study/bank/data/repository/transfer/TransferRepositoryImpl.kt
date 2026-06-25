@@ -3,6 +3,7 @@ package com.study.bank.data.repository.transfer
 import android.util.Log
 import com.study.bank.data.remote.kftc.api.KftcApiService
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
+import com.study.bank.domain.coroutine.cancellableCatching
 import com.study.bank.domain.model.Money
 import com.study.bank.domain.model.transaction.TransactionId
 import com.study.bank.domain.model.transaction.TransactionStatus
@@ -54,7 +55,7 @@ class TransferRepositoryImpl @Inject constructor(
             )
 
         // KFTC mock 상태가 변했으니 SSOT(Room)를 재동기화. 실패해도 이체 성공은 유지(best-effort).
-        runCatching {
+        cancellableCatching {
             accountRepository.refresh()
             transactionRepository.refresh(request.fromAccountId)
         }.onFailure { Log.w(TAG, "이체 후 SSOT 갱신 실패", it) }
