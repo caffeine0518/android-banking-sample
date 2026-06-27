@@ -25,6 +25,10 @@ enum class Currency(val code: String, val exponent: Int) {
 
         fun byCode(code: String): Currency? = entries.firstOrNull { it.code == code }
 
+        /** [code]가 우리가 저장/응답한 값이라 반드시 지원돼야 할 때. 미지원이면 스키마-코드 불일치이므로 fail-fast. */
+        fun requireByCode(code: String): Currency =
+            requireNotNull(byCode(code)) { "Unsupported currency: $code" }
+
         /** [code]가 null이거나 미지원이면 [DEFAULT]로 폴백. */
         fun byCodeOrDefault(code: String?): Currency = code?.let(::byCode) ?: DEFAULT
     }
