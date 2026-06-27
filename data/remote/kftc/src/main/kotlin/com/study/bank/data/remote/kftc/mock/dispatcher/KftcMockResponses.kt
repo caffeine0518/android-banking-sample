@@ -46,8 +46,26 @@ internal class KftcMockResponses(
     fun balanceFinNum(account: SeedAccount): MockResponse =
         success(account.toBalanceResponse(newApiTranId(), nowDtm(), newBankTranId()))
 
-    fun transactionList(account: SeedAccount, records: List<TransactionRecord>): MockResponse =
-        success(records.toTransactionListResponse(account, newApiTranId(), nowDtm(), newBankTranId()))
+    /**
+     * 거래내역 한 페이지. [hasNext]를 next_page_yn("Y"/"N")으로, [nextCursor]를 befor_inquiry_trace_info로 실어
+     * 클라(RemoteMediator)가 연속조회를 이어가게 한다. 마지막 페이지면 hasNext=false·nextCursor="".
+     */
+    fun transactionList(
+        account: SeedAccount,
+        records: List<TransactionRecord>,
+        hasNext: Boolean,
+        nextCursor: String,
+    ): MockResponse =
+        success(
+            records.toTransactionListResponse(
+                account = account,
+                apiTranId = newApiTranId(),
+                apiTranDtm = nowDtm(),
+                bankTranId = newBankTranId(),
+                nextPageYn = if (hasNext) "Y" else "N",
+                beforInquiryTraceInfo = nextCursor,
+            ),
+        )
 
     fun withdrawSuccess(result: WithdrawResult.Success): MockResponse =
         success(result.toResponse(newApiTranId(), nowDtm(), newBankTranId(), nowDate()))

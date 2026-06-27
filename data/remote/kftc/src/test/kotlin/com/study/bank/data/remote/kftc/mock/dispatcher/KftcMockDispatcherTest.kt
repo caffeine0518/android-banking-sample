@@ -173,12 +173,13 @@ class KftcMockDispatcherTest {
     // --- transaction_list / withdraw 라우팅 ---
 
     @Test
-    fun `transaction_list는 200과 envelope + 초기 빈 res_list를 돌려준다`() {
-        val (code, body) = get("/v2.0/account/transaction_list/fin_num?fintech_use_num=$SALARY")
+    fun `transaction_list는 200과 envelope + 시드 없는 계좌는 빈 res_list를 돌려준다`() {
+        // 월급통장은 시드 히스토리가 있으므로, 라우팅+빈 결과 검증은 시드 없는 신한 계좌로 한다.
+        val (code, body) = get("/v2.0/account/transaction_list/fin_num?fintech_use_num=$SHINHAN")
 
         assertEquals(200, code)
         assertEnvelope(body, rspCode = "A0000")
-        assertTrue("초기 거래내역 0건: $body", body.contains(""""res_cnt":"0""""))
+        assertTrue("거래내역 0건: $body", body.contains(""""res_cnt":"0""""))
         assertTrue("빈 res_list: $body", body.contains(""""res_list":[]"""))
     }
 
@@ -359,6 +360,7 @@ class KftcMockDispatcherTest {
 
         const val SALARY = KftcSeedAccountIds.PAYROLL_KRW
         const val SAFEBOX = KftcSeedAccountIds.SAFEBOX_KRW
+        const val SHINHAN = KftcSeedAccountIds.SHINHAN_KRW
         const val SAFEBOX_NUM = "1000-55-1114443"
     }
 }

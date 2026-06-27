@@ -33,8 +33,10 @@ internal class KftcMockDispatcher(
         return when (url.encodedPath) {
             PATH_LIST_FINUSE -> accountHandler.list()
             PATH_BALANCE_FIN_NUM -> accountHandler.balance(url.queryParameter(QUERY_FINTECH_USE_NUM))
-            PATH_TRANSACTION_LIST_FIN_NUM ->
-                accountHandler.transactionList(url.queryParameter(QUERY_FINTECH_USE_NUM))
+            PATH_TRANSACTION_LIST_FIN_NUM -> accountHandler.transactionList(
+                fintechUseNum = url.queryParameter(QUERY_FINTECH_USE_NUM),
+                beforInquiryTraceInfo = url.queryParameter(QUERY_BEFOR_INQUIRY_TRACE_INFO),
+            )
             // peek()로 본문을 복사 읽어 takeRequest()의 RecordedRequest body를 소비하지 않는다.
             PATH_TRANSFER_WITHDRAW_FIN_NUM -> transferHandler.withdraw(request.body.peek().readUtf8())
             PATH_INQUIRY_REAL_NAME -> inquiryHandler.realName(request.body.peek().readUtf8())

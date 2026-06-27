@@ -4,6 +4,7 @@ import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryRequest
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
 import com.study.bank.data.remote.kftc.mock.KftcMockServer
 import com.study.bank.data.remote.kftc.mock.KftcSeedAccountIds
+import com.study.bank.data.remote.kftc.mock.KftcTransactionSeed
 import com.study.bank.data.remote.kftc.network.NetworkJson
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
@@ -166,19 +167,97 @@ class KftcApiServiceTest {
     // --- 거래내역 조회 / 출금이체 E2E ---
 
     @Test
-    fun `transaction_list는 초기엔 빈 res_list와 현재 잔액을 돌려준다`() = runTest {
+    fun `시드 거래내역이 없는 계좌는 빈 res_list와 next_page_yn=N을 돌려준다`() = runTest {
+        // 신한 계좌는 시드 히스토리가 없다(세션 이체도 안 함) → 첫 페이지가 곧 빈 결과.
         val response = api.getTransactionList(
             bankTranId = "M202300001U000010",
-            fintechUseNum = SALARY,
-            fromDate = "20260601",
-            toDate = "20260618",
+            fintechUseNum = SHINHAN,
+            fromDate = "20260101",
+            toDate = "20261231",
             tranDtime = "20260618103000",
         )
 
         assertEquals("A0000", response.rspCode)
         assertEquals("0", response.resCnt)
         assertTrue(response.resList.isEmpty())
-        assertEquals("2847320", response.balanceAmt)
+        assertEquals("N", response.nextPageYn)
+        assertEquals("450000", response.balanceAmt)
+    }
+
+    @Test
+    fun `월급통장 첫 페이지는 서버 페이지 크기만큼 주고 next_page_yn=Y와 다음 커서를 준다`() = runTest {
+        val first = api.getTransactionList(
+            bankTranId = "M202300001U000020",
+            fintechUseNum = SALARY,
+            fromDate = "20260101",
+            toDate = "20261231",
+            tranDtime = "20260618103000",
+            // 첫 페이지는 커서 미전송(null).
+        )
+
+        assertEquals("A0000", first.rspCode)
+        assertEquals(KFTC_TRANSACTION_PAGE_SIZE, first.resList.size)
+        assertEquals("Y", first.nextPageYn)
+        assertTrue("다음 커서가 있어야 한다", first.beforInquiryTraceInfo.isNotEmpty())
+        // 명세서 최신순 → 첫 거래의 잔액은 현재 잔액.
+        assertEquals("2847320", first.resList.first().afterBalanceAmt)
+    }
+
+    @Test
+    fun `커서로 연속조회하면 끝까지 시드 전체를 겹침 없이 받고 마지막은 next_page_yn=N`() = runTest {
+        var cursor: String? = null
+        var pageCount = 0
+        val collected = mutableListOf<com.study.bank.data.remote.kftc.dto.transaction.TransactionItemDto>()
+
+        do {
+            val page = api.getTransactionList(
+                bankTranId = "M202300001U%06d".format(pageCount),
+                fintechUseNum = SALARY,
+                fromDate = "20260101",
+                toDate = "20261231",
+                tranDtime = "20260618103000",
+                beforInquiryTraceInfo = cursor,
+            )
+            collected += page.resList
+            cursor = if (page.nextPageYn == "Y") page.beforInquiryTraceInfo else null
+            pageCount++
+        } while (cursor != null && pageCount < 1_000)
+
+        // 전체 시드 건수를 빠짐없이, 중복 없이 받았다.
+        assertEquals(KftcTransactionSeed.HISTORY_COUNT, collected.size)
+        assertEquals(KftcTransactionSeed.HISTORY_COUNT, collected.distinct().size)
+        // ceil(전체 / 페이지) — 비배수여도 맞도록(현재 1200/20=60이지만 가정에 의존하지 않게).
+        val expectedPages = (KftcTransactionSeed.HISTORY_COUNT + KFTC_TRANSACTION_PAGE_SIZE - 1) / KFTC_TRANSACTION_PAGE_SIZE
+        assertEquals(expectedPages, pageCount)
+    }
+
+    @Test
+    fun `연속조회 도중 새 거래가 명세서 머리에 끼어도 페이지 경계가 밀리지 않는다`() = runTest {
+        // 키셋 커서 회귀 보호: 오프셋 커서였다면 새 거래가 모든 오프셋을 +1 밀어 경계행이 1·2페이지에 중복된다.
+        val first = api.getTransactionList(
+            bankTranId = "M202300001U000030",
+            fintechUseNum = SALARY,
+            fromDate = "20260101",
+            toDate = "20261231",
+            tranDtime = "20260618103000",
+        )
+
+        // 페이지 도중 월급통장에 새 이체 발생 → ledger.add(0, …)로 명세서 맨 앞에 끼어든다.
+        api.withdraw(externalRequest(from = SALARY, amount = "1000"))
+
+        val second = api.getTransactionList(
+            bankTranId = "M202300001U000031",
+            fintechUseNum = SALARY,
+            fromDate = "20260101",
+            toDate = "20261231",
+            tranDtime = "20260618103000",
+            beforInquiryTraceInfo = first.beforInquiryTraceInfo,
+        )
+
+        val firstKeys = first.resList.map { it.tranDate + it.tranTime }.toSet()
+        val secondKeys = second.resList.map { it.tranDate + it.tranTime }
+        assertEquals(KFTC_TRANSACTION_PAGE_SIZE, second.resList.size)
+        assertTrue("1·2페이지가 겹치면 안 된다", secondKeys.none { it in firstKeys })
     }
 
     @Test
@@ -305,6 +384,7 @@ class KftcApiServiceTest {
     private companion object {
         const val SALARY = KftcSeedAccountIds.PAYROLL_KRW
         const val SAFEBOX = KftcSeedAccountIds.SAFEBOX_KRW
+        const val SHINHAN = KftcSeedAccountIds.SHINHAN_KRW
         const val SAFEBOX_NUM = "1000-55-1114443"
     }
 }

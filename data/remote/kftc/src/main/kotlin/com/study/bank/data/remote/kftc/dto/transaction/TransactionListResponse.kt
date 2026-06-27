@@ -20,4 +20,6 @@ data class TransactionListResponse(
     @SerialName("currency_code") val currencyCode: String,
     @SerialName("res_cnt") val resCnt: String,
     @SerialName("res_list") val resList: List<TransactionItemDto>,
+    @SerialName("next_page_yn") val nextPageYn: String = "N",
+    @SerialName("befor_inquiry_trace_info") val beforInquiryTraceInfo: String = "",
 )
