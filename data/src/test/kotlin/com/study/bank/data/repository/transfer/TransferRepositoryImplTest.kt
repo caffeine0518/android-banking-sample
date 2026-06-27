@@ -1,11 +1,7 @@
 package com.study.bank.data.repository.transfer
 
 import com.study.bank.data.remote.kftc.api.KftcApiService
-import com.study.bank.data.remote.kftc.dto.account.AccountBalanceResponse
-import com.study.bank.data.remote.kftc.dto.account.AccountListResponse
-import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryRequest
-import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryResponse
-import com.study.bank.data.remote.kftc.dto.transaction.TransactionListResponse
+import com.study.bank.data.repository.NoopKftcApiService
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferResponse
 import com.study.bank.domain.model.Currency
@@ -13,6 +9,7 @@ import com.study.bank.domain.model.Money
 import com.study.bank.domain.model.account.Account
 import com.study.bank.domain.model.account.AccountId
 import com.study.bank.domain.model.account.AccountNumber
+import androidx.paging.PagingData
 import com.study.bank.domain.model.BankCode
 import com.study.bank.domain.model.transaction.Transaction
 import com.study.bank.domain.model.transaction.TransactionStatus
@@ -181,11 +178,12 @@ class TransferRepositoryImplTest {
         override suspend fun refresh(accountId: AccountId) {
             refreshedAccounts += accountId
         }
+        override fun transactionStream(accountId: AccountId): Flow<PagingData<Transaction>> = emptyFlow()
     }
 
     private class FakeKftcApiService(
         private val onWithdraw: () -> WithdrawTransferResponse,
-    ) : KftcApiService {
+    ) : KftcApiService by NoopKftcApiService {
         var lastWithdraw: WithdrawTransferRequest? = null
             private set
 
@@ -193,22 +191,5 @@ class TransferRepositoryImplTest {
             lastWithdraw = request
             return onWithdraw()
         }
-
-        override suspend fun getAccountList(userSeqNo: String, includeCancelYn: String, sortOrder: String): AccountListResponse =
-            error("unused")
-        override suspend fun getAccountBalance(bankTranId: String, fintechUseNum: String, tranDtime: String): AccountBalanceResponse =
-            error("unused")
-        override suspend fun getTransactionList(
-            bankTranId: String,
-            fintechUseNum: String,
-            fromDate: String,
-            toDate: String,
-            tranDtime: String,
-            inquiryType: String,
-            inquiryBase: String,
-            sortOrder: String,
-        ): TransactionListResponse = error("unused")
-        override suspend fun inquireRealName(request: RealNameInquiryRequest): RealNameInquiryResponse =
-            error("unused")
     }
 }

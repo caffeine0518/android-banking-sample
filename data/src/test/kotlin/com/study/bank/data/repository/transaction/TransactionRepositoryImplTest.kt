@@ -1,16 +1,12 @@
 package com.study.bank.data.repository.transaction
 
+import androidx.paging.PagingSource
 import com.study.bank.data.local.dao.TransactionDao
 import com.study.bank.data.local.entity.TransactionEntity
 import com.study.bank.data.remote.kftc.api.KftcApiService
-import com.study.bank.data.remote.kftc.dto.account.AccountBalanceResponse
-import com.study.bank.data.remote.kftc.dto.account.AccountListResponse
 import com.study.bank.data.remote.kftc.dto.transaction.TransactionItemDto
 import com.study.bank.data.remote.kftc.dto.transaction.TransactionListResponse
-import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryRequest
-import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryResponse
-import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
-import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferResponse
+import com.study.bank.data.repository.NoopKftcApiService
 import com.study.bank.domain.model.Currency
 import com.study.bank.domain.model.account.AccountId
 import com.study.bank.domain.model.transaction.TransactionType
@@ -211,8 +207,12 @@ class TransactionRepositoryImplTest {
         override fun observeByAccountId(accountId: String): Flow<List<TransactionEntity>> =
             source.map { all ->
                 all.filter { it.accountId == accountId }
-                    .sortedWith(compareByDescending<TransactionEntity> { it.occurredAt }.thenBy { it.id })
+                    // 실 DAO와 동일: occurred_at DESC, id DESC(같은 초는 seq 내장 id로 최신-먼저).
+                    .sortedWith(compareByDescending<TransactionEntity> { it.occurredAt }.thenByDescending { it.id })
             }
+
+        // 페이징(transactionStream)은 RemoteMediator 테스트에서 별도로 본다. 이 테스트는 observe/refresh만 다룬다.
+        override fun pagingSource(accountId: String): PagingSource<Int, TransactionEntity> = error("unused")
 
         override suspend fun insertAll(entities: List<TransactionEntity>) {
             val incoming = entities.map { it.id }.toSet()
@@ -226,7 +226,7 @@ class TransactionRepositoryImplTest {
 
     private class FakeKftcApiService(
         private val responses: Map<String, TransactionListResponse>,
-    ) : KftcApiService by UnusedKftcApiService {
+    ) : KftcApiService by NoopKftcApiService {
         override suspend fun getTransactionList(
             bankTranId: String,
             fintechUseNum: String,
@@ -236,12 +236,13 @@ class TransactionRepositoryImplTest {
             inquiryType: String,
             inquiryBase: String,
             sortOrder: String,
+            beforInquiryTraceInfo: String?,
         ): TransactionListResponse = responses[fintechUseNum] ?: error("no stub for $fintechUseNum")
     }
 
     private class SequencedKftcApiService(
         private val sequence: MutableList<TransactionListResponse>,
-    ) : KftcApiService by UnusedKftcApiService {
+    ) : KftcApiService by NoopKftcApiService {
         override suspend fun getTransactionList(
             bankTranId: String,
             fintechUseNum: String,
@@ -251,28 +252,7 @@ class TransactionRepositoryImplTest {
             inquiryType: String,
             inquiryBase: String,
             sortOrder: String,
+            beforInquiryTraceInfo: String?,
         ): TransactionListResponse = sequence.removeAt(0)
-    }
-
-    /** 본 테스트가 쓰지 않는 엔드포인트는 호출되면 실패하도록. */
-    private object UnusedKftcApiService : KftcApiService {
-        override suspend fun getAccountList(userSeqNo: String, includeCancelYn: String, sortOrder: String): AccountListResponse =
-            error("unused")
-        override suspend fun getAccountBalance(bankTranId: String, fintechUseNum: String, tranDtime: String): AccountBalanceResponse =
-            error("unused")
-        override suspend fun getTransactionList(
-            bankTranId: String,
-            fintechUseNum: String,
-            fromDate: String,
-            toDate: String,
-            tranDtime: String,
-            inquiryType: String,
-            inquiryBase: String,
-            sortOrder: String,
-        ): TransactionListResponse = error("unused")
-        override suspend fun withdraw(request: WithdrawTransferRequest): WithdrawTransferResponse =
-            error("unused")
-        override suspend fun inquireRealName(request: RealNameInquiryRequest): RealNameInquiryResponse =
-            error("unused")
     }
 }

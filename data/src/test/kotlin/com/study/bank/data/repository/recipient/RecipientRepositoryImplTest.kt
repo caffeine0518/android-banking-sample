@@ -1,13 +1,9 @@
 package com.study.bank.data.repository.recipient
 
 import com.study.bank.data.remote.kftc.api.KftcApiService
-import com.study.bank.data.remote.kftc.dto.account.AccountBalanceResponse
-import com.study.bank.data.remote.kftc.dto.account.AccountListResponse
 import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryRequest
 import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryResponse
-import com.study.bank.data.remote.kftc.dto.transaction.TransactionListResponse
-import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
-import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferResponse
+import com.study.bank.data.repository.NoopKftcApiService
 import com.study.bank.domain.model.BankCode
 import com.study.bank.domain.model.account.AccountId
 import com.study.bank.domain.model.account.AccountNumber
@@ -77,7 +73,7 @@ class RecipientRepositoryImplTest {
 
     private class FakeKftcApiService(
         private val response: RealNameInquiryResponse,
-    ) : KftcApiService by UnusedKftcApiService {
+    ) : KftcApiService by NoopKftcApiService {
         var lastRequest: RealNameInquiryRequest? = null
             private set
 
@@ -85,27 +81,5 @@ class RecipientRepositoryImplTest {
             lastRequest = request
             return response
         }
-    }
-
-    /** 본 테스트가 쓰지 않는 엔드포인트는 호출되면 실패하도록. */
-    private object UnusedKftcApiService : KftcApiService {
-        override suspend fun getAccountList(userSeqNo: String, includeCancelYn: String, sortOrder: String): AccountListResponse =
-            error("unused")
-        override suspend fun getAccountBalance(bankTranId: String, fintechUseNum: String, tranDtime: String): AccountBalanceResponse =
-            error("unused")
-        override suspend fun getTransactionList(
-            bankTranId: String,
-            fintechUseNum: String,
-            fromDate: String,
-            toDate: String,
-            tranDtime: String,
-            inquiryType: String,
-            inquiryBase: String,
-            sortOrder: String,
-        ): TransactionListResponse = error("unused")
-        override suspend fun withdraw(request: WithdrawTransferRequest): WithdrawTransferResponse =
-            error("unused")
-        override suspend fun inquireRealName(request: RealNameInquiryRequest): RealNameInquiryResponse =
-            error("unused")
     }
 }

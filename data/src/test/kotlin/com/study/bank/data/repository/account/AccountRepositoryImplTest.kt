@@ -7,11 +7,7 @@ import com.study.bank.data.remote.kftc.api.KftcApiService
 import com.study.bank.data.remote.kftc.dto.account.AccountBalanceResponse
 import com.study.bank.data.remote.kftc.dto.account.AccountListResponse
 import com.study.bank.data.remote.kftc.dto.account.FintechAccountDto
-import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryRequest
-import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryResponse
-import com.study.bank.data.remote.kftc.dto.transaction.TransactionListResponse
-import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
-import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferResponse
+import com.study.bank.data.repository.NoopKftcApiService
 import com.study.bank.domain.model.account.AccountId
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -207,7 +203,7 @@ class AccountRepositoryImplTest {
 
     private class FakeKftcApiService(
         initialSeeds: List<Seed>,
-    ) : KftcApiService {
+    ) : KftcApiService by NoopKftcApiService {
 
         private var seeds: List<Seed> = initialSeeds
         var listCallCount: Int = 0
@@ -259,24 +255,6 @@ class AccountRepositoryImplTest {
                 currencyCode = seed.currencyCode,
             )
         }
-
-        // 이 테스트가 쓰지 않는 엔드포인트(KftcApiService 계약 충족용).
-        override suspend fun getTransactionList(
-            bankTranId: String,
-            fintechUseNum: String,
-            fromDate: String,
-            toDate: String,
-            tranDtime: String,
-            inquiryType: String,
-            inquiryBase: String,
-            sortOrder: String,
-        ): TransactionListResponse = error("이 테스트는 거래내역 엔드포인트를 쓰지 않는다")
-
-        override suspend fun withdraw(request: WithdrawTransferRequest): WithdrawTransferResponse =
-            error("이 테스트는 출금이체 엔드포인트를 쓰지 않는다")
-
-        override suspend fun inquireRealName(request: RealNameInquiryRequest): RealNameInquiryResponse =
-            error("이 테스트는 계좌실명조회 엔드포인트를 쓰지 않는다")
 
         private fun Seed.toFintechDto() = FintechAccountDto(
             fintechUseNum = fintechUseNum,
