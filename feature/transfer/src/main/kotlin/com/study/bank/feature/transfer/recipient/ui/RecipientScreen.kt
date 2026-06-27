@@ -32,6 +32,7 @@ import com.study.bank.feature.transfer.recipient.contract.RecipientIntent
 import com.study.bank.feature.transfer.recipient.contract.RecipientState
 import com.study.bank.feature.transfer.recipient.ui.component.MyAccountRow
 import com.study.bank.feature.transfer.recipient.ui.preview.PreviewRecipientState
+import com.study.bank.feature.transfer.recipient.ui.preview.PreviewRecipientStateLongList
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -119,6 +120,17 @@ private fun RecipientScreenPreview() {
     MaterialTheme {
         RecipientScreen(
             state = PreviewRecipientState,
+            onIntent = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 360, heightDp = 720, name = "내 계좌 다건(스크롤)")
+@Composable
+private fun RecipientScreenLongListPreview() {
+    MaterialTheme {
+        RecipientScreen(
+            state = PreviewRecipientStateLongList,
             onIntent = {},
         )
     }
