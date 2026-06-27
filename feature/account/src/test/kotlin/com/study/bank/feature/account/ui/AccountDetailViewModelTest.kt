@@ -2,6 +2,7 @@ package com.study.bank.feature.account.ui
 
 import app.cash.turbine.test
 import androidx.lifecycle.SavedStateHandle
+import androidx.paging.PagingData
 import com.study.bank.core.ui.mapper.MoneyUiMapper
 import com.study.bank.domain.coroutine.DispatcherProvider
 import com.study.bank.domain.model.BankCode
@@ -30,6 +31,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -187,6 +189,8 @@ class AccountDetailViewModelTest {
         override suspend fun refresh(accountId: AccountId) {
             refreshCount++
         }
+        // todo 페이징 스트림 UI 마이그레이션
+        override fun transactionStream(accountId: AccountId): Flow<PagingData<Transaction>> = emptyFlow()
     }
 
     private class TestDispatcherProvider(dispatcher: CoroutineDispatcher) : DispatcherProvider {
