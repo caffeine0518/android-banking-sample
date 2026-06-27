@@ -84,6 +84,7 @@ private fun HomeContent(
     onAccountClick: (String) -> Unit,
 ) {
     LazyColumn(
+        modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
