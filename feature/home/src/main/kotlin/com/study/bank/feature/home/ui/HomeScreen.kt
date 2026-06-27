@@ -89,7 +89,8 @@ private fun HomeContent(
         contentPadding = PaddingValues(bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        item {
+        // contentType: 헤더와 계좌 행은 구조가 달라, 스크롤 시 같은 타입끼리만 재사용되도록 구분한다.
+        item(contentType = "header") {
             TotalBalanceHeader(
                 totalAssets = state.totalAssets,
                 unconvertedAssets = state.unconvertedAssets,
@@ -98,7 +99,7 @@ private fun HomeContent(
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
         }
-        items(state.accounts, key = { it.id }) { account ->
+        items(state.accounts, key = { it.id }, contentType = { "account" }) { account ->
             AccountListItem(
                 account = account,
                 onClick = { onAccountClick(account.id) },
