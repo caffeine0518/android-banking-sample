@@ -32,6 +32,7 @@ import com.study.bank.feature.home.contract.HomeState
 import com.study.bank.feature.home.ui.component.AccountListItem
 import com.study.bank.feature.home.ui.component.TotalBalanceHeader
 import com.study.bank.feature.home.ui.preview.PreviewHomeState
+import com.study.bank.feature.home.ui.preview.PreviewHomeStateLongList
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -113,6 +114,17 @@ private fun HomeScreenPreview() {
     MaterialTheme {
         HomeScreen(
             state = PreviewHomeState,
+            onIntent = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 360, heightDp = 720, name = "계좌 다건(스크롤)")
+@Composable
+private fun HomeScreenLongListPreview() {
+    MaterialTheme {
+        HomeScreen(
+            state = PreviewHomeStateLongList,
             onIntent = {},
         )
     }

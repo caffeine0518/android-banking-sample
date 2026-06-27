@@ -2,6 +2,7 @@ package com.study.bank.feature.account.ui.preview
 
 import com.study.bank.core.ui.model.CurrencyUi
 import com.study.bank.core.ui.model.MoneyUi
+import com.study.bank.core.ui.preview.PREVIEW_LIST_SIZE
 import com.study.bank.feature.account.contract.AccountDetailState
 import com.study.bank.feature.account.ui.model.AccountTypeUi
 import com.study.bank.feature.account.ui.model.AccountUi
@@ -41,4 +42,18 @@ internal val PreviewAccountDetailState = AccountDetailState(
             occurredAtLabel = "2026.06.14",
         ),
     ),
+)
+
+/** LazyColumn 스크롤이 실제로 동작하는지 확인하기 위한 다건 거래내역 프리뷰 상태. */
+internal val PreviewAccountDetailStateLongList = PreviewAccountDetailState.copy(
+    transactions = List(PREVIEW_LIST_SIZE) { index ->
+        val type = TransactionTypeUi.entries[index % TransactionTypeUi.entries.size]
+        TransactionUi(
+            id = "tx-${index + 1}",
+            type = type,
+            counterpartyName = if (type == TransactionTypeUi.WITHDRAWAL) null else "거래상대 ${index + 1}",
+            amount = MoneyUi(BigDecimal((index + 1) * 1_000L), CurrencyUi.KRW),
+            occurredAtLabel = "2026.06.%02d".format((index % 28) + 1),
+        )
+    },
 )

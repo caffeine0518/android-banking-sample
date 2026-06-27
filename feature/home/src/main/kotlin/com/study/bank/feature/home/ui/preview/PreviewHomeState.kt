@@ -2,6 +2,7 @@ package com.study.bank.feature.home.ui.preview
 
 import com.study.bank.core.ui.model.CurrencyUi
 import com.study.bank.core.ui.model.MoneyUi
+import com.study.bank.core.ui.preview.PREVIEW_LIST_SIZE
 import com.study.bank.feature.home.contract.HomeState
 import com.study.bank.feature.home.ui.model.AccountTypeUi
 import com.study.bank.feature.home.ui.model.AccountUi
@@ -58,4 +59,17 @@ internal val PreviewHomeState = HomeState(
         MoneyUi(BigDecimal("128400"), CurrencyUi.JPY),
         MoneyUi(BigDecimal("842.15"), CurrencyUi.EUR),
     ),
+)
+
+/** LazyColumn 스크롤이 실제로 동작하는지 확인하기 위한 다건 계좌 프리뷰 상태. */
+internal val PreviewHomeStateLongList = PreviewHomeState.copy(
+    accounts = List(PREVIEW_LIST_SIZE) { index ->
+        AccountUi(
+            id = "acc-${index + 1}",
+            bankDisplayName = if (index % 4 == 0) "신한은행" else "토스뱅크",
+            type = AccountTypeUi.entries[index % AccountTypeUi.entries.size],
+            nickname = if (index % 3 == 0) null else "통장 ${index + 1}",
+            balance = MoneyUi(BigDecimal((index + 1) * 10_000L), CurrencyUi.KRW),
+        )
+    },
 )

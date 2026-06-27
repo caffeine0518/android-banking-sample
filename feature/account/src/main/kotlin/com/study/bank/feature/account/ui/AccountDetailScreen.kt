@@ -40,6 +40,7 @@ import com.study.bank.feature.account.contract.AccountDetailState
 import com.study.bank.feature.account.ui.component.AccountDetailHeader
 import com.study.bank.feature.account.ui.component.TransactionListItem
 import com.study.bank.feature.account.ui.preview.PreviewAccountDetailState
+import com.study.bank.feature.account.ui.preview.PreviewAccountDetailStateLongList
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -161,6 +162,17 @@ private fun AccountDetailScreenPreview() {
     MaterialTheme {
         AccountDetailScreen(
             state = PreviewAccountDetailState,
+            onIntent = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 360, heightDp = 720, name = "거래내역 다건(스크롤)")
+@Composable
+private fun AccountDetailScreenLongListPreview() {
+    MaterialTheme {
+        AccountDetailScreen(
+            state = PreviewAccountDetailStateLongList,
             onIntent = {},
         )
     }
