@@ -80,6 +80,21 @@ internal val previewTransactionsLong: Flow<PagingData<TransactionUi>> = MutableS
 internal val previewTransactionsEmpty: Flow<PagingData<TransactionUi>> =
     MutableStateFlow(PagingData.from(emptyList()))
 
+/**
+ * 첫 진입 로딩 — refresh가 Loading이고 아이템이 아직 없음. 현재 리스트 영역은 비고 상단 진행바만 표시된다
+ * (리스트 영역 스피너/스켈레톤은 미구현). 이 프리뷰가 그 "로딩 중 빈 리스트"를 드러낸다.
+ */
+internal val previewTransactionsLoading: Flow<PagingData<TransactionUi>> = MutableStateFlow(
+    PagingData.from(
+        emptyList(),
+        sourceLoadStates = LoadStates(
+            refresh = LoadState.Loading,
+            prepend = LoadState.NotLoading(endOfPaginationReached = true),
+            append = LoadState.NotLoading(endOfPaginationReached = true),
+        ),
+    ),
+)
+
 private val previewLoadError = IllegalStateException("미리보기용 에러")
 
 /** 첫 페이지 로드 실패 — 화면 전체 에러+재시도 프리뷰. */

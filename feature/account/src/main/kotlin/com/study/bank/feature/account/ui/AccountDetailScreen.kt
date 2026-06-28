@@ -51,6 +51,7 @@ import com.study.bank.feature.account.ui.preview.previewTransactionsEmpty
 import com.study.bank.feature.account.ui.preview.previewTransactionsError
 import com.study.bank.feature.account.ui.preview.previewTransactionsFooterError
 import com.study.bank.feature.account.ui.preview.previewTransactionsFooterLoading
+import com.study.bank.feature.account.ui.preview.previewTransactionsLoading
 import com.study.bank.feature.account.ui.preview.previewTransactionsLong
 import kotlinx.coroutines.flow.Flow
 
@@ -352,6 +353,18 @@ private fun AccountDetailScreenFooterLoadingPreview() {
         AccountDetailScreen(
             state = PreviewAccountDetailState,
             transactions = previewTransactionsFooterLoading,
+            onIntent = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 360, heightDp = 720, name = "거래내역 초기 로딩")
+@Composable
+private fun AccountDetailScreenLoadingPreview() {
+    MaterialTheme {
+        AccountDetailScreen(
+            state = PreviewAccountDetailState,
+            transactions = previewTransactionsLoading,
             onIntent = {},
         )
     }
