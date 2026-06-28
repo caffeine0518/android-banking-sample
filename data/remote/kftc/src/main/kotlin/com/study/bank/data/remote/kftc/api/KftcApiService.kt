@@ -44,6 +44,7 @@ interface KftcApiService {
         @Query("inquiry_type") inquiryType: String = "A",
         @Query("inquiry_base") inquiryBase: String = "D",
         @Query("sort_order") sortOrder: String = "D",
+        @Query("befor_inquiry_trace_info") beforInquiryTraceInfo: String? = null,
     ): TransactionListResponse
 
     @POST("v2.0/transfer/withdraw/fin_num")

@@ -7,7 +7,8 @@ android {
 }
 
 dependencies {
-    // 공통 feature 스택(mvi/model/mapper + Compose/Lifecycle/Navigation + Hilt + Robolectric 테스트)은
-    // bank.android.feature convention plugin이 제공. 아래는 이 모듈 고유 의존성.
     implementation(libs.androidx.compose.material.icons.core)
+    implementation(libs.androidx.paging.common)
+    implementation(libs.androidx.paging.compose)
+    testImplementation(libs.androidx.paging.testing)
 }

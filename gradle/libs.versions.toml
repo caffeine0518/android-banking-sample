@@ -21,6 +21,7 @@ retrofitKotlinxSerialization = "1.0.0"
 javaxInject = "1"
 hiltNavigationCompose = "1.2.0"
 room = "2.7.1"
+paging = "3.3.6"
 turbine = "1.2.1"
 robolectric = "4.14.1"
 roborazzi = "1.64.0"
@@ -63,6 +64,14 @@ androidx-room-runtime = { group = "androidx.room", name = "room-runtime", versio
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 androidx-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
+# Room ↔ Paging3 통합: DAO가 PagingSource<Int, Entity>를 노출(가이드의 DB=SSOT, RemoteMediator가 네트워크 적재).
+androidx-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "room" }
+# Paging 3 코어 — Android UI 비의존(순수 Kotlin/JVM). 도메인/데이터가 PagingData·Pager·PagingSource를 공유한다.
+androidx-paging-common = { group = "androidx.paging", name = "paging-common", version.ref = "paging" }
+# Compose 연동: collectAsLazyPagingItems / LazyPagingItems. feature UI가 페이징 목록을 그린다.
+androidx-paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
+# 페이징 Flow 단위 테스트: asSnapshot으로 PagingData를 재료화.
+androidx-paging-testing = { group = "androidx.paging", name = "paging-testing", version.ref = "paging" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 roborazzi = { group = "io.github.takahirom.roborazzi", name = "roborazzi", version.ref = "roborazzi" }

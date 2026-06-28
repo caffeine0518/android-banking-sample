@@ -4,7 +4,11 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.map
 import com.study.bank.core.ui.mvi.MviStore
+import com.study.bank.feature.account.ui.model.TransactionUi
 import com.study.bank.domain.coroutine.DispatcherProvider
 import com.study.bank.domain.coroutine.cancellableCatching
 import com.study.bank.domain.model.account.AccountId
@@ -23,6 +27,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -64,10 +69,6 @@ class AccountDetailViewModel @Inject constructor(
                 setState { copy(account = action.account?.let(accountUiMapper::map)) }
             }
 
-            is AccountDetailInternalAction.TransactionsUpdated -> {
-                setState { copy(transactions = action.transactions.map(transactionUiMapper::map)) }
-            }
-
             is AccountDetailInternalAction.RefreshFinished -> {
                 if (action.error != null) sendEffect(AccountDetailEffect.ShowRefreshError)
                 setState { copy(isLoading = false) }
@@ -78,9 +79,13 @@ class AccountDetailViewModel @Inject constructor(
     val state: StateFlow<AccountDetailState> = store.state
     val effect: Flow<AccountDetailEffect> = store.effect
 
+    val transactions: Flow<PagingData<TransactionUi>> =
+        transactionRepository.transactionStream(accountId)
+            .map { pagingData -> pagingData.map(transactionUiMapper::map) }
+            .cachedIn(viewModelScope)
+
     init {
         collectAccount()
-        collectTransactions()
         store.sendIntent(AccountDetailIntent.Refresh)
     }
 
@@ -90,10 +95,8 @@ class AccountDetailViewModel @Inject constructor(
 
     private fun startRefresh() {
         viewModelScope.launch {
-            val error = cancellableCatching {
-                accountRepository.refresh()
-                transactionRepository.refresh(accountId)
-            }.exceptionOrNull()?.also { Log.e(TAG, "refresh failed", it) }
+            val error = cancellableCatching { accountRepository.refresh() }
+                .exceptionOrNull()?.also { Log.e(TAG, "refresh failed", it) }
             store.sendIntent(AccountDetailInternalAction.RefreshFinished(error))
         }
     }
@@ -104,16 +107,6 @@ class AccountDetailViewModel @Inject constructor(
                 .catch { error -> Log.e(TAG, "Failed to observe account", error) }
                 .collect { account ->
                     store.sendIntent(AccountDetailInternalAction.AccountUpdated(account))
-                }
-        }
-    }
-
-    private fun collectTransactions() {
-        viewModelScope.launch {
-            transactionRepository.observeTransactions(accountId)
-                .catch { error -> Log.e(TAG, "Failed to observe transactions", error) }
-                .collect { transactions ->
-                    store.sendIntent(AccountDetailInternalAction.TransactionsUpdated(transactions))
                 }
         }
     }

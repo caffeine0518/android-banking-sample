@@ -8,6 +8,9 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.paging.LoadState
+import androidx.paging.LoadStates
+import androidx.paging.PagingData
 import com.study.bank.core.ui.model.CurrencyUi
 import com.study.bank.core.ui.model.MoneyUi
 import com.study.bank.feature.account.R
@@ -18,6 +21,8 @@ import com.study.bank.feature.account.ui.model.AccountUi
 import com.study.bank.feature.account.ui.model.TransactionTypeUi
 import com.study.bank.feature.account.ui.model.TransactionUi
 import java.math.BigDecimal
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -39,10 +44,27 @@ class AccountDetailScreenTest {
 
     private fun string(id: Int) = RuntimeEnvironment.getApplication().getString(id)
 
-    private fun setScreen(state: AccountDetailState) {
+    // 적재 완료(NotLoading) 상태로 PagingData를 만든다 — 안 주면 refresh가 Loading으로 남아 '빈 안내' 조건이 안 켜진다.
+    private val idleLoadStates = LoadStates(
+        refresh = LoadState.NotLoading(endOfPaginationReached = true),
+        prepend = LoadState.NotLoading(endOfPaginationReached = true),
+        append = LoadState.NotLoading(endOfPaginationReached = true),
+    )
+
+    private fun txFlow(items: List<TransactionUi>): Flow<PagingData<TransactionUi>> =
+        flowOf(PagingData.from(items, sourceLoadStates = idleLoadStates))
+
+    private fun setScreen(
+        state: AccountDetailState,
+        transactions: Flow<PagingData<TransactionUi>> = txFlow(emptyList()),
+    ) {
         composeRule.setContent {
             MaterialTheme {
-                AccountDetailScreen(state = state, onIntent = { intents += it })
+                AccountDetailScreen(
+                    state = state,
+                    transactions = transactions,
+                    onIntent = { intents += it },
+                )
             }
         }
     }
@@ -52,10 +74,8 @@ class AccountDetailScreenTest {
     @Test
     fun `계좌 닉네임과 거래 상대가 화면에 표시된다`() {
         setScreen(
-            AccountDetailState(
-                account = account(),
-                transactions = listOf(transaction("tx-1", "세이프박스")),
-            ),
+            state = AccountDetailState(account = account()),
+            transactions = txFlow(listOf(transaction("tx-1", "세이프박스"))),
         )
 
         composeRule.onNodeWithText("월급통장").assertIsDisplayed()
@@ -64,7 +84,10 @@ class AccountDetailScreenTest {
 
     @Test
     fun `거래내역이 없으면 빈 안내가 표시된다`() {
-        setScreen(AccountDetailState(account = account(), transactions = emptyList()))
+        setScreen(
+            state = AccountDetailState(account = account()),
+            transactions = txFlow(emptyList()),
+        )
 
         composeRule.onNodeWithText(string(R.string.account_transactions_empty)).assertIsDisplayed()
     }

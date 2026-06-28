@@ -3,6 +3,7 @@ package com.study.bank
 import com.study.bank.domain.model.BankCode
 import com.study.bank.domain.model.Currency
 import com.study.bank.domain.model.Money
+import com.study.bank.data.remote.kftc.api.KFTC_TRANSACTION_PAGE_SIZE
 import com.study.bank.data.remote.kftc.mock.KftcSeedAccountIds
 import com.study.bank.domain.model.account.AccountId
 import com.study.bank.domain.model.account.AccountNumber
@@ -60,7 +61,7 @@ class DataFlowIntegrationTest {
     }
 
     @Test
-    fun `계좌 상세 진입 — refresh 후 계좌가 시드 잔액으로 뜨고 거래내역은 비어 있다`() = runBlocking {
+    fun `계좌 상세 진입 — refresh 후 계좌가 시드 잔액으로 뜨고 월급통장 시드 거래내역이 적재된다`() = runBlocking {
         accountRepository.refresh()
         transactionRepository.refresh(SALARY)
 
@@ -68,7 +69,10 @@ class DataFlowIntegrationTest {
         assertEquals(Currency.KRW, account.balance.currency)
         assertEquals(0, account.balance.amount.compareTo(BigDecimal("2847320")))
 
-        assertTrue(transactionRepository.observeTransactions(SALARY).first().isEmpty())
+        // 레거시 refresh는 첫 페이지(서버 페이지=PAGE_SIZE건)를 적재한다. 시드 1,200건이라 가득 찬 한 페이지.
+        val txns = transactionRepository.observeTransactions(SALARY).first()
+        assertEquals(PAGE_SIZE, txns.size)
+        assertTrue(txns.all { it.accountId == SALARY })
     }
 
     @Test
@@ -104,9 +108,10 @@ class DataFlowIntegrationTest {
         assertEquals(0, salary.balance.amount.compareTo(BigDecimal("2797320")))
         assertEquals(0, safebox.balance.amount.compareTo(BigDecimal("12050000")))
 
-        // 거래내역: 출금계좌엔 TRANSFER_OUT (execute가 출금계좌 내역 refresh).
+        // 거래내역: execute가 출금계좌 내역을 refresh → 첫 페이지(PAGE_SIZE건) = 방금 송금분(최신) + 시드 과거.
+        // 건수는 한 페이지로 고정되고, 맨 앞(최신)이 이번 송금 TRANSFER_OUT인지 본다.
         val salaryTxns = transactionRepository.observeTransactions(SALARY).first()
-        assertEquals(1, salaryTxns.size)
+        assertEquals(PAGE_SIZE, salaryTxns.size)
         assertEquals(TransactionType.TRANSFER_OUT, salaryTxns.first().type)
         assertEquals(0, salaryTxns.first().amount.amount.compareTo(BigDecimal("50000")))
 
@@ -227,5 +232,8 @@ class DataFlowIntegrationTest {
         val SAFEBOX = AccountId(KftcSeedAccountIds.SAFEBOX_KRW)
         val FX_USD = AccountId(KftcSeedAccountIds.FX_USD)
         val SAFEBOX_NUMBER = AccountNumber("1000-55-1114443")
+
+        // 서버 페이지 크기 단일 소유처. 레거시 refresh는 첫 페이지 한 장을 적재한다.
+        const val PAGE_SIZE = KFTC_TRANSACTION_PAGE_SIZE
     }
 }

@@ -41,6 +41,7 @@ fun AccountDetailRoute(
 
     AccountDetailScreen(
         state = state,
+        transactions = viewModel.transactions,
         onIntent = viewModel::onIntent,
         snackbarHostState = snackbarHostState,
     )

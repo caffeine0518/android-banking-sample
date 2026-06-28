@@ -24,15 +24,26 @@ internal class KftcBankState(
     private val scales = HashMap<String, Int>()
     private val ledger = LinkedHashMap<String, MutableList<TransactionRecord>>()
 
+    // 부팅 시 1회 생성되는 과거 거래(월급통장 1천여 건). 세션 이체로 변하는 [ledger]와 달리 불변이라 reset 대상이 아니다.
+    private val seededHistory: Map<String, List<TransactionRecord>> =
+        KftcTransactionSeed.seededHistory(seed)
+
+    // 시드가 쓴 최대 seq. 세션 이체 seq는 이 위에서 증가해 항상 시드보다 최신(큰 seq)이 된다.
+    private val maxSeededSeq: Long = seededHistory.values.flatten().maxOfOrNull { it.seq } ?: 0L
+
+    // 세션 이체에 단조 증가 seq를 부여하는 카운터. lock 안에서만 접근하므로 별도 동기화 불필요.
+    private var liveSeq: Long = maxSeededSeq
+
     init {
         reset()
     }
 
-    /** 잔액·원장을 시드 초깃값으로 되돌린다. */
+    /** 잔액·원장·seq 카운터를 시드 초깃값으로 되돌린다. */
     fun reset() = synchronized(lock) {
         balances.clear()
         scales.clear()
         ledger.clear()
+        liveSeq = maxSeededSeq
         seed.forEach { account ->
             val parsed = BigDecimal(account.balanceAmt)
             balances[account.fintechUseNum] = parsed
@@ -51,9 +62,21 @@ internal class KftcBankState(
             ?.copy(balanceAmt = formatBalance(fintechUseNum))
     }
 
-    /** 최신 거래가 앞에 오는 계좌별 원장(KFTC sort_order=D). */
+    /** 이번 세션 이체로 쌓인 계좌별 원장(최신 우선). 시드 과거 거래는 빼고 [statement]가 합친다. */
     fun transactions(fintechUseNum: String): List<TransactionRecord> = synchronized(lock) {
         ledger[fintechUseNum].orEmpty().toList()
+    }
+
+    /**
+     * 계좌 거래내역 전체(KFTC sort_order=D, 최신 우선) = 세션 이체 원장 + 시드 과거 거래를 **seq 내림차순으로 정렬**.
+     *
+     * seq는 단조 증가 고유값이라 전순서가 보장된다 — 같은 초 행이 있어도 커서가 strict `<`로 빠짐없이 seek할 수 있고
+     * (오프셋/초단위 키의 누락 결함 회피), 화면측 Room `ORDER BY occurred_at DESC, id DESC`(id에 seq 내장)와도
+     * 같은 순서가 된다. 연속조회 엔드포인트(transaction_list + befor_inquiry_trace_info 커서)가 이 명세서를 잘라 돌려준다.
+     */
+    fun statement(fintechUseNum: String): List<TransactionRecord> = synchronized(lock) {
+        (ledger[fintechUseNum].orEmpty() + seededHistory[fintechUseNum].orEmpty())
+            .sortedByDescending { it.seq }
     }
 
     fun withdraw(command: WithdrawCommand): WithdrawResult = synchronized(lock) {
@@ -172,6 +195,7 @@ internal class KftcBankState(
         ledger.getValue(fintechUseNum).add(
             0,
             TransactionRecord(
+                seq = ++liveSeq, // 시드 최대 seq 위에서 단조 증가 → 항상 시드보다 최신
                 tranDate = at.format(DATE_FORMATTER),
                 tranTime = at.format(TIME_FORMATTER),
                 direction = direction,

@@ -1,5 +1,6 @@
 package com.study.bank.data.local.dao
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -11,8 +12,11 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TransactionDao {
 
-    @Query("SELECT * FROM transactions WHERE account_id = :accountId ORDER BY occurred_at DESC, id")
+    @Query("SELECT * FROM transactions WHERE account_id = :accountId ORDER BY occurred_at DESC, id DESC")
     fun observeByAccountId(accountId: String): Flow<List<TransactionEntity>>
+
+    @Query("SELECT * FROM transactions WHERE account_id = :accountId ORDER BY occurred_at DESC, id DESC")
+    fun pagingSource(accountId: String): PagingSource<Int, TransactionEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(entities: List<TransactionEntity>)

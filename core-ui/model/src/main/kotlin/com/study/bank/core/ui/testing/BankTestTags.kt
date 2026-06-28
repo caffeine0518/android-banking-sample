@@ -18,6 +18,9 @@ object BankTestTags {
     /** 계좌 상세 화면(특정 계좌의 상세에 도착·복귀했는지 식별). */
     fun accountDetail(accountId: String): String = "account_detail_$accountId"
 
+    /** 계좌 상세의 거래내역 한 줄. [id]는 TransactionUi.id(거래 PK). */
+    fun transactionItem(id: String): String = "detail_tx_item_$id"
+
     // --- 정적 화면/컨트롤 앵커 ---
     // 화면 도착·버튼 클릭처럼 "텍스트가 무엇인지는 중요치 않은" locator. 표시 문구나 문자열 리소싱 전략
     // (키 rename·i18n 교체 등)이 바뀌어도 안 깨지도록, copy가 아니라 이 안정 태그로 식별한다.
@@ -33,6 +36,10 @@ object BankTestTags {
     const val DETAIL_SEND = "detail_send"
     const val DETAIL_TX_LABEL = "detail_tx_label"
     const val DETAIL_TX_EMPTY = "detail_tx_empty"
+    const val DETAIL_TX_ERROR = "detail_tx_error"
+    const val DETAIL_TX_RETRY = "detail_tx_retry"
+    const val DETAIL_TX_FOOTER_LOADING = "detail_tx_footer_loading"
+    const val DETAIL_TX_FOOTER_RETRY = "detail_tx_footer_retry"
 
     // transfer
     const val SCREEN_RECIPIENT = "screen_recipient"

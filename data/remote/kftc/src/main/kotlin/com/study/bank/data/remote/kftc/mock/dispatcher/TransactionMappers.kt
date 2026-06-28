@@ -13,6 +13,7 @@ import com.study.bank.data.remote.kftc.mock.TransactionRecord
  * envelope 추적 필드는 호출 측([KftcMockResponses])이 채운다.
  */
 internal fun TransactionRecord.toItemDto(): TransactionItemDto = TransactionItemDto(
+    tranSeq = seq,
     tranDate = tranDate,
     tranTime = tranTime,
     inoutType = when (direction) {
@@ -30,6 +31,8 @@ internal fun List<TransactionRecord>.toTransactionListResponse(
     apiTranId: String,
     apiTranDtm: String,
     bankTranId: String,
+    nextPageYn: String = "N",
+    beforInquiryTraceInfo: String = "",
 ): TransactionListResponse = TransactionListResponse(
     apiTranId = apiTranId,
     apiTranDtm = apiTranDtm,
@@ -41,4 +44,6 @@ internal fun List<TransactionRecord>.toTransactionListResponse(
     currencyCode = account.currencyCode,
     resCnt = size.toString(),
     resList = map { it.toItemDto() },
+    nextPageYn = nextPageYn,
+    beforInquiryTraceInfo = beforInquiryTraceInfo,
 )

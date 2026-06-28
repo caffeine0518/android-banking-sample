@@ -18,9 +18,11 @@ import javax.inject.Singleton
 /**
  * KFTC 거래내역 `res_list` 항목 → 도메인 [Transaction] 매퍼.
  *
- * KFTC 기본 거래내역엔 행 고유 id가 없어 (계좌+발생일시+조회순번)으로 합성한다. 통화는 응답 계좌 단위라
- * 호출 측이 [currency]로 넘긴다. inout_type/tran_type 한글 라벨은 KFTC 와이어 계약값이며 mock은 전부
- * 완료 거래라 status는 COMPLETED로 둔다.
+ * TransactionId는 (계좌+발생일시+tran_seq)로 합성한다. tran_seq는 단조 증가 고유값이라 페이지/새로고침과
+ * 무관하게 같은 거래가 동일 id를 유지하고(Paging 아이템 식별 안정성) 충돌이 없다. 발생일시를 앞에 둬
+ * Room `ORDER BY occurred_at DESC, id DESC`의 타이브레이커가 seq(=시간순)와 일치하게 한다. 통화는 응답
+ * 계좌 단위라 호출 측이 [currency]로 넘긴다. inout_type/tran_type 한글 라벨은 KFTC 와이어 계약값이며
+ * mock은 전부 완료 거래라 status는 COMPLETED로 둔다.
  */
 @Singleton
 class TransactionMapper @Inject constructor() {
@@ -29,9 +31,9 @@ class TransactionMapper @Inject constructor() {
         dto: TransactionItemDto,
         accountId: AccountId,
         currency: Currency,
-        index: Int,
     ): Transaction = Transaction(
-        id = TransactionId("${accountId.value}-${dto.tranDate}${dto.tranTime}-$index"),
+        // 계좌+발생일시+seq(12자리 0패딩). seq가 유일해 충돌이 없고, 0패딩이라 같은 일시 안에서 id 사전순=seq 순서.
+        id = TransactionId("${accountId.value}-${dto.tranDate}${dto.tranTime}-${"%012d".format(dto.tranSeq)}"),
         accountId = accountId,
         type = resolveType(dto.inoutType, dto.tranType),
         amount = Money.of(dto.tranAmt, currency),

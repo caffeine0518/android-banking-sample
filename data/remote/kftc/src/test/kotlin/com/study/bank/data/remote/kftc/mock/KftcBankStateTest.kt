@@ -13,7 +13,8 @@ import java.time.LocalDateTime
  */
 class KftcBankStateTest {
 
-    private val fixedClock = { LocalDateTime.of(2026, 6, 18, 10, 30, 0) }
+    // 시드 히스토리 최신(2026-06-25 18:00)보다 뒤여야 세션 이체가 실제로도 최신 — 프로덕션(now>시드)과 같은 전제.
+    private val fixedClock = { LocalDateTime.of(2026, 6, 27, 10, 30, 0) }
 
     private fun newState() = KftcBankState(KftcAccountSeed.accounts, fixedClock)
 
@@ -140,6 +141,56 @@ class KftcBankStateTest {
         assertEquals("두번째", ledger[0].counterpartyName)
         assertEquals("첫번째", ledger[1].counterpartyName)
         assertEquals("2817320", ledger[0].afterBalanceAmt) // 2847320 - 10000 - 20000
+    }
+
+    // --- 페이지네이션용 시드 거래내역(statement) ---
+
+    @Test
+    fun `월급통장 statement는 1천 건 이상의 시드 거래내역을 노출한다`() {
+        val statement = newState().statement(SALARY)
+
+        assertTrue("시드 거래가 1000건 이상이어야 한다: ${statement.size}", statement.size >= 1000)
+        assertEquals(KftcTransactionSeed.HISTORY_COUNT, statement.size)
+    }
+
+    @Test
+    fun `statement 최신 거래의 잔액은 시드 현재 잔액과 일치한다`() {
+        assertEquals("2847320", newState().statement(SALARY).first().afterBalanceAmt)
+    }
+
+    @Test
+    fun `시드 히스토리는 월급통장에만 있고 세션 원장과 다른 계좌는 비어 있다`() {
+        val state = newState()
+
+        assertTrue(state.statement(USD).isEmpty())
+        assertTrue("세션 이체 원장은 여전히 비어 있어야 한다", state.transactions(SALARY).isEmpty())
+    }
+
+    @Test
+    fun `세션 이체는 시드보다 큰 seq를 받아 statement 맨 앞에 온다`() {
+        val state = newState()
+
+        state.withdraw(externalCommand(from = SALARY, amount = "50000"))
+
+        val statement = state.statement(SALARY)
+        assertEquals(KftcTransactionSeed.HISTORY_COUNT + 1, statement.size)
+        // statement는 seq(기록순) 내림차순 정렬. 세션 이체 seq > 모든 시드 seq라 맨 앞.
+        assertEquals(TransactionDirection.WITHDRAWAL, statement.first().direction)
+        assertEquals("2797320", statement.first().afterBalanceAmt)
+    }
+
+    @Test
+    fun `각 거래는 단조 증가 seq를 받고 statement는 seq 내림차순이다`() {
+        val state = newState()
+
+        state.withdraw(externalCommand(from = SALARY, amount = "10000", recvName = "첫번째"))
+        state.withdraw(externalCommand(from = SALARY, amount = "20000", recvName = "두번째"))
+
+        val statement = state.statement(SALARY)
+        // 나중에 기록된 "두번째"가 더 큰 seq → 맨 앞. seq는 전체적으로 내림차순.
+        assertEquals("두번째", statement[0].counterpartyName)
+        assertEquals("첫번째", statement[1].counterpartyName)
+        assertTrue("seq가 엄격히 내림차순이어야", statement.zipWithNext().all { (a, b) -> a.seq > b.seq })
     }
 
     private fun externalCommand(from: String, amount: String, recvName: String = "외부수취인") = WithdrawCommand(
