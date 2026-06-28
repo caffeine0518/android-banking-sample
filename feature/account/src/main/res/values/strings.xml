@@ -8,6 +8,8 @@
 
     <string name="account_transactions_label">거래 내역</string>
     <string name="account_transactions_empty">거래 내역이 없어요</string>
+    <string name="account_transactions_error">거래 내역을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</string>
+    <string name="account_transactions_retry">다시 시도</string>
 
     <string name="account_subtitle" translatable="false">%1$s · %2$s</string>
     <string name="account_type_checking">입출금</string>

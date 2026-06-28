@@ -3,6 +3,8 @@ package com.study.bank.feature.account.ui
 import app.cash.turbine.test
 import androidx.lifecycle.SavedStateHandle
 import androidx.paging.PagingData
+import androidx.paging.map
+import androidx.paging.testing.asSnapshot
 import com.study.bank.core.ui.mapper.MoneyUiMapper
 import com.study.bank.domain.coroutine.DispatcherProvider
 import com.study.bank.domain.model.BankCode
@@ -32,6 +34,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -61,14 +64,24 @@ class AccountDetailViewModelTest {
     }
 
     @Test
-    fun `거래내역 스트림이 방출되면 state_transactions로 노출된다`() = runTest {
+    fun `거래내역 페이징 스트림을 화면 계좌 id로 요청한다`() = runTest {
         val txRepo = FakeTransactionRepository()
-        val vm = buildViewModel(FakeAccountRepository(), txRepo)
+
+        buildViewModel(FakeAccountRepository(), txRepo) // transactions val 초기화 시 transactionStream(accountId) 호출
+
+        assertEquals(ACCOUNT_ID, txRepo.lastStreamAccountId?.value)
+    }
+
+    @Test
+    fun `거래내역 페이징이 UI 모델로 매핑된다`() = runTest {
+        // VM이 적용하는 변환(PagingData.map(uiMapper))을 cachedIn 없이 그대로 검증한다.
         val tx = transaction("tx-1", TransactionType.TRANSFER_OUT, 50_000)
 
-        txRepo.emit(listOf(tx))
+        val snapshot = flowOf(PagingData.from(listOf(tx)))
+            .map { pagingData -> pagingData.map(transactionUiMapper::map) }
+            .asSnapshot()
 
-        assertEquals(listOf(transactionUiMapper.map(tx)), vm.state.value.transactions)
+        assertEquals(listOf(transactionUiMapper.map(tx)), snapshot)
     }
 
     @Test
@@ -96,14 +109,15 @@ class AccountDetailViewModelTest {
     }
 
     @Test
-    fun `init 시 계좌와 거래내역을 각각 1회 refresh하고 완료 후 로딩이 해제된다`() = runTest {
+    fun `init 시 계좌 잔액을 1회 refresh하고 완료 후 로딩이 해제된다`() = runTest {
         val accountRepo = FakeAccountRepository()
         val txRepo = FakeTransactionRepository()
 
         val vm = buildViewModel(accountRepo, txRepo)
 
+        // 거래내역 refresh는 페이징(LazyPagingItems)이 소유하므로 VM은 잔액만 새로고침한다.
         assertEquals(1, accountRepo.refreshCount)
-        assertEquals(1, txRepo.refreshCount)
+        assertEquals(0, txRepo.refreshCount)
         assertFalse(vm.state.value.isLoading)
     }
 
@@ -177,20 +191,20 @@ class AccountDetailViewModelTest {
     }
 
     private class FakeTransactionRepository : TransactionRepository {
-        private val transactionsFlow = MutableStateFlow<List<Transaction>>(emptyList())
         var refreshCount: Int = 0
             private set
+        var lastStreamAccountId: AccountId? = null
+            private set
 
-        fun emit(transactions: List<Transaction>) {
-            transactionsFlow.value = transactions
-        }
-
-        override fun observeTransactions(accountId: AccountId): Flow<List<Transaction>> = transactionsFlow
+        // 이 화면은 더 이상 단건 목록 경로를 쓰지 않는다(페이징으로 일원화). 계약 충족용 stub.
+        override fun observeTransactions(accountId: AccountId): Flow<List<Transaction>> = emptyFlow()
         override suspend fun refresh(accountId: AccountId) {
             refreshCount++
         }
-        // todo 페이징 스트림 UI 마이그레이션
-        override fun transactionStream(accountId: AccountId): Flow<PagingData<Transaction>> = emptyFlow()
+        override fun transactionStream(accountId: AccountId): Flow<PagingData<Transaction>> {
+            lastStreamAccountId = accountId
+            return flowOf(PagingData.empty())
+        }
     }
 
     private class TestDispatcherProvider(dispatcher: CoroutineDispatcher) : DispatcherProvider {

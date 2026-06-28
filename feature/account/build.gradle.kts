@@ -9,4 +9,6 @@ android {
 dependencies {
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.paging.common)
+    implementation(libs.androidx.paging.compose)
+    testImplementation(libs.androidx.paging.testing)
 }
