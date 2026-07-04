@@ -1,5 +1,7 @@
 plugins {
     id("bank.android.feature")
+    // NavKey 타입세이프 라우트의 @Serializable용.
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.roborazzi)
 }
 
