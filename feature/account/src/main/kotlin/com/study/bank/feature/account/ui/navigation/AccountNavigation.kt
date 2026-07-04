@@ -1,35 +1,25 @@
 package com.study.bank.feature.account.ui.navigation
 
-import androidx.navigation.NavController
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptions
-import androidx.navigation.NavType
-import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavKey
 import com.study.bank.domain.model.account.AccountId
 import com.study.bank.feature.account.ui.AccountDetailRoute
-
-const val ACCOUNT_ID_ARG = "accountId"
-const val ACCOUNT_ROUTE = "account/{$ACCOUNT_ID_ARG}"
+import kotlinx.serialization.Serializable
 
 /**
- * [accountId] 상세 화면의 인자 채워진 구체 라우트. 진입(navigate)과 복귀(popBackStack) 양쪽에서 같은
- * 규칙으로 만들어, 백스택의 동일 목적지를 식별할 수 있게 한다.
+ * 계좌 상세 화면 내비 키. [accountId]=fintech_use_num. 진입(add)과 복귀(백스택 절단) 양쪽에서
+ * 데이터 클래스 동등성으로 백스택의 동일 목적지를 식별한다.
  */
-fun accountRoute(accountId: String): String = "account/$accountId"
+@Serializable
+data class AccountRoute(val accountId: String) : NavKey
 
-fun NavController.navigateToAccount(accountId: AccountId, navOptions: NavOptions? = null) {
-    navigate(accountRoute(accountId.value), navOptions)
-}
+fun accountRoute(accountId: AccountId) = AccountRoute(accountId.value)
 
-fun NavGraphBuilder.accountScreen(
+fun EntryProviderScope<NavKey>.accountEntry(
     onSendClick: (AccountId) -> Unit,
     onBack: () -> Unit,
 ) {
-    composable(
-        route = ACCOUNT_ROUTE,
-        arguments = listOf(navArgument(ACCOUNT_ID_ARG) { type = NavType.StringType }),
-    ) {
-        AccountDetailRoute(onSendClick = onSendClick, onBack = onBack)
+    entry<AccountRoute> { key ->
+        AccountDetailRoute(route = key, onSendClick = onSendClick, onBack = onBack)
     }
 }

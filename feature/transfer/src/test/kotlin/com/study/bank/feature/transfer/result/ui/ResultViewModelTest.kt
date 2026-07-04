@@ -19,6 +19,8 @@ import com.study.bank.domain.model.transfer.TransferResult
 import com.study.bank.domain.repository.AccountRepository
 import com.study.bank.domain.repository.TransferRepository
 import com.study.bank.domain.usecase.transfer.ExecuteTransferUseCase
+import com.study.bank.feature.transfer.navigation.TransferRecipientArg
+import com.study.bank.feature.transfer.navigation.TransferResultRoute
 import com.study.bank.feature.transfer.result.contract.ResultEffect
 import com.study.bank.feature.transfer.result.contract.ResultIntent
 import com.study.bank.feature.transfer.result.contract.ResultPhase
@@ -120,14 +122,14 @@ class ResultViewModelTest {
             accounts,
             transfer,
             amount = 1,
-            savedStateHandle = SavedStateHandle(
-                mapOf(
-                    "sourceAccountId" to SOURCE_ID,
-                    "recipientBankCode" to "088",
-                    "recipientAccountNumber" to "110-555-667788",
-                    "recipientHolderName" to "김토스",
-                    "amount" to 1L,
+            route = TransferResultRoute(
+                sourceAccountId = SOURCE_ID,
+                recipient = TransferRecipientArg(
+                    bankCode = "088",
+                    accountNumber = "110-555-667788",
+                    holderName = "김토스",
                 ),
+                amount = 1L,
             ),
         )
 
@@ -182,15 +184,8 @@ class ResultViewModelTest {
         val accounts = FakeAccountRepository().apply {
             emit(account(SOURCE_ID), account(RECIPIENT_ID))
         }
-        val savedStateHandle = SavedStateHandle(
-            mapOf(
-                "sourceAccountId" to SOURCE_ID,
-                "recipientBankCode" to "088",
-                "recipientAccountNumber" to "110-503-685417",
-                "recipientHolderName" to "안성재",
-                "amount" to 1L,
-            ),
-        )
+        // 멱등성 키의 유일한 저장소 — 프로세스 death 복원 시 Navigation이 엔트리별로 되살려 준다.
+        val savedStateHandle = SavedStateHandle()
         val first = SequencedTransferRepository(TransferOutcome.Failure.Network(RuntimeException("timeout")))
         buildViewModel(accounts, first, amount = 1, savedStateHandle = savedStateHandle)
 
@@ -260,16 +255,19 @@ class ResultViewModelTest {
         accounts: FakeAccountRepository,
         transfer: TransferRepository,
         amount: Long,
-        savedStateHandle: SavedStateHandle = SavedStateHandle(
-            mapOf(
-                "sourceAccountId" to SOURCE_ID,
-                "recipientBankCode" to "088",
-                "recipientAccountNumber" to "110-503-685417",
-                "recipientHolderName" to "안성재",
-                "amount" to amount,
+        route: TransferResultRoute = TransferResultRoute(
+            sourceAccountId = SOURCE_ID,
+            recipient = TransferRecipientArg(
+                bankCode = "088",
+                accountNumber = "110-503-685417",
+                holderName = "안성재",
             ),
+            amount = amount,
         ),
+        // 내비 인자는 라우트로 받으므로 SavedStateHandle은 멱등성 키 저장용으로만 쓰인다.
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
     ) = ResultViewModel(
+        route = route,
         savedStateHandle = savedStateHandle,
         accountRepository = accounts,
         executeTransfer = ExecuteTransferUseCase(transfer),

@@ -1,7 +1,6 @@
 package com.study.bank.feature.account.ui
 
 import app.cash.turbine.test
-import androidx.lifecycle.SavedStateHandle
 import androidx.paging.PagingData
 import androidx.paging.map
 import androidx.paging.testing.asSnapshot
@@ -26,7 +25,7 @@ import com.study.bank.feature.account.contract.AccountDetailIntent
 import com.study.bank.feature.account.testutil.MainDispatcherRule
 import com.study.bank.feature.account.ui.model.AccountUiMapper
 import com.study.bank.feature.account.ui.model.TransactionUiMapper
-import com.study.bank.feature.account.ui.navigation.ACCOUNT_ID_ARG
+import com.study.bank.feature.account.ui.navigation.AccountRoute
 import java.io.IOException
 import java.time.Instant
 import kotlinx.coroutines.CoroutineDispatcher
@@ -139,7 +138,7 @@ class AccountDetailViewModelTest {
         accountRepo: FakeAccountRepository,
         txRepo: FakeTransactionRepository,
     ) = AccountDetailViewModel(
-        savedStateHandle = SavedStateHandle(mapOf(ACCOUNT_ID_ARG to ACCOUNT_ID)),
+        route = AccountRoute(ACCOUNT_ID),
         accountRepository = accountRepo,
         transactionRepository = txRepo,
         accountUiMapper = accountUiMapper,

@@ -1,6 +1,5 @@
 package com.study.bank.feature.transfer.accountinput.ui
 
-import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.study.bank.domain.coroutine.DispatcherProvider
 import com.study.bank.domain.model.BankCode
@@ -12,6 +11,7 @@ import com.study.bank.domain.usecase.transfer.ValidateRecipientUseCase
 import com.study.bank.feature.transfer.accountinput.contract.AccountInputEffect
 import com.study.bank.feature.transfer.accountinput.contract.AccountInputError
 import com.study.bank.feature.transfer.accountinput.contract.AccountInputIntent
+import com.study.bank.feature.transfer.navigation.TransferAccountInputRoute
 import com.study.bank.feature.transfer.navigation.TransferRecipientArg
 import com.study.bank.feature.transfer.testutil.MainDispatcherRule
 import kotlinx.coroutines.CoroutineDispatcher
@@ -136,7 +136,7 @@ class AccountInputViewModelTest {
     }
 
     private fun buildViewModel(lookup: RecipientLookup) = AccountInputViewModel(
-        savedStateHandle = SavedStateHandle(mapOf("sourceAccountId" to SOURCE_ID)),
+        route = TransferAccountInputRoute(SOURCE_ID),
         validateRecipient = ValidateRecipientUseCase(FakeRecipientRepository(lookup)),
         dispatcherProvider = TestDispatcherProvider(mainDispatcherRule.testDispatcher),
     )

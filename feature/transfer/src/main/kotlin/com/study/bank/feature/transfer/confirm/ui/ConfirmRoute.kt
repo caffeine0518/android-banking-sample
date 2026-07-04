@@ -4,20 +4,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
 import com.study.bank.feature.transfer.confirm.contract.ConfirmEffect
+import com.study.bank.feature.transfer.navigation.TransferConfirmRoute
 import com.study.bank.feature.transfer.navigation.TransferResultRoute
-import com.study.bank.feature.transfer.navigation.resultRoute
 
 @Composable
 fun ConfirmRoute(
+    route: TransferConfirmRoute,
     onBack: () -> Unit,
     onSent: (TransferResultRoute) -> Unit,
-    viewModel: ConfirmViewModel = hiltViewModel(),
+    viewModel: ConfirmViewModel = hiltViewModel<ConfirmViewModel, ConfirmViewModel.Factory>(
+        creationCallback = { factory -> factory.create(route) },
+    ),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val lifecycle = LocalLifecycleOwner.current.lifecycle
@@ -30,7 +33,7 @@ fun ConfirmRoute(
             when (effect) {
                 ConfirmEffect.NavigateBack -> onBack()
                 is ConfirmEffect.Submit ->
-                    onSent(resultRoute(effect.sourceAccountId, effect.recipient, effect.amount))
+                    onSent(TransferResultRoute(effect.sourceAccountId, effect.recipient, effect.amount))
                 // 편집/변경 화면 미구현 — 현재는 무시(placeholder).
                 ConfirmEffect.EditDisplayName -> Unit
                 ConfirmEffect.ChangeSource -> Unit

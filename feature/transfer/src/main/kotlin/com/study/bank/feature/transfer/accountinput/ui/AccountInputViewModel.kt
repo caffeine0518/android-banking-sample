@@ -1,7 +1,6 @@
 package com.study.bank.feature.transfer.accountinput.ui
 
 import android.util.Log
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.study.bank.core.ui.mvi.MviStore
@@ -18,25 +17,30 @@ import com.study.bank.feature.transfer.accountinput.contract.AccountInputError
 import com.study.bank.feature.transfer.accountinput.contract.AccountInputInternalAction
 import com.study.bank.feature.transfer.accountinput.contract.AccountInputIntent
 import com.study.bank.feature.transfer.accountinput.contract.AccountInputState
-import com.study.bank.feature.transfer.navigation.ARG_SOURCE_ACCOUNT_ID
+import com.study.bank.feature.transfer.navigation.TransferAccountInputRoute
 import com.study.bank.feature.transfer.navigation.TransferRecipientArg
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-@HiltViewModel
-class AccountInputViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = AccountInputViewModel.Factory::class)
+class AccountInputViewModel @AssistedInject constructor(
+    @Assisted route: TransferAccountInputRoute,
     private val validateRecipient: ValidateRecipientUseCase,
     private val dispatcherProvider: DispatcherProvider,
 ) : ViewModel() {
 
+    @AssistedFactory
+    interface Factory {
+        fun create(route: TransferAccountInputRoute): AccountInputViewModel
+    }
+
     // 출금계좌(보내는 쪽). 실명조회 시 자기이체 판별에 쓴다.
-    private val sourceAccountId = AccountId(
-        checkNotNull(savedStateHandle.get<String>(ARG_SOURCE_ACCOUNT_ID)) { "accountId 인자 누락" },
-    )
+    private val sourceAccountId = AccountId(route.sourceAccountId)
 
     private val store = MviStore<AccountInputState, AccountInputAction, AccountInputEffect>(
         initialState = AccountInputState(),

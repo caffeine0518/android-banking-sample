@@ -1,7 +1,6 @@
 package com.study.bank.feature.transfer.recipient.ui
 
 import android.util.Log
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.study.bank.core.ui.mvi.MviStore
@@ -9,33 +8,38 @@ import com.study.bank.domain.coroutine.DispatcherProvider
 import com.study.bank.domain.model.account.Account
 import com.study.bank.domain.model.account.AccountId
 import com.study.bank.domain.repository.AccountRepository
-import com.study.bank.feature.transfer.navigation.ARG_SOURCE_ACCOUNT_ID
 import com.study.bank.feature.transfer.navigation.TransferRecipientArg
+import com.study.bank.feature.transfer.navigation.TransferRecipientRoute
 import com.study.bank.feature.transfer.recipient.contract.RecipientAction
 import com.study.bank.feature.transfer.recipient.contract.RecipientEffect
 import com.study.bank.feature.transfer.recipient.contract.RecipientInternalAction
 import com.study.bank.feature.transfer.recipient.contract.RecipientIntent
 import com.study.bank.feature.transfer.recipient.contract.RecipientState
 import com.study.bank.feature.transfer.recipient.ui.model.AccountUiMapper
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
-@HiltViewModel
-class RecipientViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = RecipientViewModel.Factory::class)
+class RecipientViewModel @AssistedInject constructor(
+    @Assisted route: TransferRecipientRoute,
     private val accountRepository: AccountRepository,
     private val accountUiMapper: AccountUiMapper,
     private val dispatcherProvider: DispatcherProvider,
 ) : ViewModel() {
 
+    @AssistedFactory
+    interface Factory {
+        fun create(route: TransferRecipientRoute): RecipientViewModel
+    }
+
     // 출금계좌(보내는 쪽). "내 계좌" 목록에서 자기 자신은 제외한다.
-    private val sourceAccountId = AccountId(
-        checkNotNull(savedStateHandle.get<String>(ARG_SOURCE_ACCOUNT_ID)) { "accountId 인자 누락" },
-    )
+    private val sourceAccountId = AccountId(route.sourceAccountId)
 
     // 클릭 시 수취인 신원(번호·은행·명의)을 구성하려고 원본 계좌를 식별자로 보관. 단일 컨슈머 reducer가
     // MyAccountsUpdated/MyAccountClicked를 직렬 처리하므로 별도 동기화 없이 안전하다.

@@ -1,22 +1,19 @@
 package com.study.bank.feature.home.ui.navigation
 
-import androidx.navigation.NavController
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptions
-import androidx.navigation.compose.composable
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavKey
 import com.study.bank.domain.model.account.AccountId
-import com.study.bank.feature.home.ui.HomeRoute
+import com.study.bank.feature.home.ui.HomeRoute as HomeRouteScreen
+import kotlinx.serialization.Serializable
 
-const val HOME_ROUTE = "home"
+/** 홈(계좌 목록) 화면 내비 키. 백스택의 루트 목적지. */
+@Serializable
+data object HomeRoute : NavKey
 
-fun NavController.navigateToHome(navOptions: NavOptions? = null) {
-    navigate(HOME_ROUTE, navOptions)
-}
-
-fun NavGraphBuilder.homeScreen(
+fun EntryProviderScope<NavKey>.homeEntry(
     onAccountClick: (AccountId) -> Unit,
 ) {
-    composable(HOME_ROUTE) {
-        HomeRoute(onAccountClick = onAccountClick)
+    entry<HomeRoute> {
+        HomeRouteScreen(onAccountClick = onAccountClick)
     }
 }

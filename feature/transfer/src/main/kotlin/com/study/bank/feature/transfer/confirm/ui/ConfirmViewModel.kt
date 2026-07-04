@@ -1,7 +1,6 @@
 package com.study.bank.feature.transfer.confirm.ui
 
 import android.util.Log
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.study.bank.core.ui.mvi.MviStore
@@ -14,30 +13,33 @@ import com.study.bank.feature.transfer.confirm.contract.ConfirmInternalAction
 import com.study.bank.feature.transfer.confirm.contract.ConfirmIntent
 import com.study.bank.feature.transfer.confirm.contract.ConfirmState
 import com.study.bank.feature.transfer.confirm.ui.model.ConfirmUiMapper
-import com.study.bank.feature.transfer.navigation.ARG_AMOUNT
-import com.study.bank.feature.transfer.navigation.ARG_SOURCE_ACCOUNT_ID
-import com.study.bank.feature.transfer.navigation.transferRecipientArg
+import com.study.bank.feature.transfer.navigation.TransferConfirmRoute
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
-@HiltViewModel
-class ConfirmViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = ConfirmViewModel.Factory::class)
+class ConfirmViewModel @AssistedInject constructor(
+    @Assisted route: TransferConfirmRoute,
     private val accountRepository: AccountRepository,
     private val confirmUiMapper: ConfirmUiMapper,
     private val dispatcherProvider: DispatcherProvider,
 ) : ViewModel() {
 
-    private val sourceAccountId = AccountId(
-        checkNotNull(savedStateHandle.get<String>(ARG_SOURCE_ACCOUNT_ID)) { "accountId 인자 누락" },
-    )
+    @AssistedFactory
+    interface Factory {
+        fun create(route: TransferConfirmRoute): ConfirmViewModel
+    }
+
+    private val sourceAccountId = AccountId(route.sourceAccountId)
     // 수취인·금액은 라우트로 확정돼 화면 동안 고정이다.
-    private val recipient = savedStateHandle.transferRecipientArg()
-    private val amount = checkNotNull(savedStateHandle.get<Long>(ARG_AMOUNT)) { "amount 인자 누락" }
+    private val recipient = route.recipient
+    private val amount = route.amount
 
     private val store = MviStore<ConfirmState, ConfirmAction, ConfirmEffect>(
         initialState = ConfirmState(),

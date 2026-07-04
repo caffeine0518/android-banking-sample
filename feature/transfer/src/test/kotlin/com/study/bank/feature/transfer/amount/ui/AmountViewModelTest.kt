@@ -1,7 +1,6 @@
 package com.study.bank.feature.transfer.amount.ui
 
 import app.cash.turbine.test
-import androidx.lifecycle.SavedStateHandle
 import com.study.bank.core.ui.mapper.MoneyUiMapper
 import com.study.bank.domain.coroutine.DispatcherProvider
 import com.study.bank.domain.model.BankCode
@@ -15,6 +14,7 @@ import com.study.bank.domain.repository.AccountRepository
 import com.study.bank.feature.transfer.amount.contract.AmountEffect
 import com.study.bank.feature.transfer.amount.contract.AmountIntent
 import com.study.bank.feature.transfer.amount.ui.model.AmountUiMapper
+import com.study.bank.feature.transfer.navigation.TransferAmountRoute
 import com.study.bank.feature.transfer.navigation.TransferRecipientArg
 import com.study.bank.feature.transfer.testutil.MainDispatcherRule
 import kotlinx.coroutines.CoroutineDispatcher
@@ -204,12 +204,12 @@ class AmountViewModelTest {
     }
 
     private fun buildViewModel(repo: FakeAccountRepository) = AmountViewModel(
-        savedStateHandle = SavedStateHandle(
-            mapOf(
-                "sourceAccountId" to SOURCE_ID,
-                "recipientBankCode" to "088",
-                "recipientAccountNumber" to "110-503-685417",
-                "recipientHolderName" to "안성재",
+        route = TransferAmountRoute(
+            sourceAccountId = SOURCE_ID,
+            recipient = TransferRecipientArg(
+                bankCode = "088",
+                accountNumber = "110-503-685417",
+                holderName = "안성재",
             ),
         ),
         accountRepository = repo,
