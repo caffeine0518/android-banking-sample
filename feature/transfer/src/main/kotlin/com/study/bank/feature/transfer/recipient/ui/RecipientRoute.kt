@@ -11,7 +11,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
 import com.study.bank.feature.transfer.navigation.TransferAmountRoute
 import com.study.bank.feature.transfer.navigation.TransferRecipientRoute
-import com.study.bank.feature.transfer.navigation.amountRoute
 import com.study.bank.feature.transfer.recipient.contract.RecipientEffect
 
 @Composable
@@ -37,7 +36,7 @@ fun RecipientRoute(
                 is RecipientEffect.NavigateToAccountNumberInput ->
                     onAccountNumberInput(effect.sourceAccountId)
                 is RecipientEffect.NavigateToAmount ->
-                    onContinue(amountRoute(effect.sourceAccountId, effect.recipient))
+                    onContinue(TransferAmountRoute(effect.sourceAccountId, effect.recipient))
             }
         }
     }

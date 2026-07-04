@@ -12,7 +12,6 @@ import androidx.lifecycle.flowWithLifecycle
 import com.study.bank.feature.transfer.amount.contract.AmountEffect
 import com.study.bank.feature.transfer.navigation.TransferAmountRoute
 import com.study.bank.feature.transfer.navigation.TransferConfirmRoute
-import com.study.bank.feature.transfer.navigation.confirmRoute
 
 @Composable
 fun AmountRoute(
@@ -34,7 +33,7 @@ fun AmountRoute(
             when (effect) {
                 AmountEffect.NavigateBack -> onBack()
                 is AmountEffect.NavigateNext ->
-                    onNext(confirmRoute(effect.sourceAccountId, effect.recipient, effect.amount))
+                    onNext(TransferConfirmRoute(effect.sourceAccountId, effect.recipient, effect.amount))
             }
         }
     }

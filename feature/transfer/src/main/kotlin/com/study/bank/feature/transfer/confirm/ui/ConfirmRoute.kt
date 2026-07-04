@@ -12,7 +12,6 @@ import androidx.lifecycle.flowWithLifecycle
 import com.study.bank.feature.transfer.confirm.contract.ConfirmEffect
 import com.study.bank.feature.transfer.navigation.TransferConfirmRoute
 import com.study.bank.feature.transfer.navigation.TransferResultRoute
-import com.study.bank.feature.transfer.navigation.resultRoute
 
 @Composable
 fun ConfirmRoute(
@@ -34,7 +33,7 @@ fun ConfirmRoute(
             when (effect) {
                 ConfirmEffect.NavigateBack -> onBack()
                 is ConfirmEffect.Submit ->
-                    onSent(resultRoute(effect.sourceAccountId, effect.recipient, effect.amount))
+                    onSent(TransferResultRoute(effect.sourceAccountId, effect.recipient, effect.amount))
                 // 편집/변경 화면 미구현 — 현재는 무시(placeholder).
                 ConfirmEffect.EditDisplayName -> Unit
                 ConfirmEffect.ChangeSource -> Unit

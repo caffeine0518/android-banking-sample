@@ -59,15 +59,6 @@ data class TransferResultRoute(
 
 fun transferRecipientRoute(sourceAccountId: AccountId) = TransferRecipientRoute(sourceAccountId.value)
 
-fun amountRoute(sourceAccountId: String, recipient: TransferRecipientArg) =
-    TransferAmountRoute(sourceAccountId, recipient)
-
-fun confirmRoute(sourceAccountId: String, recipient: TransferRecipientArg, amount: Long) =
-    TransferConfirmRoute(sourceAccountId, recipient, amount)
-
-fun resultRoute(sourceAccountId: String, recipient: TransferRecipientArg, amount: Long) =
-    TransferResultRoute(sourceAccountId, recipient, amount)
-
 fun EntryProviderScope<NavKey>.transferRecipientEntry(
     onBack: () -> Unit,
     onAccountNumberInput: (sourceAccountId: String) -> Unit,
