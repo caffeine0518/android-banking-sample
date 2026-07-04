@@ -16,6 +16,7 @@ import kotlinx.serialization.Serializable
  * 확정돼 금액→확인→결과까지 그대로 전달된다 — 출금계좌 저장소에 없는 외부 계좌도 식별자 재조회 없이 처리된다.
  * 내비 키에는 기본 타입만 싣도록 [TransferAmountRoute] 등에서 평탄화해 담는다.
  */
+@Serializable
 data class TransferRecipientArg(
     val bankCode: String,
     val accountNumber: String,
