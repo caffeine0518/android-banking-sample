@@ -1,7 +1,6 @@
 package com.study.bank.feature.transfer.confirm.ui
 
 import app.cash.turbine.test
-import androidx.lifecycle.SavedStateHandle
 import com.study.bank.core.ui.mapper.MoneyUiMapper
 import com.study.bank.domain.coroutine.DispatcherProvider
 import com.study.bank.domain.model.BankCode
@@ -15,6 +14,7 @@ import com.study.bank.domain.repository.AccountRepository
 import com.study.bank.feature.transfer.confirm.contract.ConfirmEffect
 import com.study.bank.feature.transfer.confirm.contract.ConfirmIntent
 import com.study.bank.feature.transfer.confirm.ui.model.ConfirmUiMapper
+import com.study.bank.feature.transfer.navigation.TransferConfirmRoute
 import com.study.bank.feature.transfer.navigation.TransferRecipientArg
 import com.study.bank.feature.transfer.testutil.MainDispatcherRule
 import java.math.BigDecimal
@@ -152,14 +152,12 @@ class ConfirmViewModelTest {
     }
 
     private fun buildViewModel(repo: FakeAccountRepository, amount: Long) = ConfirmViewModel(
-        savedStateHandle = SavedStateHandle(
-            mapOf(
-                "sourceAccountId" to SOURCE_ID,
-                "recipientBankCode" to "088",
-                "recipientAccountNumber" to "110-503-685417",
-                "recipientHolderName" to "안성재",
-                "amount" to amount,
-            ),
+        route = TransferConfirmRoute(
+            sourceAccountId = SOURCE_ID,
+            recipientBankCode = "088",
+            recipientAccountNumber = "110-503-685417",
+            recipientHolderName = "안성재",
+            amount = amount,
         ),
         accountRepository = repo,
         confirmUiMapper = confirmUiMapper,

@@ -10,13 +10,17 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
+import com.study.bank.feature.transfer.navigation.TransferResultRoute
 import com.study.bank.feature.transfer.result.contract.ResultEffect
 import com.study.bank.feature.transfer.result.contract.ResultPhase
 
 @Composable
 fun ResultRoute(
+    route: TransferResultRoute,
     onFinish: (sourceAccountId: String) -> Unit,
-    viewModel: ResultViewModel = hiltViewModel(),
+    viewModel: ResultViewModel = hiltViewModel<ResultViewModel, ResultViewModel.Factory>(
+        creationCallback = { factory -> factory.create(route) },
+    ),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val lifecycle = LocalLifecycleOwner.current.lifecycle

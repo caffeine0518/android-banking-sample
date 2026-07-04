@@ -10,14 +10,18 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
 import com.study.bank.feature.transfer.amount.contract.AmountEffect
+import com.study.bank.feature.transfer.navigation.TransferAmountRoute
 import com.study.bank.feature.transfer.navigation.TransferConfirmRoute
 import com.study.bank.feature.transfer.navigation.confirmRoute
 
 @Composable
 fun AmountRoute(
+    route: TransferAmountRoute,
     onBack: () -> Unit,
     onNext: (TransferConfirmRoute) -> Unit,
-    viewModel: AmountViewModel = hiltViewModel(),
+    viewModel: AmountViewModel = hiltViewModel<AmountViewModel, AmountViewModel.Factory>(
+        creationCallback = { factory -> factory.create(route) },
+    ),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val lifecycle = LocalLifecycleOwner.current.lifecycle

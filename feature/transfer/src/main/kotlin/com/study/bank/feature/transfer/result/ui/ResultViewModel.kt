@@ -15,9 +15,8 @@ import com.study.bank.domain.model.transfer.TransferOutcome
 import com.study.bank.domain.model.transfer.TransferRequest
 import com.study.bank.domain.repository.AccountRepository
 import com.study.bank.domain.usecase.transfer.ExecuteTransferUseCase
-import com.study.bank.feature.transfer.navigation.ARG_AMOUNT
-import com.study.bank.feature.transfer.navigation.ARG_SOURCE_ACCOUNT_ID
-import com.study.bank.feature.transfer.navigation.transferRecipientArg
+import com.study.bank.feature.transfer.navigation.TransferResultRoute
+import com.study.bank.feature.transfer.navigation.recipientArg
 import com.study.bank.feature.transfer.result.contract.ResultAction
 import com.study.bank.feature.transfer.result.contract.ResultEffect
 import com.study.bank.feature.transfer.result.contract.ResultInternalAction
@@ -26,15 +25,19 @@ import com.study.bank.feature.transfer.result.contract.ResultPhase
 import com.study.bank.feature.transfer.result.contract.ResultState
 import com.study.bank.feature.transfer.result.ui.model.ResultFailureUi
 import com.study.bank.feature.transfer.result.ui.model.ResultUiMapper
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.UUID
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-@HiltViewModel
-class ResultViewModel @Inject constructor(
+@HiltViewModel(assistedFactory = ResultViewModel.Factory::class)
+class ResultViewModel @AssistedInject constructor(
+    @Assisted route: TransferResultRoute,
+    // 내비 인자는 라우트로 받지만, 멱등성 키는 프로세스 death를 넘겨 살아남아야 하므로 SavedStateHandle에 둔다.
     savedStateHandle: SavedStateHandle,
     private val accountRepository: AccountRepository,
     private val executeTransfer: ExecuteTransferUseCase,
@@ -42,12 +45,15 @@ class ResultViewModel @Inject constructor(
     private val dispatcherProvider: DispatcherProvider,
 ) : ViewModel() {
 
-    private val sourceAccountId = AccountId(
-        checkNotNull(savedStateHandle.get<String>(ARG_SOURCE_ACCOUNT_ID)) { "accountId 인자 누락" },
-    )
+    @AssistedFactory
+    interface Factory {
+        fun create(route: TransferResultRoute): ResultViewModel
+    }
+
+    private val sourceAccountId = AccountId(route.sourceAccountId)
     // 수취인은 라우트 신원(외부 계좌는 출금계좌 저장소에 없으므로 식별자 재조회 없이 그대로 송금에 쓴다).
-    private val recipient = savedStateHandle.transferRecipientArg()
-    private val amount = checkNotNull(savedStateHandle.get<Long>(ARG_AMOUNT)) { "amount 인자 누락" }
+    private val recipient = route.recipientArg
+    private val amount = route.amount
 
     /**
      * 멱등성 키는 "이 송금 한 건"에 묶여 재시도 내내 동일해야 한다. 재시도마다 새로 만들면

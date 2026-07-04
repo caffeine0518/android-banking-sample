@@ -10,14 +10,18 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
 import com.study.bank.feature.transfer.confirm.contract.ConfirmEffect
+import com.study.bank.feature.transfer.navigation.TransferConfirmRoute
 import com.study.bank.feature.transfer.navigation.TransferResultRoute
 import com.study.bank.feature.transfer.navigation.resultRoute
 
 @Composable
 fun ConfirmRoute(
+    route: TransferConfirmRoute,
     onBack: () -> Unit,
     onSent: (TransferResultRoute) -> Unit,
-    viewModel: ConfirmViewModel = hiltViewModel(),
+    viewModel: ConfirmViewModel = hiltViewModel<ConfirmViewModel, ConfirmViewModel.Factory>(
+        creationCallback = { factory -> factory.create(route) },
+    ),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val lifecycle = LocalLifecycleOwner.current.lifecycle

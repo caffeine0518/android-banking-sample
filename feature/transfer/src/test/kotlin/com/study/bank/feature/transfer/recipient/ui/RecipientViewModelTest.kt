@@ -1,7 +1,6 @@
 package com.study.bank.feature.transfer.recipient.ui
 
 import app.cash.turbine.test
-import androidx.lifecycle.SavedStateHandle
 import com.study.bank.domain.coroutine.DispatcherProvider
 import com.study.bank.domain.model.BankCode
 import com.study.bank.domain.model.Currency
@@ -12,6 +11,7 @@ import com.study.bank.domain.model.account.AccountNumber
 import com.study.bank.domain.model.account.AccountType
 import com.study.bank.domain.repository.AccountRepository
 import com.study.bank.feature.transfer.navigation.TransferRecipientArg
+import com.study.bank.feature.transfer.navigation.TransferRecipientRoute
 import com.study.bank.feature.transfer.recipient.contract.RecipientEffect
 import com.study.bank.feature.transfer.recipient.contract.RecipientIntent
 import com.study.bank.feature.transfer.testutil.MainDispatcherRule
@@ -91,7 +91,7 @@ class RecipientViewModelTest {
     }
 
     private fun buildViewModel(repo: FakeAccountRepository) = RecipientViewModel(
-        savedStateHandle = SavedStateHandle(mapOf("sourceAccountId" to SOURCE_ID)),
+        route = TransferRecipientRoute(SOURCE_ID),
         accountRepository = repo,
         accountUiMapper = accountUiMapper,
         dispatcherProvider = TestDispatcherProvider(mainDispatcherRule.testDispatcher),
