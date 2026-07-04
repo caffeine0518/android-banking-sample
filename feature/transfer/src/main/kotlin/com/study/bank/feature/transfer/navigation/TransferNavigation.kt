@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
 /**
  * 송금 플로우 동안 화면 사이를 흐르는 수취인 신원. 실명조회(외부 계좌)나 "내 계좌" 선택(picker)에서 한 번
  * 확정돼 금액→확인→결과까지 그대로 전달된다 — 출금계좌 저장소에 없는 외부 계좌도 식별자 재조회 없이 처리된다.
- * 내비 키에는 기본 타입만 싣도록 [TransferAmountRoute] 등에서 평탄화해 담는다.
+ * Nav3 내비 키는 kotlinx 직렬화로 통째 저장되므로 [TransferAmountRoute] 등에 중첩 필드로 그대로 싣는다.
  */
 @Serializable
 data class TransferRecipientArg(
@@ -25,21 +25,6 @@ data class TransferRecipientArg(
     /** 표시용 은행명. 알 수 없는 코드는 코드 원문으로 폴백. */
     val bankDisplayName: String get() = BankCode.byCode(bankCode)?.displayName ?: bankCode
 }
-
-/** 수취인 신원을 평탄화해 싣는 라우트의 공통 계약. [recipientArg]로 다시 묶어 읽는다. */
-interface TransferRecipientCarrier {
-    val recipientBankCode: String
-    val recipientAccountNumber: String
-    val recipientHolderName: String
-}
-
-/** 라우트에 평탄화된 수취인 신원을 [TransferRecipientArg]로 묶어 읽는다. */
-val TransferRecipientCarrier.recipientArg: TransferRecipientArg
-    get() = TransferRecipientArg(
-        bankCode = recipientBankCode,
-        accountNumber = recipientAccountNumber,
-        holderName = recipientHolderName,
-    )
 
 /** 송금 1번째 화면: 수취인 선택. [sourceAccountId]=출금계좌. */
 @Serializable
@@ -53,57 +38,35 @@ data class TransferAccountInputRoute(val sourceAccountId: String) : NavKey
 @Serializable
 data class TransferAmountRoute(
     val sourceAccountId: String,
-    override val recipientBankCode: String,
-    override val recipientAccountNumber: String,
-    override val recipientHolderName: String,
-) : NavKey, TransferRecipientCarrier
+    val recipient: TransferRecipientArg,
+) : NavKey
 
 /** 송금 3번째 화면: 송금 확인. [amount]=출금계좌 통화 최소단위(minor unit) 정수. */
 @Serializable
 data class TransferConfirmRoute(
     val sourceAccountId: String,
-    override val recipientBankCode: String,
-    override val recipientAccountNumber: String,
-    override val recipientHolderName: String,
+    val recipient: TransferRecipientArg,
     val amount: Long,
-) : NavKey, TransferRecipientCarrier
+) : NavKey
 
 /** 송금 4번째 화면: 송금 결과(로딩→성공/실패). 진입과 동시에 실제 송금을 실행한다. */
 @Serializable
 data class TransferResultRoute(
     val sourceAccountId: String,
-    override val recipientBankCode: String,
-    override val recipientAccountNumber: String,
-    override val recipientHolderName: String,
+    val recipient: TransferRecipientArg,
     val amount: Long,
-) : NavKey, TransferRecipientCarrier
+) : NavKey
 
 fun transferRecipientRoute(sourceAccountId: AccountId) = TransferRecipientRoute(sourceAccountId.value)
 
-fun amountRoute(sourceAccountId: String, recipient: TransferRecipientArg) = TransferAmountRoute(
-    sourceAccountId = sourceAccountId,
-    recipientBankCode = recipient.bankCode,
-    recipientAccountNumber = recipient.accountNumber,
-    recipientHolderName = recipient.holderName,
-)
+fun amountRoute(sourceAccountId: String, recipient: TransferRecipientArg) =
+    TransferAmountRoute(sourceAccountId, recipient)
 
 fun confirmRoute(sourceAccountId: String, recipient: TransferRecipientArg, amount: Long) =
-    TransferConfirmRoute(
-        sourceAccountId = sourceAccountId,
-        recipientBankCode = recipient.bankCode,
-        recipientAccountNumber = recipient.accountNumber,
-        recipientHolderName = recipient.holderName,
-        amount = amount,
-    )
+    TransferConfirmRoute(sourceAccountId, recipient, amount)
 
 fun resultRoute(sourceAccountId: String, recipient: TransferRecipientArg, amount: Long) =
-    TransferResultRoute(
-        sourceAccountId = sourceAccountId,
-        recipientBankCode = recipient.bankCode,
-        recipientAccountNumber = recipient.accountNumber,
-        recipientHolderName = recipient.holderName,
-        amount = amount,
-    )
+    TransferResultRoute(sourceAccountId, recipient, amount)
 
 fun EntryProviderScope<NavKey>.transferRecipientEntry(
     onBack: () -> Unit,

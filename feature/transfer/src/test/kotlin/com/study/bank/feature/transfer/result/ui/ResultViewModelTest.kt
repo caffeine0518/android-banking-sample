@@ -19,6 +19,7 @@ import com.study.bank.domain.model.transfer.TransferResult
 import com.study.bank.domain.repository.AccountRepository
 import com.study.bank.domain.repository.TransferRepository
 import com.study.bank.domain.usecase.transfer.ExecuteTransferUseCase
+import com.study.bank.feature.transfer.navigation.TransferRecipientArg
 import com.study.bank.feature.transfer.navigation.TransferResultRoute
 import com.study.bank.feature.transfer.result.contract.ResultEffect
 import com.study.bank.feature.transfer.result.contract.ResultIntent
@@ -123,9 +124,11 @@ class ResultViewModelTest {
             amount = 1,
             route = TransferResultRoute(
                 sourceAccountId = SOURCE_ID,
-                recipientBankCode = "088",
-                recipientAccountNumber = "110-555-667788",
-                recipientHolderName = "김토스",
+                recipient = TransferRecipientArg(
+                    bankCode = "088",
+                    accountNumber = "110-555-667788",
+                    holderName = "김토스",
+                ),
                 amount = 1L,
             ),
         )
@@ -254,9 +257,11 @@ class ResultViewModelTest {
         amount: Long,
         route: TransferResultRoute = TransferResultRoute(
             sourceAccountId = SOURCE_ID,
-            recipientBankCode = "088",
-            recipientAccountNumber = "110-503-685417",
-            recipientHolderName = "안성재",
+            recipient = TransferRecipientArg(
+                bankCode = "088",
+                accountNumber = "110-503-685417",
+                holderName = "안성재",
+            ),
             amount = amount,
         ),
         // 내비 인자는 라우트로 받으므로 SavedStateHandle은 멱등성 키 저장용으로만 쓰인다.

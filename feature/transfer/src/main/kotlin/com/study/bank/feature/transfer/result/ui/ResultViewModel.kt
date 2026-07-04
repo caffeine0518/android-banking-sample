@@ -16,7 +16,6 @@ import com.study.bank.domain.model.transfer.TransferRequest
 import com.study.bank.domain.repository.AccountRepository
 import com.study.bank.domain.usecase.transfer.ExecuteTransferUseCase
 import com.study.bank.feature.transfer.navigation.TransferResultRoute
-import com.study.bank.feature.transfer.navigation.recipientArg
 import com.study.bank.feature.transfer.result.contract.ResultAction
 import com.study.bank.feature.transfer.result.contract.ResultEffect
 import com.study.bank.feature.transfer.result.contract.ResultInternalAction
@@ -52,7 +51,7 @@ class ResultViewModel @AssistedInject constructor(
 
     private val sourceAccountId = AccountId(route.sourceAccountId)
     // 수취인은 라우트 신원(외부 계좌는 출금계좌 저장소에 없으므로 식별자 재조회 없이 그대로 송금에 쓴다).
-    private val recipient = route.recipientArg
+    private val recipient = route.recipient
     private val amount = route.amount
 
     /**

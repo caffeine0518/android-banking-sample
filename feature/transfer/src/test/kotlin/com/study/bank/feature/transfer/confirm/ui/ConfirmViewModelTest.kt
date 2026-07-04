@@ -154,9 +154,11 @@ class ConfirmViewModelTest {
     private fun buildViewModel(repo: FakeAccountRepository, amount: Long) = ConfirmViewModel(
         route = TransferConfirmRoute(
             sourceAccountId = SOURCE_ID,
-            recipientBankCode = "088",
-            recipientAccountNumber = "110-503-685417",
-            recipientHolderName = "안성재",
+            recipient = TransferRecipientArg(
+                bankCode = "088",
+                accountNumber = "110-503-685417",
+                holderName = "안성재",
+            ),
             amount = amount,
         ),
         accountRepository = repo,

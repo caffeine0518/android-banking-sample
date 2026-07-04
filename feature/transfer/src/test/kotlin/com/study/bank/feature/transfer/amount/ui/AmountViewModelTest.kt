@@ -206,9 +206,11 @@ class AmountViewModelTest {
     private fun buildViewModel(repo: FakeAccountRepository) = AmountViewModel(
         route = TransferAmountRoute(
             sourceAccountId = SOURCE_ID,
-            recipientBankCode = "088",
-            recipientAccountNumber = "110-503-685417",
-            recipientHolderName = "안성재",
+            recipient = TransferRecipientArg(
+                bankCode = "088",
+                accountNumber = "110-503-685417",
+                holderName = "안성재",
+            ),
         ),
         accountRepository = repo,
         amountUiMapper = amountUiMapper,

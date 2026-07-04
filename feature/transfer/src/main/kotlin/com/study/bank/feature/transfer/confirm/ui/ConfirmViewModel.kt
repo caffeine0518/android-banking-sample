@@ -14,7 +14,6 @@ import com.study.bank.feature.transfer.confirm.contract.ConfirmIntent
 import com.study.bank.feature.transfer.confirm.contract.ConfirmState
 import com.study.bank.feature.transfer.confirm.ui.model.ConfirmUiMapper
 import com.study.bank.feature.transfer.navigation.TransferConfirmRoute
-import com.study.bank.feature.transfer.navigation.recipientArg
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -39,7 +38,7 @@ class ConfirmViewModel @AssistedInject constructor(
 
     private val sourceAccountId = AccountId(route.sourceAccountId)
     // 수취인·금액은 라우트로 확정돼 화면 동안 고정이다.
-    private val recipient = route.recipientArg
+    private val recipient = route.recipient
     private val amount = route.amount
 
     private val store = MviStore<ConfirmState, ConfirmAction, ConfirmEffect>(

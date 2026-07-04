@@ -15,7 +15,6 @@ import com.study.bank.feature.transfer.amount.contract.AmountState
 import com.study.bank.feature.transfer.amount.ui.model.AmountSourceUi
 import com.study.bank.feature.transfer.amount.ui.model.AmountUiMapper
 import com.study.bank.feature.transfer.navigation.TransferAmountRoute
-import com.study.bank.feature.transfer.navigation.recipientArg
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -41,7 +40,7 @@ class AmountViewModel @AssistedInject constructor(
     private val sourceAccountId = AccountId(route.sourceAccountId)
 
     // 수취인은 라우트로 확정돼(외부·내 계좌 동일) 화면 동안 고정이다 — 재조회하지 않고 초기 상태에 한 번 반영한다.
-    private val recipient = route.recipientArg
+    private val recipient = route.recipient
 
     private val store = MviStore<AmountState, AmountAction, AmountEffect>(
         initialState = AmountState(recipient = amountUiMapper.mapRecipient(recipient)),
