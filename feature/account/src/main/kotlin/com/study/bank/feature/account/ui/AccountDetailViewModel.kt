@@ -1,7 +1,6 @@
 package com.study.bank.feature.account.ui
 
 import android.util.Log
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -21,18 +20,20 @@ import com.study.bank.feature.account.contract.AccountDetailIntent
 import com.study.bank.feature.account.contract.AccountDetailState
 import com.study.bank.feature.account.ui.model.AccountUiMapper
 import com.study.bank.feature.account.ui.model.TransactionUiMapper
-import com.study.bank.feature.account.ui.navigation.ACCOUNT_ID_ARG
+import com.study.bank.feature.account.ui.navigation.AccountRoute
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-@HiltViewModel
-class AccountDetailViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
+@HiltViewModel(assistedFactory = AccountDetailViewModel.Factory::class)
+class AccountDetailViewModel @AssistedInject constructor(
+    @Assisted route: AccountRoute,
     private val accountRepository: AccountRepository,
     private val transactionRepository: TransactionRepository,
     private val accountUiMapper: AccountUiMapper,
@@ -40,10 +41,13 @@ class AccountDetailViewModel @Inject constructor(
     private val dispatcherProvider: DispatcherProvider,
 ) : ViewModel() {
 
-    // 진입 시 네비게이션 인자로 받은 계좌 식별자(= fintech_use_num). 이 화면의 단일 대상.
-    private val accountId = AccountId(
-        checkNotNull(savedStateHandle.get<String>(ACCOUNT_ID_ARG)) { "accountId 인자 누락" },
-    )
+    @AssistedFactory
+    interface Factory {
+        fun create(route: AccountRoute): AccountDetailViewModel
+    }
+
+    // 진입 내비 키로 확정된 계좌 식별자(= fintech_use_num). 이 화면의 단일 대상.
+    private val accountId = AccountId(route.accountId)
 
     private val store = MviStore<AccountDetailState, AccountDetailAction, AccountDetailEffect>(
         initialState = AccountDetailState(),

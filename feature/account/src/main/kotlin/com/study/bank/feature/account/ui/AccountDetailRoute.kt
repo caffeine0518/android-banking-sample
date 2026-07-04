@@ -14,12 +14,16 @@ import androidx.lifecycle.flowWithLifecycle
 import com.study.bank.domain.model.account.AccountId
 import com.study.bank.feature.account.R
 import com.study.bank.feature.account.contract.AccountDetailEffect
+import com.study.bank.feature.account.ui.navigation.AccountRoute
 
 @Composable
 fun AccountDetailRoute(
+    route: AccountRoute,
     onSendClick: (AccountId) -> Unit,
     onBack: () -> Unit,
-    viewModel: AccountDetailViewModel = hiltViewModel(),
+    viewModel: AccountDetailViewModel = hiltViewModel<AccountDetailViewModel, AccountDetailViewModel.Factory>(
+        creationCallback = { factory -> factory.create(route) },
+    ),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val lifecycle = LocalLifecycleOwner.current.lifecycle
