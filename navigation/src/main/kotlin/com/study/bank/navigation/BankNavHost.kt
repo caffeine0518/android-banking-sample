@@ -69,14 +69,8 @@ private fun entryProvider(backStack: NavBackStack<NavKey>): (NavKey) -> NavEntry
             onSent = { route -> backStack.push(route) },
         )
         transferResultEntry(
-            // 송금 완료 후 "확인"/상단 백 → 송금 플로우(수취인~결과) 전체를 걷어내고 출금계좌 상세로 복귀.
-            // 그 화면은 Room Flow를 구독하므로 송금이 갱신한 잔액·거래내역이 즉시 반영된다.
-            // 앵커 위쪽만 지우므로 스택이 빌 수 없고, 재호출도 멱등이라 별도 가드가 필요 없다.
             onFinish = { sourceAccountId ->
-                val anchor = backStack.lastIndexOf(AccountRoute(sourceAccountId))
-                if (anchor >= 0) {
-                    while (backStack.lastIndex > anchor) backStack.removeAt(backStack.lastIndex)
-                }
+                backStack.popUpTo { it is AccountRoute && it.accountId == sourceAccountId }
             },
         )
     }
@@ -96,4 +90,15 @@ private fun NavBackStack<NavKey>.push(key: NavKey) {
  */
 private fun NavBackStack<NavKey>.pop() {
     if (size > 1) removeLastOrNull()
+}
+
+/**
+ * popUpTo. [predicate]에 처음 걸리는(위에서 아래로) 엔트리가 최상단이 되도록 그 위를 모두 걷어낸다
+ * (Nav2 popUpTo, inclusive=false 대응). 앵커를 값이 아니라 식별 필드로 참조하므로 라우트에 필드가
+ * 늘어도 매칭이 깨지지 않는다. 걸리는 엔트리가 없으면 스택 불변. 앵커는 남으므로 스택이 빌 수 없고, 재호출도 멱등이다.
+ */
+private inline fun NavBackStack<NavKey>.popUpTo(predicate: (NavKey) -> Boolean) {
+    val index = indexOfLast(predicate)
+    if (index < 0) return
+    while (lastIndex > index) removeAt(lastIndex)
 }
