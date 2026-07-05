@@ -4,9 +4,7 @@
 > 
 > 총 자산 · 다통화 계좌 리스팅, 4단계 송금 플로우(수취인 → 금액 → 확인 → 결과)
 >
-> **DDD · 멀티모듈 클린 아키텍처 · MVI · 계층별 테스트 피라미드**
->
-> <sub>개인 포트폴리오 · 단독 설계·구현 · 약 2주 · 홈 / 계좌상세 / 송금 도메인</sub>
+> **DDD · Multi-module Clean Architecture · MVI · Layered Test Pyramid**
 
 
 ---
