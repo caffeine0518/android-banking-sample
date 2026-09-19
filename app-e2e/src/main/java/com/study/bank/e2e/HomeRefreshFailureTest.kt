@@ -1,4 +1,4 @@
-package com.study.bank.e2e.feature.home
+package com.study.bank.e2e
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -10,7 +10,7 @@ import com.study.bank.core.ui.testing.BankTestTags.HOME_SNACKBAR
 import com.study.bank.core.ui.testing.BankTestTags.accountItem
 import com.study.bank.data.di.kftc.NetworkFaultController
 import com.study.bank.domain.model.Currency
-import com.study.bank.e2e.support.E2eAccounts
+import com.study.bank.e2e.support.AccountsByCurrency
 import com.study.bank.e2e.support.awaitNotLoading
 import com.study.bank.e2e.support.awaitTag
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -29,7 +29,7 @@ import org.junit.Test
  * :data:remote:kftc를 직접 의존하지 않는다.
  */
 @HiltAndroidTest
-class HomeRefreshErrorEndToEndTest {
+class HomeRefreshFailureTest {
 
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
@@ -54,7 +54,7 @@ class HomeRefreshErrorEndToEndTest {
     @Test
     fun 새로고침이_실패하면_에러_스낵바가_뜨고_기존_계좌는_유지된다() {
         // 앱 부팅 시 자동 Refresh가 성공해 시드 계좌가 뜰 때까지 대기(표시명이 아닌 id 태그로).
-        val account = E2eAccounts.firstOf(Currency.KRW)
+        val account = AccountsByCurrency.firstOf(Currency.KRW)
         composeRule.awaitTag(accountItem(account))
         // isLoading=true면 새로고침 인텐트가 무시되므로, 초기 로딩이 끝난 뒤 클릭한다.
         composeRule.awaitNotLoading()

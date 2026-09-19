@@ -1,4 +1,4 @@
-package com.study.bank.e2e.feature.transfer
+package com.study.bank.e2e
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -18,7 +18,7 @@ import com.study.bank.core.ui.testing.BankTestTags.SCREEN_RECIPIENT
 import com.study.bank.core.ui.testing.BankTestTags.accountDetail
 import com.study.bank.core.ui.testing.BankTestTags.accountItem
 import com.study.bank.domain.model.Currency
-import com.study.bank.e2e.support.E2eAccounts
+import com.study.bank.e2e.support.AccountsByCurrency
 import com.study.bank.e2e.support.awaitTag
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -29,7 +29,7 @@ import org.junit.Test
  * 송금 풀 플로우 E2E: 홈 → 계좌 상세 → 수취인 → 금액 → 확인 → 결과.
  */
 @HiltAndroidTest
-class TransferFlowEndToEndTest {
+class TransferFlowTest {
 
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
@@ -39,7 +39,7 @@ class TransferFlowEndToEndTest {
 
     @Test
     fun 같은_통화_내_계좌로_송금하면_성공_화면이_보인다() {
-        val (source, recipient) = E2eAccounts.sameCurrencyPair(Currency.KRW)
+        val (source, recipient) = AccountsByCurrency.sameCurrencyPair(Currency.KRW)
         openAmountScreen(sourceId = source, recipientId = recipient)
         enterDigits("10000")
 
@@ -56,7 +56,7 @@ class TransferFlowEndToEndTest {
 
     @Test
     fun 통화가_다른_계좌로는_송금이_거절된다() {
-        val (source, recipient) = E2eAccounts.crossCurrencyPair(from = Currency.KRW, to = Currency.USD)
+        val (source, recipient) = AccountsByCurrency.crossCurrencyPair(from = Currency.KRW, to = Currency.USD)
         openAmountScreen(sourceId = source, recipientId = recipient)
         enterDigits("10000")
 
@@ -72,7 +72,7 @@ class TransferFlowEndToEndTest {
 
     @Test
     fun 송금_성공_후_확인하면_출금계좌_상세로_돌아간다() {
-        val (source, recipient) = E2eAccounts.sameCurrencyPair(Currency.KRW)
+        val (source, recipient) = AccountsByCurrency.sameCurrencyPair(Currency.KRW)
         openAmountScreen(sourceId = source, recipientId = recipient)
         enterDigits("10000")
 
@@ -98,7 +98,7 @@ class TransferFlowEndToEndTest {
     @Test
     fun 같은_USD_계좌로_소수점_금액을_보내면_절삭_없이_송금된다() {
         // 출금·수취 모두 USD(소수점 통화). 동일 통화라 송금이 성립하고, 소수점 보존을 검증한다.
-        val (source, recipient) = E2eAccounts.sameCurrencyPair(Currency.USD)
+        val (source, recipient) = AccountsByCurrency.sameCurrencyPair(Currency.USD)
         openAmountScreen(sourceId = source, recipientId = recipient)
         // $100.50 = 10,050센트를 키패드로 입력(소수점 키 없이 최소단위 누적).
         enterDigits("10050")

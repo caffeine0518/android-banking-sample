@@ -10,7 +10,7 @@ import com.study.bank.domain.model.Currency
  * 쌍으로 표현하면 시드의 어떤 계좌가 무슨 통화인지 바뀌어도 그 의도가 유지된다. 통화→id 매핑은
  * [KftcSeedAccountIds.idsOf]가 시드에서 파생한다.
  */
-internal object E2eAccounts {
+internal object AccountsByCurrency {
 
     /** [currency] 계좌 하나(시드 등록 순 첫 번째). */
     fun firstOf(currency: Currency): String =

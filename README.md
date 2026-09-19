@@ -12,7 +12,7 @@
 <p align="center">
   <img src="docs/assets/e2e-transfer.gif" width="280" alt="UI 계기 E2E가 송금 4단계 플로우를 자동 구동하는 장면" />
   <br/>
-  <sub><b>UI 계기 E2E</b> — <code>:app-e2e</code>가 실제 에뮬레이터에서 앱을 구동: 홈 → 계좌상세 → 수취인 → 금액 → 확인 → 결과(성공) · <code>TransferFlowEndToEndTest</code></sub>
+  <sub><b>UI 계기 E2E</b> — <code>:app-e2e</code>가 실제 에뮬레이터에서 앱을 구동: 홈 → 계좌상세 → 수취인 → 금액 → 확인 → 결과(성공) · <code>TransferFlowTest</code></sub>
 </p>
 
 ---

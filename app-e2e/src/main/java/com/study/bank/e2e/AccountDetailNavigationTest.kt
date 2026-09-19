@@ -1,4 +1,4 @@
-package com.study.bank.e2e.feature.account
+package com.study.bank.e2e
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -13,7 +13,7 @@ import com.study.bank.core.ui.testing.BankTestTags.SCREEN_HOME
 import com.study.bank.core.ui.testing.BankTestTags.accountDetail
 import com.study.bank.core.ui.testing.BankTestTags.accountItem
 import com.study.bank.domain.model.Currency
-import com.study.bank.e2e.support.E2eAccounts
+import com.study.bank.e2e.support.AccountsByCurrency
 import com.study.bank.e2e.support.awaitTag
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -21,7 +21,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @HiltAndroidTest
-class AccountDetailFlowEndToEndTest {
+class AccountDetailNavigationTest {
 
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
@@ -32,7 +32,7 @@ class AccountDetailFlowEndToEndTest {
     @Test
     fun 계좌를_탭하면_상세_화면이_보인다() {
         // 이 테스트는 통화 무관 — 아무 계좌나 하나 열어 상세가 끝까지 표시되는지 검증한다(거래내역 적재는 페이징·비동기라 단정하지 않음).
-        val account = E2eAccounts.firstOf(Currency.KRW)
+        val account = AccountsByCurrency.firstOf(Currency.KRW)
         // 표시명이 아니라 안정적 id 태그로 그 계좌 행을 지목해 클릭.
         composeRule.awaitTag(accountItem(account))
         composeRule.onNodeWithTag(accountItem(account)).performClick()
@@ -46,7 +46,7 @@ class AccountDetailFlowEndToEndTest {
 
     @Test
     fun 상세에서_뒤로가기를_누르면_홈으로_돌아온다() {
-        val account = E2eAccounts.firstOf(Currency.KRW)
+        val account = AccountsByCurrency.firstOf(Currency.KRW)
         composeRule.awaitTag(accountItem(account))
         composeRule.onNodeWithTag(accountItem(account)).performClick()
         composeRule.awaitTag(accountDetail(account))

@@ -1,4 +1,4 @@
-package com.study.bank.e2e.navigation
+package com.study.bank.e2e
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.click
@@ -13,7 +13,7 @@ import com.study.bank.core.ui.testing.BankTestTags.SCREEN_HOME
 import com.study.bank.core.ui.testing.BankTestTags.accountDetail
 import com.study.bank.core.ui.testing.BankTestTags.accountItem
 import com.study.bank.domain.model.Currency
-import com.study.bank.e2e.support.E2eAccounts
+import com.study.bank.e2e.support.AccountsByCurrency
 import com.study.bank.e2e.support.awaitTag
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -31,7 +31,7 @@ import org.junit.Test
  * [performTouchInput] 한 배치에 클릭 2회를 넣어야 재현된다 — performClick 2회는 사이에 idle 동기화가 낀다.
  */
 @HiltAndroidTest
-class NavigationDoubleTapGuardEndToEndTest {
+class NavigationDoubleTapGuardTest {
 
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
@@ -41,7 +41,7 @@ class NavigationDoubleTapGuardEndToEndTest {
 
     @Test
     fun 계좌를_더블탭해도_상세는_한_번만_쌓인다() {
-        val account = E2eAccounts.firstOf(Currency.KRW)
+        val account = AccountsByCurrency.firstOf(Currency.KRW)
         composeRule.awaitTag(accountItem(account))
 
         composeRule.onNodeWithTag(accountItem(account)).performTouchInput {
@@ -59,7 +59,7 @@ class NavigationDoubleTapGuardEndToEndTest {
 
     @Test
     fun 상세_백버튼을_더블탭해도_크래시_없이_홈에_머문다() {
-        val account = E2eAccounts.firstOf(Currency.KRW)
+        val account = AccountsByCurrency.firstOf(Currency.KRW)
         composeRule.awaitTag(accountItem(account))
         composeRule.onNodeWithTag(accountItem(account)).performClick()
         composeRule.awaitTag(accountDetail(account))
