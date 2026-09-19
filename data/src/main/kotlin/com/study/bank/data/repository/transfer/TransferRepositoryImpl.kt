@@ -21,10 +21,6 @@ import javax.inject.Singleton
 /**
  * 출금이체 실행 = KFTC withdraw 호출 후 SSOT(Room) 재동기화.
  *
- * mock withdraw는 KFTC 인메모리 상태(잔액+원장)를 바꾸지만 Room 캐시는 별개이므로, 성공 시
- * [accountRepository]/[transactionRepository]의 refresh로 출금계좌 잔액·거래내역을 다시 끌어와 SSOT를 맞춘다
- * (수취계좌 내역은 그 화면 진입 시 각자 refresh). refresh 실패가 성공한 이체를 실패로 뒤집지 않도록 best-effort.
- *
  * 업무 거절(잔액부족 등)은 KFTC가 HTTP 200 + rsp_code A0001 + bank_rsp_code로 알리고, 전송/입력 오류는
  * 예외(IOException=네트워크, 그 외=Unknown)로 매핑한다.
  */

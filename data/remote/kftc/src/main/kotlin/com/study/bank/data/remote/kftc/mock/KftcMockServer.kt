@@ -29,7 +29,6 @@ class KftcMockServer @Inject constructor(
 ) {
 
     private val server: MockWebServer = MockWebServer()
-    // Composition root: 디스패처/핸들러가 직접 협력자를 생성하지 않도록 여기서 그래프를 명시 조립해 주입한다.
     // responses는 단일 인스턴스를 공유해야 api_tran_id 시퀀스가 엔드포인트 전역으로 1씩 증가한다.
     private val state = KftcBankState(KftcAccountSeed.accounts)
     private val responses = KftcMockResponses()

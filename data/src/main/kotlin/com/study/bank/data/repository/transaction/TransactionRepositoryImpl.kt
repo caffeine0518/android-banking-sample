@@ -19,14 +19,8 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 /**
- * 거래내역 SSOT = Room. 단건 목록 읽기([observeTransactions])는 [dao] Flow만 구독한다.
- *
- * 원격(KFTC)은 [refresh]에서만 호출돼 결과를 해당 계좌 캐시에 통째 교체 기록한다. 따라서 화면은 항상
- * 로컬 캐시를 관찰하고 갱신은 별도 트리거로 일어난다([com.study.bank.data.repository.account.AccountRepositoryImpl] 패턴).
- *
- * [transactionStream]도 SSOT는 Room이다(가이드의 network+DB 패턴) — UI/Pager는 [TransactionDao.pagingSource]만
- * 관찰하고, [TransactionRemoteMediator]가 KFTC 연속조회로 페이지를 받아 Room에 적재한다. 월급통장처럼 수천 건인
- * 계좌도 화면에 보이는 만큼만 점진 적재된다.
+ * 거래내역 SSOT = Room. 원격(KFTC)은 [refresh]와 [TransactionRemoteMediator]에서만 호출되고, 화면은 늘
+ * 로컬 캐시를 관찰한다([com.study.bank.data.repository.account.AccountRepositoryImpl]와 같은 패턴).
  */
 @OptIn(ExperimentalPagingApi::class)
 @Singleton

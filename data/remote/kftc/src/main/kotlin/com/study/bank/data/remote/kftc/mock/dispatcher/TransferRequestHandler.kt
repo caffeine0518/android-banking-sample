@@ -12,11 +12,8 @@ import java.util.concurrent.TimeUnit
 /**
  * KFTC `/v2.0/transfer/…` 요청 핸들러: 출금이체.
  *
- * 본문 역직렬화 → [state] 위임 → 결과를 전송 오류(4xx)/업무 거절(200+A0001)/성공으로 응답 분기한다.
- * 라우팅은 [KftcMockDispatcher], 응답 조립은 [responses], 본문 파싱은 [json]에 위임.
- *
  * [responseDelayMillis]>0이면 출금 응답을 그만큼 지연시킨다 — 데모/수동 테스트에서 "보내는 중이에요"
- * 로딩 화면을 눈으로 확인할 수 있게 한다. 기본 0(지연 없음)이라 단위 테스트는 느려지지 않고, 실제 앱
+ * 로딩 화면을 눈으로 확인하려는 용도다. 기본 0이라 단위 테스트는 느려지지 않고, 실제 앱
  * wiring([com.study.bank.data.remote.kftc.mock.KftcMockServer])에서만 양수를 준다.
  */
 internal class TransferRequestHandler(

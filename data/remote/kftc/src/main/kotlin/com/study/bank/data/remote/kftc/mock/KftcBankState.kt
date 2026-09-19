@@ -8,9 +8,6 @@ import java.time.format.DateTimeFormatter
 /**
  * KFTC mock의 가변 인메모리 상태(잔액 + 거래원장).
  *
- * 시드에서 초기화되고 [withdraw]로 잔액이 변하며 양쪽 계좌에 [TransactionRecord]를 남긴다.
- * 디스크 영속이 없어 프로세스 재시작(=앱 재실행)이 곧 초깃값 리셋이며, [reset]은 같은 효과를 명시적으로 낸다.
- *
  * 여러 스레드(요청 디스패치 vs 검증)가 접근하므로 모든 진입점을 [lock]으로 직렬화한다.
  * 잔액 문자열의 소수 자릿수(통화 exponent)는 시드 원본 문자열의 scale을 보존해 재포맷한다 —
  * 이 모듈은 :domain의 Currency를 모르기 때문.
