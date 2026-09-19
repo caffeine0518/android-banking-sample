@@ -1,10 +1,12 @@
 package com.study.bank.data.remote.kftc.api
 
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryRequest
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
 import com.study.bank.data.remote.kftc.mock.KftcMockServer
-import com.study.bank.data.remote.kftc.mock.KftcSeedAccountIds
-import com.study.bank.data.remote.kftc.mock.KftcTransactionSeed
+import com.study.bank.data.remote.kftc.mock.TestMockBank
+import com.study.bank.data.remote.kftc.mock.seed.KftcSeedAccountIds
+import com.study.bank.data.remote.kftc.mock.seed.KftcTransactionSeed
 import com.study.bank.data.remote.kftc.network.NetworkJson
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
@@ -16,10 +18,13 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import retrofit2.HttpException
 import retrofit2.Retrofit
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 
+/** mock 서버가 Room 기반 상태를 들고 있어 Context가 필요하다 — Robolectric에서 실행한다. */
+@RunWith(RobolectricTestRunner::class)
 class KftcApiServiceTest {
 
     private lateinit var mockServer: KftcMockServer
@@ -27,7 +32,13 @@ class KftcApiServiceTest {
 
     @Before
     fun setUp() {
-        mockServer = KftcMockServer(NetworkJson()).apply { start() }
+        val bank = TestMockBank()
+        mockServer = KftcMockServer(
+            accountDao = bank.accountDao,
+            transactionDao = bank.transactionDao,
+            withdrawalService = bank.withdrawalService,
+            networkJson = NetworkJson(),
+        ).apply { start() }
 
         val json = Json {
             ignoreUnknownKeys = true

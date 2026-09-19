@@ -1,11 +1,19 @@
 package com.study.bank.data.remote.kftc.mock
 
-import com.study.bank.data.remote.kftc.mock.dispatcher.AccountRequestHandler
-import com.study.bank.data.remote.kftc.mock.dispatcher.InquiryRequestHandler
-import com.study.bank.data.remote.kftc.mock.dispatcher.KftcMockDispatcher
-import com.study.bank.data.remote.kftc.mock.dispatcher.KftcMockResponses
-import com.study.bank.data.remote.kftc.mock.dispatcher.TransferRequestHandler
+import com.study.bank.data.remote.kftc.mock.http.KftcMockDispatcher
+import com.study.bank.data.remote.kftc.mock.http.handler.AccountRequestHandler
+import com.study.bank.data.remote.kftc.mock.http.handler.InquiryRequestHandler
+import com.study.bank.data.remote.kftc.mock.http.handler.TransferRequestHandler
+import com.study.bank.data.remote.kftc.mock.http.kftcRoutes
+import com.study.bank.data.remote.kftc.mock.http.response.KftcMockResponses
+import com.study.bank.data.remote.kftc.mock.seed.KftcAccountSeed
+import com.study.bank.data.remote.kftc.mock.seed.KftcRecipientSeed
+import com.study.bank.data.remote.kftc.mock.service.KftcWithdrawalService
+import com.study.bank.data.remote.kftc.mock.storage.dao.MockAccountDao
+import com.study.bank.data.remote.kftc.mock.storage.dao.MockTransactionDao
 import com.study.bank.data.remote.kftc.network.NetworkJson
+import java.net.InetAddress
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import okhttp3.HttpUrl
@@ -13,8 +21,6 @@ import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import okhttp3.tls.HandshakeCertificates
 import okhttp3.tls.HeldCertificate
-import java.net.InetAddress
-import java.util.concurrent.TimeUnit
 
 /**
  * KFTC v2.0 mock 서버의 라이프사이클 래퍼.
@@ -24,26 +30,30 @@ import java.util.concurrent.TimeUnit
  * 자체 서명 loopback 인증서로 HTTPS를 제공하고, 클라이언트는 [clientCertificates]로 이 CA를 신뢰한다.
  */
 @Singleton
-class KftcMockServer @Inject constructor(
+class KftcMockServer @Inject internal constructor(
+    accountDao: MockAccountDao,
+    transactionDao: MockTransactionDao,
+    withdrawalService: KftcWithdrawalService,
     networkJson: NetworkJson,
 ) {
 
     private val server: MockWebServer = MockWebServer()
     // responses는 단일 인스턴스를 공유해야 api_tran_id 시퀀스가 엔드포인트 전역으로 1씩 증가한다.
-    private val state = KftcBankState(KftcAccountSeed.accounts)
     private val responses = KftcMockResponses()
     private val dispatcher = KftcMockDispatcher(
-        accountHandler = AccountRequestHandler(state, responses),
-        transferHandler = TransferRequestHandler(
-            state,
-            responses,
-            networkJson.value,
-            responseDelayMillis = WITHDRAW_RESPONSE_DELAY_MS,
-        ),
-        inquiryHandler = InquiryRequestHandler(
-            KftcRecipientSeed.directory(KftcAccountSeed.accounts),
-            responses,
-            networkJson.value,
+        routes = kftcRoutes(
+            account = AccountRequestHandler(accountDao, transactionDao, responses),
+            transfer = TransferRequestHandler(
+                withdrawalService,
+                responses,
+                networkJson.value,
+                responseDelayMillis = WITHDRAW_RESPONSE_DELAY_MS,
+            ),
+            inquiry = InquiryRequestHandler(
+                KftcRecipientSeed.directory(KftcAccountSeed.accounts),
+                responses,
+                networkJson.value,
+            ),
         ),
         responses = responses,
     )
