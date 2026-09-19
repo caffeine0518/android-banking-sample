@@ -229,7 +229,9 @@ private fun BottomBar(phase: ResultPhase, onIntent: (ResultIntent) -> Unit) {
             when (phase) {
                 is ResultPhase.Failure -> FilledTonalButton(
                     onClick = { onIntent(ResultIntent.RetryClicked) },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .testTag(BankTestTags.RESULT_RETRY),
                 ) {
                     Text(stringResource(R.string.transfer_result_retry))
                 }
