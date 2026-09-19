@@ -3,12 +3,13 @@ package com.study.bank.data.remote.kftc.mock.dispatcher
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
+import okhttp3.mockwebserver.SocketPolicy
 
 /**
  * KFTC 오픈뱅킹 v2.0 mock 라우터.
  *
- * 책임은 장애 토글 + path → 핸들러 분기뿐. 엔드포인트별 로직은 [accountHandler]/[transferHandler]가,
- * 라우팅 레벨 에러(잘못된 URL/미등록 path/장애 주입)만 [responses]가 직접 응답한다.
+ * 책임은 연결 차단 토글 + path → 핸들러 분기뿐. 엔드포인트별 로직은 [accountHandler]/[transferHandler]가,
+ * 라우팅 레벨 에러(잘못된 URL/미등록 path)만 [responses]가 직접 응답한다.
  * 협력자는 모두 [com.study.bank.data.remote.kftc.mock.KftcMockServer]가 구성해 주입한다.
  */
 internal class KftcMockDispatcher(
@@ -18,15 +19,12 @@ internal class KftcMockDispatcher(
     private val responses: KftcMockResponses,
 ) : Dispatcher() {
 
-    /**
-     * 테스트 전용 장애 주입 스위치. true면 모든 요청에 [MockError.ServerFault](5xx)를 응답해
-     * "새로고침 실패 → 에러 스낵바" 경로를 E2E에서 재현한다. 여러 스레드(메인/네트워크)가 읽으므로 @Volatile.
-     */
     @Volatile
-    var faultEnabled: Boolean = false
+    var dropConnections: Boolean = false
 
     override fun dispatch(request: RecordedRequest): MockResponse {
-        if (faultEnabled) return responses.error(MockError.ServerFault)
+        // dispatch는 요청을 읽은 뒤라 AT_START(읽기 전 차단)가 아니라 AFTER_REQUEST다.
+        if (dropConnections) return MockResponse().apply { socketPolicy = SocketPolicy.DISCONNECT_AFTER_REQUEST }
 
         val url = request.requestUrl ?: return responses.error(MockError.InvalidUrl)
 

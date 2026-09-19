@@ -40,10 +40,10 @@ android {
 
 dependencies {
     // :app은 implementation으로 하위 모듈을 가리므로 그 타입들은 여기서 다시 노출해야 한다.
-    implementation(projects.dataDi)        // NetworkFaultController(장애 주입 seam)
+    implementation(projects.dataDi)        // Hilt 테스트 루트가 data 계층 모듈을 집계하려면 필요
     implementation(projects.domain)        // Currency(통화 의도로 시드 계좌 선택)
     implementation(projects.coreUi.model)  // BankTestTags(동적 리스트 항목을 id 기반 testTag로 지목)
-    implementation(projects.data.remote.kftc) // KftcSeedAccountIds(시드 계좌 id 단일 출처)
+    implementation(projects.data.remote.kftc) // KftcSeedAccountIds(시드 id 단일 출처) + KftcMockServer(연결 차단)
     // @TestInstallIn이 테스트 Hilt 루트를 새로 생성하므로, E2E에 등장하는 @HiltViewModel 바인딩(home/account/
     // transfer)이 이 모듈 클래스패스에서 집계되도록 feature 모듈을 명시 의존한다(home.R도 여기서 옴).
     implementation(projects.feature.home)
