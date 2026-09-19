@@ -40,8 +40,8 @@ android {
 
 dependencies {
     // :app은 implementation으로 하위 모듈을 가리므로 그 타입들은 여기서 다시 노출해야 한다.
-    implementation(projects.dataDi)        // NetworkFaultController(장애 주입 seam) + DispatchersModule 교체
-    implementation(projects.domain)        // DispatcherProvider(E2E 디스패처 교체)
+    implementation(projects.dataDi)        // NetworkFaultController(장애 주입 seam)
+    implementation(projects.domain)        // Currency(통화 의도로 시드 계좌 선택)
     implementation(projects.coreUi.model)  // BankTestTags(동적 리스트 항목을 id 기반 testTag로 지목)
     implementation(projects.data.remote.kftc) // KftcSeedAccountIds(시드 계좌 id 단일 출처)
     // @TestInstallIn이 테스트 Hilt 루트를 새로 생성하므로, E2E에 등장하는 @HiltViewModel 바인딩(home/account/
