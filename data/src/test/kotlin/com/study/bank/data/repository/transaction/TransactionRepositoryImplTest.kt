@@ -23,8 +23,7 @@ import java.math.BigDecimal
 /**
  * [TransactionRepositoryImpl] SSOT 동작 검증.
  *
- * Room을 단위 테스트에서 띄우려면 Robolectric이 필요해 [TransactionDao]를 인터페이스 충실 모사로 대체
- * ([AccountRepositoryImplTest]와 동일 전략). 읽기는 DAO Flow만, refresh는 원격→DAO 통째 교체임을 검증한다.
+ * Room을 단위 테스트에서 띄우려면 Robolectric이 필요해 [TransactionDao]를 인터페이스 충실 모사로 대체한다.
  */
 class TransactionRepositoryImplTest {
 
@@ -211,7 +210,6 @@ class TransactionRepositoryImplTest {
                     .sortedWith(compareByDescending<TransactionEntity> { it.occurredAt }.thenByDescending { it.id })
             }
 
-        // 페이징(transactionStream)은 RemoteMediator 테스트에서 별도로 검증한다. 이 테스트는 observe/refresh만 다룬다.
         override fun pagingSource(accountId: String): PagingSource<Int, TransactionEntity> = error("unused")
 
         override suspend fun insertAll(entities: List<TransactionEntity>) {

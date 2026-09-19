@@ -15,10 +15,8 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
 /**
- * [HomeScreen]의 골든 스크린샷 테스트.
- *
- * 동작·구조는 [HomeScreenTest](시맨틱 트리)가 담당하고, 여기서는 NATIVE 그래픽으로 실제 픽셀을
- * 렌더해 PNG로 박제한다(색/간격/레이아웃 회귀 검출용). 골든은 src/test/screenshots에 저장.
+ * [HomeScreen]의 골든 스크린샷 테스트 — 색·간격·레이아웃 회귀를 실제 픽셀로 검출한다.
+ * 골든은 src/test/screenshots에 저장된다.
  *
  * - 골든 기록: ./gradlew :feature:home:recordRoborazziDebug
  * - 회귀 검증: ./gradlew :feature:home:verifyRoborazziDebug

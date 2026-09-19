@@ -30,10 +30,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 
-/**
- * [AccountDetailScreen]의 화면 단위 테스트. state를 직접 주입해 (1) 렌더링과 (2) 동작→인텐트 매핑을 검증한다.
- * Robolectric으로 JVM(src/test)에서 구동 — 에뮬레이터 불필요.
- */
+/** state를 직접 주입하는 [AccountDetailScreen] 화면 테스트. Robolectric으로 JVM에서 구동한다. */
 @RunWith(RobolectricTestRunner::class)
 class AccountDetailScreenTest {
 

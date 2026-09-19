@@ -22,12 +22,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * [TransactionRemoteMediator] 네트워크→DB 적재 검증.
- *
- * 메모리 커서(befor_inquiry_trace_info) 재사용, REFRESH 시 캐시 교체, next_page_yn→endOfPaginationReached
- * 매핑, 더 받을 게 없을 때 네트워크 미호출을 검증한다. Room 없이 인메모리 fake DAO로 실행한다.
- */
+/** Room 없이 인메모리 fake DAO로 [TransactionRemoteMediator]의 네트워크→DB 적재를 검증한다. */
 @OptIn(ExperimentalPagingApi::class)
 class TransactionRemoteMediatorTest {
 

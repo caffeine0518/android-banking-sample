@@ -6,9 +6,7 @@ import org.junit.Test
 import java.time.LocalDateTime
 
 /**
- * [KftcBankState] 단독 검증.
- *
- * HTTP/직렬화 없이 잔액·원장 변동 로직만 검증한다(라우팅은 KftcMockDispatcherTest, E2E는 KftcApiServiceTest).
+ * HTTP/직렬화 없이 [KftcBankState]의 잔액·원장 변동 로직만 검증한다.
  * 기본 시드를 그대로 쓰되 시각은 고정 clock으로 결정적이게 만든다.
  */
 class KftcBankStateTest {

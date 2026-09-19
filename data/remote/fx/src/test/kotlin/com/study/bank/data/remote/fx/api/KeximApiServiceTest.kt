@@ -28,7 +28,6 @@ class KeximApiServiceTest {
         api = createKeximApiService()
     }
 
-    // 실제 KEXIM 호출 — USD 매매기준율/매도/매수가 모두 채워지고 FX 호가 불변량(매도 > 매매기준율 > 매입)을 만족.
     @Test
     fun `실제 KEXIM 호출은 USD 매매기준율과 매도 매입율을 채우고 호가 불변량을 만족한다`() = runTest {
         val items = fetchRecentSuccess()
@@ -50,7 +49,7 @@ class KeximApiServiceTest {
         assertTrue("매매기준율 > 매입(팔때): $mid vs $bid", mid > bid)
     }
 
-    // 잘못된 인증키 → result=3 + 다른 필드 null. 키 없이도 돌아가는 테스트(인증 실패 경로 검증).
+    // 유효한 인증키가 없어도 돌아가는 테스트다.
     @Test
     fun `잘못된 인증키로 호출하면 result 3과 null 필드들로 응답한다`() = runTest {
         val brokenApi = createKeximApiService(authKey = "INVALID_KEY_FOR_TEST")

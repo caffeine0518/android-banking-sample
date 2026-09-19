@@ -71,7 +71,6 @@ class FxRateRepositoryImplTest {
         assertEquals(3, api.callCount)
     }
 
-    // 빈 배열뿐 아니라 result=2(휴일) 응답도 walkback 트리거인지.
     @Test
     fun `result가 1이 아닌 응답도 walkback 대상`() = runTest {
         val api = FakeKeximApiService(mapOf(
@@ -102,7 +101,6 @@ class FxRateRepositoryImplTest {
         }
     }
 
-    // 일회성 네트워크 에러가 전체 환율 흐름을 끊지 않게 (resilience).
     @Test
     fun `API 예외 발생해도 walkback으로 다음 날짜 시도`() = runTest {
         val api = FakeKeximApiService(

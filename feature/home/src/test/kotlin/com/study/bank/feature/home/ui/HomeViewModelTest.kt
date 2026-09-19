@@ -66,7 +66,6 @@ class HomeViewModelTest {
 
         repo.emit(account("acc-1", 1_000_000, Currency.KRW))
 
-        // 환산·합산 정합성은 TotalAssetsUseCaseTest 담당. 여기선 usecase 결과가 state로 '연결'되는지만 확인한다.
         assertEquals(moneyUiMapper.map(Money.of(1_000_000, Currency.KRW)), vm.state.value.totalAssets)
     }
 

@@ -21,7 +21,6 @@ class FxRateMapperTest {
 
     // ----- KEXIM 입력 파싱 -----
 
-    // KEXIM 통화별 응답이 누락 없이 도메인 통화 키로 흐르는지.
     @Test
     fun `map은 KEXIM 응답 한 통화당 한 행으로 변환`() {
         val items = listOf(
@@ -65,7 +64,6 @@ class FxRateMapperTest {
         assertNull(result[Currency.JPY])
     }
 
-    // 미지원 통화 추가 시 매핑이 실패하지 않는지.
     @Test
     fun `map은 도메인이 모르는 통화 코드를 무시`() {
         val items = listOf(
@@ -81,7 +79,6 @@ class FxRateMapperTest {
         assertEquals(2, result.size) // USD + KRW identity
     }
 
-    // KEXIM 콤마 포함 숫자 포맷이 BigDecimal 파싱에서 실패하지 않는지.
     @Test
     fun `map은 천단위 콤마 포함 문자열을 파싱`() {
         val items = listOf(success("USD", "1,234,567.89"))
@@ -93,7 +90,6 @@ class FxRateMapperTest {
 
     // ----- "데이터 없음" 시그널 -----
 
-    // 빈 입력 또는 전부 실패 응답이면 호출자가 "데이터 없음"을 명시적으로 알 수 있어야 함.
     @Test
     fun `map은 파싱 가능한 응답이 없으면 null 반환`() {
         listOf(Currency.KRW, Currency.USD, Currency.EUR).forEach { target ->

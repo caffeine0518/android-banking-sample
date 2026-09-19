@@ -77,7 +77,6 @@ class TotalAssetsUseCaseTest {
         assertTrue(totals.unconverted.isEmpty())
     }
 
-    // 빈 입력의 zero가 target에 종속 — 잘못된 통화로 0이 전달되지 않게.
     @Test
     fun `계좌가 없으면 어떤 target이든 그 통화의 0과 빈 unconverted`() = runTest {
         val useCase = TotalAssetsUseCase(

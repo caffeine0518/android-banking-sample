@@ -26,11 +26,8 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 
 /**
- * [HomeScreen]의 화면 단위 테스트.
- *
- * HomeScreen은 state를 받아 그리고 사용자 동작을 onIntent로만 내보내는 stateless composable이므로,
- * ViewModel 없이 state를 직접 주입해 (1) 렌더링과 (2) 동작→인텐트 매핑을 검증한다.
- * Robolectric으로 JVM(src/test)에서 구동 — 에뮬레이터 불필요.
+ * [HomeScreen]은 state를 받아 그리고 동작을 onIntent로만 내보내는 stateless composable이라, ViewModel 없이
+ * state를 직접 주입해 검증한다. Robolectric으로 JVM에서 구동 — 에뮬레이터 불필요.
  */
 @RunWith(RobolectricTestRunner::class)
 class HomeScreenTest {
