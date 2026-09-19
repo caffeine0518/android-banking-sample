@@ -67,8 +67,9 @@ internal class KftcMockResponses(
             ),
         )
 
+    /** bank_tran_id는 새로 만들지 않고 요청값을 반환한다 — 재요청이 같은 거래여야 한다. */
     fun withdrawSuccess(result: WithdrawResult.Success): MockResponse =
-        success(result.toResponse(newApiTranId(), nowDtm(), newBankTranId(), nowDate()))
+        success(result.toResponse(newApiTranId(), nowDtm(), result.bankTranId, nowDate()))
 
     /** 업무 거절: KFTC대로 HTTP 200 + rsp_code A0001 + 식별용 bank_rsp_code. 성공과 같은 DTO를 재사용. */
     fun withdrawFailure(bankRspCode: String, message: String): MockResponse =

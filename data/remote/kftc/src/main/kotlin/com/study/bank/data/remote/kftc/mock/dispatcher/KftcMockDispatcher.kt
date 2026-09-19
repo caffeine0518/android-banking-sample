@@ -22,10 +22,14 @@ internal class KftcMockDispatcher(
     @Volatile
     var dropConnections: Boolean = false
 
+    /** [dropConnections]는 응답만 유실시킨다 — [route]를 먼저 실행하므로 서버 상태는 이미 반영됐다. */
     override fun dispatch(request: RecordedRequest): MockResponse {
-        // dispatch는 요청을 읽은 뒤라 AT_START(읽기 전 차단)가 아니라 AFTER_REQUEST다.
+        val response = route(request)
         if (dropConnections) return MockResponse().apply { socketPolicy = SocketPolicy.DISCONNECT_AFTER_REQUEST }
+        return response
+    }
 
+    private fun route(request: RecordedRequest): MockResponse {
         val url = request.requestUrl ?: return responses.error(MockError.InvalidUrl)
 
         return when (url.encodedPath) {

@@ -10,6 +10,7 @@ package com.study.bank.data.remote.kftc.mock
 internal sealed interface WithdrawResult {
 
     data class Success(
+        val bankTranId: String,
         val fintechUseNum: String,
         val bankCodeStd: String,
         val accountNumMasked: String,

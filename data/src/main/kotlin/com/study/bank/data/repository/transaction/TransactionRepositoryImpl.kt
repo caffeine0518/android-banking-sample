@@ -8,6 +8,8 @@ import androidx.paging.map
 import com.study.bank.data.local.dao.TransactionDao
 import com.study.bank.data.remote.kftc.api.KFTC_TRANSACTION_PAGE_SIZE
 import com.study.bank.data.remote.kftc.api.KftcApiService
+import com.study.bank.data.repository.TRAN_DTIME
+import com.study.bank.data.repository.bankTranIdFor
 import com.study.bank.domain.model.Currency
 import com.study.bank.domain.model.account.AccountId
 import com.study.bank.domain.model.transaction.Transaction
@@ -79,12 +81,8 @@ class TransactionRepositoryImpl @Inject constructor(
     }
 
     private companion object {
-        // 데모 고정값. 실서비스는 조회 기간/요청 추적자(bank_tran_id, tran_dtime)를 동적으로 구성한다.
+        // 데모 고정값. 실서비스는 조회 기간을 동적으로 구성한다.
         const val FROM_DATE = "20260101"
         const val TO_DATE = "20261231"
-        const val TRAN_DTIME = "20260603120000"
-
-        fun bankTranIdFor(fintechUseNum: String): String =
-            "M202300001U%06d".format(fintechUseNum.hashCode() and 0xFFFFF)
     }
 }

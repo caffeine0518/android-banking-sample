@@ -3,6 +3,8 @@ package com.study.bank.data.repository.account
 import android.util.Log
 import com.study.bank.data.local.dao.AccountDao
 import com.study.bank.data.remote.kftc.api.KftcApiService
+import com.study.bank.data.repository.TRAN_DTIME
+import com.study.bank.data.repository.bankTranIdFor
 import com.study.bank.domain.coroutine.cancellableCatching
 import com.study.bank.domain.model.account.Account
 import com.study.bank.domain.model.account.AccountId
@@ -66,10 +68,5 @@ class AccountRepositoryImpl @Inject constructor(
         const val TAG = "AccountRepository"
         // 데모 전용 고정 사용자. 운영에서는 인증 토큰에서 추출한다.
         const val USER_SEQ_NO = "1100000001"
-        // tran_dtime은 KFTC 전문의 거래 추적 필드다. mock은 검증하지 않으므로 고정값을 쓴다.
-        const val TRAN_DTIME = "20260603120000"
-
-        fun bankTranIdFor(fintechUseNum: String): String =
-            "M202300001U%06d".format(fintechUseNum.hashCode() and 0xFFFFF)
     }
 }

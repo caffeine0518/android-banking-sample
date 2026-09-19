@@ -44,5 +44,6 @@ object BankTestTags {
     const val CONFIRM_SEND = "confirm_send"
     const val RESULT_SUCCESS = "result_success"
     const val RESULT_FAILURE = "result_failure"
+    const val RESULT_RETRY = "result_retry"
     const val RESULT_CONFIRM = "result_confirm"
 }

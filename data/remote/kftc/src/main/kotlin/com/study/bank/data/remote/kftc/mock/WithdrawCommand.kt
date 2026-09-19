@@ -7,6 +7,7 @@ package com.study.bank.data.remote.kftc.mock
  * (recvAccountNum, recvBankCode)로 매칭돼 복식부기 입금까지 일어난다.
  */
 internal data class WithdrawCommand(
+    val bankTranId: String,
     val fintechUseNum: String,
     val tranAmt: String,
     val recvAccountNum: String,
