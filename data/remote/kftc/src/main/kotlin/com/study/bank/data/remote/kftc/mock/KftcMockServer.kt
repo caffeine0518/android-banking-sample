@@ -95,17 +95,13 @@ class KftcMockServer @Inject constructor(
     internal fun takeRequest(timeoutMs: Long = 1_000): RecordedRequest? =
         server.takeRequest(timeoutMs, TimeUnit.MILLISECONDS)
 
-    /**
-     * 테스트 전용: 이후 모든 요청을 서버 장애(5xx)로 응답하게 한다.
-     * @Singleton이라 주입받은 인스턴스가 곧 API가 호출하는 서버이므로, 이 토글로 실 네트워크 실패를 재현한다.
-     */
-    fun enableFault() {
-        dispatcher.faultEnabled = true
+    /** 테스트 전용. @Singleton이라 주입받은 인스턴스가 곧 API가 호출하는 그 서버다. */
+    fun startDroppingConnections() {
+        dispatcher.dropConnections = true
     }
 
-    /** 테스트 전용: [enableFault]로 켠 장애 주입을 해제한다. */
-    fun disableFault() {
-        dispatcher.faultEnabled = false
+    fun stopDroppingConnections() {
+        dispatcher.dropConnections = false
     }
 
     private companion object {
