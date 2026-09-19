@@ -2,6 +2,8 @@ package com.study.bank.data.repository.recipient
 
 import com.study.bank.data.remote.kftc.api.KftcApiService
 import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryRequest
+import com.study.bank.data.repository.TRAN_DTIME
+import com.study.bank.data.repository.bankTranIdFor
 import com.study.bank.domain.model.BankCode
 import com.study.bank.domain.model.account.AccountNumber
 import com.study.bank.domain.model.transfer.RecipientLookup
@@ -33,12 +35,4 @@ class RecipientRepositoryImpl @Inject constructor(
                 ),
             ),
         )
-
-    private companion object {
-        // 데모 고정값. 실서비스는 요청 추적자(bank_tran_id, tran_dtime)를 동적으로 구성한다.
-        const val TRAN_DTIME = "20260603120000"
-
-        fun bankTranIdFor(accountNum: String): String =
-            "M202300001U%06d".format(accountNum.hashCode() and 0xFFFFF)
-    }
 }

@@ -3,6 +3,8 @@ package com.study.bank.data.repository.transfer
 import android.util.Log
 import com.study.bank.data.remote.kftc.api.KftcApiService
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
+import com.study.bank.data.repository.TRAN_DTIME
+import com.study.bank.data.repository.bankTranIdFor
 import com.study.bank.domain.coroutine.cancellableCatching
 import com.study.bank.domain.model.Money
 import com.study.bank.domain.model.transaction.TransactionId
@@ -93,10 +95,5 @@ class TransferRepositoryImpl @Inject constructor(
         const val RSP_SUCCESS = "A0000"
         const val BANK_RSP_INSUFFICIENT_FUNDS = "311"
         const val BANK_RSP_CURRENCY_MISMATCH = "320"
-        // 데모 고정값. 실서비스는 요청 추적자(tran_dtime)를 동적으로 구성한다.
-        const val TRAN_DTIME = "20260603120000"
-
-        fun bankTranIdFor(idempotencyKey: String): String =
-            "M202300001U%06d".format(idempotencyKey.hashCode() and 0xFFFFF)
     }
 }
