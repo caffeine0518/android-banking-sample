@@ -38,7 +38,7 @@ class HomeScreenTest {
     @get:Rule
     val composeRule = createComposeRule()
 
-    /** HomeScreen이 방출한 인텐트를 담아 두는 스파이. */
+    /** HomeScreen이 발행한 인텐트를 기록하는 스파이. */
     private val intents = mutableListOf<HomeIntent>()
 
     /** UI 카피는 이 모듈이 소유한 string 리소스가 정답이므로, 리터럴 중복 대신 리소스를 참조한다. */

@@ -12,6 +12,6 @@ interface NetworkFaultController {
     /** 이후 모든 요청을 서버 장애(5xx)로 응답하게 한다. */
     fun enableFault()
 
-    /** [enableFault]로 켠 장애 주입을 해제해 정상 응답으로 되돌린다. */
+    /** [enableFault]로 활성화한 장애 주입을 해제해 정상 응답으로 복원한다. */
     fun disableFault()
 }

@@ -116,7 +116,7 @@ class AccountInputViewModelTest {
 
     @Test
     fun `본인 계좌면 확인 시 SELF_TRANSFER 오류를 노출한다`() = runTest {
-        // lookup이 출금계좌와 동일한 식별자를 돌려주면 자기이체.
+        // lookup이 출금계좌와 동일한 식별자를 반환하면 자기이체.
         val vm = buildViewModel(RecipientLookup.Active(AccountId(SOURCE_ID), "홍길동"))
         vm.onIntent(AccountInputIntent.AccountNumberChanged("868369666"))
 

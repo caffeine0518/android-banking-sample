@@ -106,7 +106,7 @@ class AccountInputViewModel @AssistedInject constructor(
         store.sendIntent(intent)
     }
 
-    /** (계좌번호, 은행)으로 실명조회를 돌려 결과를 내부 액션으로 되돌린다. 입력값은 호출 시점 스냅샷. */
+    /** (계좌번호, 은행)으로 실명조회를 실행해 결과를 내부 액션으로 전달한다. 입력값은 호출 시점 스냅샷. */
     private fun resolve(accountNumber: String, bank: BankCode) {
         viewModelScope.launch {
             cancellableCatching {

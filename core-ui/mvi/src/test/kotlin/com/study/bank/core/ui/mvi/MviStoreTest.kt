@@ -146,7 +146,7 @@ class MviStoreTest {
         store.sendIntent(CounterIntent.Increment)
         runCurrent()
 
-        // 끼어듦이 있었다면 mid/end 사이에 inc 로그가 박혔을 것
+        // 끼어듦이 있었다면 mid/end 사이에 inc 로그가 기록됐을 것
         assertEquals(
             "DoubleStep 본문이 끝까지 실행된 뒤에야 Increment가 reducer에 진입해야 함",
             listOf(

@@ -7,11 +7,11 @@ import kotlinx.coroutines.flow.Flow
 interface FxRateRepository {
 
     /**
-     * Stream of FX rates converting other currencies into [target].
+     * 다른 통화를 [target]으로 환산하는 환율 스트림.
      *
-     * Each emitted map keys a source [Currency] to a multiplier:
-     * `target.amount = source.amount * rate`. The identity row
-     * `target → 1` is always present.
+     * 발행되는 맵은 원본 [Currency]를 배율에 대응시킨다:
+     * `target.amount = source.amount * rate`. 항등 항목인
+     * `target → 1`은 항상 포함된다.
      */
     fun observeRates(target: Currency): Flow<Map<Currency, BigDecimal>>
 }

@@ -5,11 +5,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Holder for the KEXIM API authentication key.
+ * KEXIM API 인증키 홀더.
  *
- * Production wiring goes through the [Inject] constructor which sources
- * [BuildConfig.KEXIM_API_KEY]. Tests instantiate the primary constructor directly
- * with an arbitrary value to exercise auth-failure paths.
+ * 운영 경로는 [BuildConfig.KEXIM_API_KEY]를 읽는 [Inject] 생성자로 주입된다.
+ * 테스트는 인증 실패 경로를 검증하려고 주 생성자에 임의 값을 직접 넣어 생성한다.
  */
 @Singleton
 class KeximAuthKey(val value: String) {

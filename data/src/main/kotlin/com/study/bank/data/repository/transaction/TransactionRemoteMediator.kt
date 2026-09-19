@@ -27,7 +27,7 @@ import com.study.bank.domain.model.account.AccountId
  * 주의(UI 배선 제약): 이 페이징 경로와 레거시 [com.study.bank.domain.repository.TransactionRepository.refresh]·
  * observeTransactions(Room 직접 교체)는 **같은 transactions 테이블을 공유하므로 동시에 활성화하면 안 된다**.
  * refresh가 테이블을 비워도 [nextCursor]는 그대로라 다음 APPEND가 먼 페이지를 받아 중간이 누락된다. AccountDetail을
- * 페이징으로 옮길 때 거래 레거시 경로를 걷어내고 pagingItems.refresh()(=Pager가 RemoteMediator REFRESH 재실행)로 일원화한다.
+ * 페이징으로 옮길 때 거래 레거시 경로를 제거하고 pagingItems.refresh()(=Pager가 RemoteMediator REFRESH 재실행)로 일원화한다.
  */
 @OptIn(ExperimentalPagingApi::class)
 internal class TransactionRemoteMediator(

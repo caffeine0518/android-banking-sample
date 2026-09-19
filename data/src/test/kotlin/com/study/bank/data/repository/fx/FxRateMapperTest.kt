@@ -48,7 +48,7 @@ class FxRateMapperTest {
         assertEquals(0, BigDecimal("9.5").compareTo(result!![Currency.JPY]))
     }
 
-    // 인증실패/휴일 응답이 환율 0으로 환산에 끼는 사고 방지.
+    // 인증실패/휴일 응답이 환율 0으로 환산에 섞이는 사고 방지.
     @Test
     fun `map은 result가 1이 아닌 응답을 제외`() {
         val items = listOf(
@@ -65,7 +65,7 @@ class FxRateMapperTest {
         assertNull(result[Currency.JPY])
     }
 
-    // 미지원 통화 추가 시 매핑이 깨지지 않는지.
+    // 미지원 통화 추가 시 매핑이 실패하지 않는지.
     @Test
     fun `map은 도메인이 모르는 통화 코드를 무시`() {
         val items = listOf(
@@ -81,7 +81,7 @@ class FxRateMapperTest {
         assertEquals(2, result.size) // USD + KRW identity
     }
 
-    // KEXIM 콤마 포함 숫자 포맷이 BigDecimal 파싱에서 깨지지 않는지.
+    // KEXIM 콤마 포함 숫자 포맷이 BigDecimal 파싱에서 실패하지 않는지.
     @Test
     fun `map은 천단위 콤마 포함 문자열을 파싱`() {
         val items = listOf(success("USD", "1,234,567.89"))
@@ -129,9 +129,9 @@ class FxRateMapperTest {
         val toKrw = mapper.map(items, Currency.KRW)
         val toUsd = mapper.map(items, Currency.USD)
 
-        // KRW view: 1 USD = 1350 KRW
+        // KRW 기준: 1 USD = 1350 KRW
         assertEquals(0, BigDecimal("1350").compareTo(toKrw!![Currency.USD]))
-        // USD view: 1 USD = 1 USD (identity), 1 EUR = 1450/1350 ≈ 1.074 USD
+        // USD 기준: 1 USD = 1 USD(항등), 1 EUR = 1450/1350 ≈ 1.074 USD
         assertEquals(0, BigDecimal.ONE.compareTo(toUsd!![Currency.USD]))
         assertTrue(toUsd[Currency.EUR]!! > BigDecimal("1.07") && toUsd[Currency.EUR]!! < BigDecimal("1.08"))
     }

@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 /**
  * [KftcBankState] 단독 검증.
  *
- * HTTP/직렬화 없이 잔액·원장 변동 로직만 본다(라우팅은 KftcMockDispatcherTest, E2E는 KftcApiServiceTest).
+ * HTTP/직렬화 없이 잔액·원장 변동 로직만 검증한다(라우팅은 KftcMockDispatcherTest, E2E는 KftcApiServiceTest).
  * 기본 시드를 그대로 쓰되 시각은 고정 clock으로 결정적이게 만든다.
  */
 class KftcBankStateTest {
@@ -104,7 +104,7 @@ class KftcBankStateTest {
         assertTrue(state.withdraw(externalCommand(from = SALARY, amount = "0")) is WithdrawResult.InvalidAmount)
         assertTrue(state.withdraw(externalCommand(from = SALARY, amount = "-100")) is WithdrawResult.InvalidAmount)
         assertTrue(state.withdraw(externalCommand(from = SALARY, amount = "abc")) is WithdrawResult.InvalidAmount)
-        // 거절들은 상태를 건드리지 않는다.
+        // 거절 건은 상태를 변경하지 않는다.
         assertEquals("2847320", state.account(SALARY)!!.balanceAmt)
     }
 

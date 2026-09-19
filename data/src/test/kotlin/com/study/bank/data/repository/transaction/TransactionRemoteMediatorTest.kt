@@ -26,7 +26,7 @@ import org.junit.Test
  * [TransactionRemoteMediator] 네트워크→DB 적재 검증.
  *
  * 메모리 커서(befor_inquiry_trace_info) 재사용, REFRESH 시 캐시 교체, next_page_yn→endOfPaginationReached
- * 매핑, 더 받을 게 없을 때 네트워크 미호출을 본다. Room 없이 인메모리 fake DAO로 돈다.
+ * 매핑, 더 받을 게 없을 때 네트워크 미호출을 검증한다. Room 없이 인메모리 fake DAO로 실행한다.
  */
 @OptIn(ExperimentalPagingApi::class)
 class TransactionRemoteMediatorTest {
@@ -96,7 +96,7 @@ class TransactionRemoteMediatorTest {
         assertEquals(0, api.callCount)
     }
 
-    // --- helpers ---
+    // --- 헬퍼 ---
 
     private fun mediator(api: KftcApiService) = TransactionRemoteMediator(
         accountId = accountId,

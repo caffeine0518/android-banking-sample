@@ -1,10 +1,10 @@
 package com.study.bank.domain.model
 
 /**
- * Currencies the bank domain explicitly supports.
+ * 뱅킹 도메인이 명시적으로 지원하는 통화.
  *
- * [exponent] is the number of fractional digits in the currency's minor unit
- * (ISO 4217). It governs how [Money] amounts are normalized and rendered.
+ * [exponent]는 해당 통화 최소 단위의 소수 자릿수(ISO 4217)다.
+ * [Money] 금액을 정규화하고 표시하는 방식을 결정한다.
  */
 enum class Currency(val code: String, val exponent: Int) {
     KRW("KRW", 0),

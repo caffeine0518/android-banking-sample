@@ -3,7 +3,7 @@ package com.study.bank.domain.model
 import java.math.BigDecimal
 import java.math.RoundingMode
 
-/** Monetary amount in a specific [Currency]; arithmetic is same-currency only. */
+/** 특정 [Currency]로 표시한 금액. 연산은 같은 통화끼리만 허용한다. */
 class Money private constructor(
     val amount: BigDecimal,
     val currency: Currency,

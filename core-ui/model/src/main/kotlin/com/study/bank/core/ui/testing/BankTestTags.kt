@@ -22,16 +22,16 @@ object BankTestTags {
     fun transactionItem(id: String): String = "detail_tx_item_$id"
 
     // --- 정적 화면/컨트롤 앵커 ---
-    // 화면 도착·버튼 클릭처럼 "텍스트가 무엇인지는 중요치 않은" locator. 표시 문구나 문자열 리소싱 전략
-    // (키 rename·i18n 교체 등)이 바뀌어도 안 깨지도록, copy가 아니라 이 안정 태그로 식별한다.
+    // 화면 도착·버튼 클릭처럼 "텍스트가 무엇인지는 중요치 않은" 로케이터. 표시 문구나 문자열 리소싱 전략
+    // (키 rename·i18n 교체 등)이 바뀌어도 실패하지 않도록, 카피가 아니라 이 안정 태그로 식별한다.
 
-    // home
+    // 홈
     const val SCREEN_HOME = "screen_home"
     const val HOME_TOTAL_BALANCE = "home_total_balance"
     const val HOME_REFRESH = "home_refresh"
     const val HOME_SNACKBAR = "home_snackbar"
 
-    // account detail
+    // 계좌 상세
     const val DETAIL_BACK = "detail_back"
     const val DETAIL_SEND = "detail_send"
     const val DETAIL_TX_LABEL = "detail_tx_label"
@@ -41,7 +41,7 @@ object BankTestTags {
     const val DETAIL_TX_FOOTER_LOADING = "detail_tx_footer_loading"
     const val DETAIL_TX_FOOTER_RETRY = "detail_tx_footer_retry"
 
-    // transfer
+    // 송금
     const val SCREEN_RECIPIENT = "screen_recipient"
     const val SCREEN_AMOUNT = "screen_amount"
     const val AMOUNT_NEXT = "amount_next"

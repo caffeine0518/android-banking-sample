@@ -28,7 +28,7 @@ class CurrencyRebaserTest {
         }
     }
 
-    // 단방향 환산만 옳고 역방향이 깨지는 수학 오류 방지.
+    // 단방향 환산만 옳고 역방향이 어긋나는 수학 오류 방지.
     @Test
     fun `source-target 역수 관계를 만족`() {
         val anchored = sampleAnchored()

@@ -17,12 +17,11 @@ import java.net.InetAddress
 import java.util.concurrent.TimeUnit
 
 /**
- * Lifecycle wrapper for the KFTC v2.0 mock server.
+ * KFTC v2.0 mock 서버의 라이프사이클 래퍼.
  *
- * Lets [com.study.bank.data.remote.kftc.api.KftcApiService] exercise the real network stack so
- * interceptors, serialization, and error paths are all verified in-process. Serves HTTPS with a
- * self-signed loopback certificate so the manifest stays cleartext-free; clients use
- * [clientCertificates] to trust this CA.
+ * [com.study.bank.data.remote.kftc.api.KftcApiService]가 실제 네트워크 스택을 그대로 거치게 해서
+ * 인터셉터·직렬화·에러 경로까지 in-process로 검증한다. 매니페스트에 cleartext 허용을 남기지 않으려고
+ * 자체 서명 loopback 인증서로 HTTPS를 제공하고, 클라이언트는 [clientCertificates]로 이 CA를 신뢰한다.
  */
 @Singleton
 class KftcMockServer @Inject constructor(
@@ -93,7 +92,7 @@ class KftcMockServer @Inject constructor(
         started = false
     }
 
-    /** 테스트 전용: 가장 오래된 수신 요청 1건을 큐에서 꺼낸다. */
+    /** 테스트 전용: 큐에 쌓인 수신 요청 중 가장 오래된 1건을 반환한다. */
     internal fun takeRequest(timeoutMs: Long = 1_000): RecordedRequest? =
         server.takeRequest(timeoutMs, TimeUnit.MILLISECONDS)
 

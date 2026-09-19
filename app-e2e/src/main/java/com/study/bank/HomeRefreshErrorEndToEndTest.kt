@@ -48,7 +48,7 @@ class HomeRefreshErrorEndToEndTest {
         hiltRule.inject()
     }
 
-    // mock 서버는 프로세스 전역 @Singleton이라 켜둔 장애가 다음 테스트로 샌다. 명시적으로 정상 복구한다.
+    // mock 서버는 프로세스 전역 @Singleton이라 활성화한 장애가 다음 테스트까지 남는다. 명시적으로 정상 복구한다.
     @After
     fun clearFault() {
         faultController.disableFault()

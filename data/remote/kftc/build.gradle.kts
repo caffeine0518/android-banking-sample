@@ -18,7 +18,7 @@ dependencies {
     implementation(libs.retrofit.converter.kotlinx.serialization)
     implementation(libs.okhttp.core)
 
-    // In-process KFTC mock — exposed to :data-di so the running app can boot it.
+    // in-process KFTC mock — 실행 중인 앱이 부팅할 수 있도록 :data-di에 노출한다.
     implementation(libs.okhttp.mockwebserver)
     implementation(libs.okhttp.tls)
 

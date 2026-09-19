@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 /**
- * 거래내역 SSOT = Room. 단건 목록 읽기([observeTransactions])는 [dao] Flow만 본다.
+ * 거래내역 SSOT = Room. 단건 목록 읽기([observeTransactions])는 [dao] Flow만 구독한다.
  *
  * 원격(KFTC)은 [refresh]에서만 호출돼 결과를 해당 계좌 캐시에 통째 교체 기록한다. 따라서 화면은 항상
  * 로컬 캐시를 관찰하고 갱신은 별도 트리거로 일어난다([com.study.bank.data.repository.account.AccountRepositoryImpl] 패턴).

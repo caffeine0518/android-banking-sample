@@ -15,7 +15,7 @@ import org.junit.Rule
 import org.junit.Test
 
 /**
- * QA의 매뉴얼 테스트를 흉내 내는 퍼스트 파티 E2E(end-to-end).
+ * QA의 수동 테스트를 재현하는 퍼스트 파티 E2E(end-to-end).
  *
  * 단일 화면을 격리하는 [com.study.bank.feature.home.ui.HomeScreenTest]와 달리, 실제 [MainActivity] →
  * BankNavHost → HomeRoute → hiltViewModel() → AccountRepository → KFTC MockWebServer까지 **앱 전체를
@@ -39,7 +39,7 @@ class HomeFlowEndToEndTest {
     @Test
     fun 앱을_켜면_시드된_계좌_목록과_총자산이_보인다() {
         // 네트워크(MockWebServer) 라운드트립 후 계좌 스트림이 도착할 때까지 대기.
-        // 표시명이 아니라 안정적 id 태그로 "그 계좌 행이 렌더됐는지"를 본다.
+        // 표시명이 아니라 안정적 id 태그로 "그 계좌 행이 렌더됐는지"를 확인한다.
         val krwAccount = E2eAccounts.firstOf(Currency.KRW)
         val usdAccount = E2eAccounts.firstOf(Currency.USD)
         composeRule.awaitTag(accountItem(krwAccount))

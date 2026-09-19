@@ -28,7 +28,7 @@ class AccountEntityMapper @Inject constructor() {
 
     /**
      * @throws IllegalStateException Entity는 우리가 직접 저장한 값이므로 enum/code 복원 실패는
-     * 스키마-코드 정합성이 깨진 상황. fail-fast.
+     * 스키마-코드 정합성이 어긋난 상황. fail-fast.
      */
     fun toDomain(entity: AccountEntity): Account {
         val bank = checkNotNull(BankCode.byCode(entity.bankCode)) {

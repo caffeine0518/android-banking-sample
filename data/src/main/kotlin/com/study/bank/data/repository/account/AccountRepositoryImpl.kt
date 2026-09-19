@@ -64,9 +64,9 @@ class AccountRepositoryImpl @Inject constructor(
 
     private companion object {
         const val TAG = "AccountRepository"
-        // Demo-only fixed user; production extracts from the auth token.
+        // 데모 전용 고정 사용자. 운영에서는 인증 토큰에서 추출한다.
         const val USER_SEQ_NO = "1100000001"
-        // tran_dtime is the KFTC envelope tracker; mock skips validation so this is fixed.
+        // tran_dtime은 KFTC 전문의 거래 추적 필드다. mock은 검증하지 않으므로 고정값을 쓴다.
         const val TRAN_DTIME = "20260603120000"
 
         fun bankTranIdFor(fintechUseNum: String): String =

@@ -8,7 +8,7 @@ package com.study.bank.data.remote.kftc.mock
  * 여러 곳에 하드코딩하던 리터럴 중복을 제거한다.
  *
  * 반대로 시드와 무관한 격리 단위테스트(레포 매핑·feature ViewModel)는 임의의 샘플 id를 쓰는 자급 픽스처라
- * 일부러 이 출처에 묶지 않는다(시드 변경에 깨지지 않아야 하고, feature는 이 mock 모듈을 의존하지도 않는다).
+ * 일부러 이 출처에 묶지 않는다(시드 변경에 실패하지 않아야 하고, feature는 이 mock 모듈을 의존하지도 않는다).
  */
 object KftcSeedAccountIds {
     const val PAYROLL_KRW = "120220112345678901234001"  // 토스뱅크 월급통장 KRW

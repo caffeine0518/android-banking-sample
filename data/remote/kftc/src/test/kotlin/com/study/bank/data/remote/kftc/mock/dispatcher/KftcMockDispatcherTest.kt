@@ -54,7 +54,7 @@ class KftcMockDispatcherTest {
         server.shutdown()
     }
 
-    // happy path baseline — 첫 라우트가 200 + envelope 골격을 그대로 돌려주는지.
+    // happy path baseline — 첫 라우트가 200 + envelope 골격을 그대로 반환하는지.
     @Test
     fun `list_finuse는 200과 KFTC 성공 envelope을 돌려준다`() {
         val (code, body) = get("/v2.0/account/list_finuse")
@@ -66,7 +66,7 @@ class KftcMockDispatcherTest {
             body.contains(""""res_cnt":"${KftcAccountSeed.accounts.size}""""))
     }
 
-    // seed lookup 정확성 — fintechUseNum 키로 매칭된 계좌의 잔액/통화가 응답에 그대로 흘러가는지.
+    // seed lookup 정확성 — fintechUseNum 키로 매칭된 계좌의 잔액/통화가 응답에 그대로 반영되는지.
     @Test
     fun `balance fin_num + 유효한 fintech_use_num은 200과 해당 시드 잔액을 돌려준다`() {
         val krw = KftcAccountSeed.accounts.firstOrNull { it.currencyCode == "KRW" }

@@ -31,7 +31,7 @@ import java.time.ZoneOffset
 
 /**
  * [TransferRepositoryImpl] 검증. KFTC withdraw 응답을 모사하고, 성공 시 SSOT 재동기화(refresh) 호출과
- * 결과/실패 매핑을 본다. AccountRepository/TransactionRepository는 refresh 호출만 기록하는 페이크.
+ * 결과/실패 매핑을 검증한다. AccountRepository/TransactionRepository는 refresh 호출만 기록하는 페이크.
  */
 class TransferRepositoryImplTest {
 
