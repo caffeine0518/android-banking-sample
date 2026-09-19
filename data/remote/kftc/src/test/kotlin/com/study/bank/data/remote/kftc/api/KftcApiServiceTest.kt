@@ -3,7 +3,7 @@ package com.study.bank.data.remote.kftc.api
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryRequest
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
-import com.study.bank.data.remote.kftc.mock.KftcMockServer
+import com.study.bank.data.remote.kftc.mock.KftcMockServerImpl
 import com.study.bank.data.remote.kftc.mock.TestMockBank
 import com.study.bank.data.remote.kftc.mock.seed.KftcSeedAccountIds
 import com.study.bank.data.remote.kftc.mock.seed.KftcTransactionSeed
@@ -27,13 +27,14 @@ import retrofit2.Retrofit
 @RunWith(RobolectricTestRunner::class)
 class KftcApiServiceTest {
 
-    private lateinit var mockServer: KftcMockServer
+    // takeRequest()가 구현체에만 있어 인터페이스가 아닌 구현 타입으로 받는다.
+    private lateinit var mockServer: KftcMockServerImpl
     private lateinit var api: KftcApiService
 
     @Before
     fun setUp() {
         val bank = TestMockBank()
-        mockServer = KftcMockServer(
+        mockServer = KftcMockServerImpl(
             accountDao = bank.accountDao,
             transactionDao = bank.transactionDao,
             withdrawalService = bank.withdrawalService,
