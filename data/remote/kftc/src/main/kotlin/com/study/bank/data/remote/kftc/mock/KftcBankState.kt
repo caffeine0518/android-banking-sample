@@ -21,6 +21,8 @@ internal class KftcBankState(
     private val scales = HashMap<String, Int>()
     private val ledger = LinkedHashMap<String, MutableList<TransactionRecord>>()
 
+    private val settledWithdrawals = HashMap<String, WithdrawResult.Success>()
+
     // 부팅 시 1회 생성되는 과거 거래(월급통장 1천여 건). 세션 이체로 변하는 [ledger]와 달리 불변이라 reset 대상이 아니다.
     private val seededHistory: Map<String, List<TransactionRecord>> =
         KftcTransactionSeed.seededHistory(seed)
@@ -35,11 +37,12 @@ internal class KftcBankState(
         reset()
     }
 
-    /** 잔액·원장·seq 카운터를 시드 초깃값으로 초기화한다. */
+    /** 잔액·원장·멱등 기록·seq 카운터를 시드 초깃값으로 초기화한다. */
     fun reset() = synchronized(lock) {
         balances.clear()
         scales.clear()
         ledger.clear()
+        settledWithdrawals.clear()
         liveSeq = maxSeededSeq
         seed.forEach { account ->
             val parsed = BigDecimal(account.balanceAmt)
@@ -76,10 +79,14 @@ internal class KftcBankState(
             .sortedByDescending { it.seq }
     }
 
+    /** 거절 건은 기록하지 않는다 — 원장을 변경하지 않았으므로 같은 키로 다시 시도할 수 있다. */
     fun withdraw(command: WithdrawCommand): WithdrawResult = synchronized(lock) {
+        settledWithdrawals[command.bankTranId]?.let { return@synchronized it }
         when (val plan = planWithdrawal(command)) {
             is WithdrawPlan.Reject -> plan.result
-            is WithdrawPlan.Approved -> applyTransfer(plan, command)
+            is WithdrawPlan.Approved -> applyTransfer(plan, command).also {
+                settledWithdrawals[command.bankTranId] = it
+            }
         }
     }
 
@@ -135,12 +142,18 @@ internal class KftcBankState(
                 at = now,
             )
         }
-        return successFor(source, amount, afterSource)
+        return successFor(command.bankTranId, source, amount, afterSource)
     }
 
-    private fun successFor(source: SeedAccount, amount: BigDecimal, afterBalance: BigDecimal): WithdrawResult.Success {
+    private fun successFor(
+        bankTranId: String,
+        source: SeedAccount,
+        amount: BigDecimal,
+        afterBalance: BigDecimal,
+    ): WithdrawResult.Success {
         val scale = scaleOf(source.fintechUseNum)
         return WithdrawResult.Success(
+            bankTranId = bankTranId,
             fintechUseNum = source.fintechUseNum,
             bankCodeStd = source.bankCodeStd,
             accountNumMasked = source.accountNumMasked,

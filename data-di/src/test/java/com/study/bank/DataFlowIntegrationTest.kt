@@ -226,6 +226,40 @@ class DataFlowIntegrationTest {
         assertEquals(0, usd.balance.amount.compareTo(BigDecimal("3245.80")))
     }
 
+    @Test
+    fun `같은 멱등성 키로 재시도하면 한 번만 차감되고 같은 거래로 응답한다`() = runBlocking {
+        accountRepository.refresh()
+
+        // 응답을 못 받아 결과 화면이 같은 키로 다시 송금하는 상황(재시도 버튼 / 프로세스 death 복원).
+        val request = TransferRequest(
+            fromAccountId = SALARY,
+            senderName = "홍길동",
+            toAccountNumber = SAFEBOX_NUMBER,
+            toBankCode = BankCode.TOSS,
+            recipientName = "홍길동",
+            amount = Money.of(50_000L, Currency.KRW),
+            memo = null,
+            idempotencyKey = "itest-idempotent-retry-1",
+        )
+        val first = ExecuteTransferUseCase(transferRepository)(request)
+        val second = ExecuteTransferUseCase(transferRepository)(request)
+
+        assertTrue("1차 송금 성공해야 함: $first", first is TransferOutcome.Success)
+        assertTrue("재시도도 성공 응답이어야 함: $second", second is TransferOutcome.Success)
+        first as TransferOutcome.Success
+        second as TransferOutcome.Success
+
+        // 멱등성 키가 bank_tran_id로 서버까지 전달돼 중복으로 판정된다 → 원장은 1건, 차감도 1회.
+        assertEquals(first.result.transactionId, second.result.transactionId)
+        val salary = requireNotNull(accountRepository.observeAccount(SALARY).first())
+        val safebox = requireNotNull(accountRepository.observeAccount(SAFEBOX).first())
+        assertEquals(0, salary.balance.amount.compareTo(BigDecimal("2797320")))
+        assertEquals(0, safebox.balance.amount.compareTo(BigDecimal("12050000")))
+
+        transactionRepository.refresh(SAFEBOX)
+        assertEquals(1, transactionRepository.observeTransactions(SAFEBOX).first().size)
+    }
+
     private companion object {
         val SALARY = AccountId(KftcSeedAccountIds.PAYROLL_KRW)
         val SAFEBOX = AccountId(KftcSeedAccountIds.SAFEBOX_KRW)

@@ -44,6 +44,7 @@ internal class TransferRequestHandler(
     private fun parseWithdraw(body: String): WithdrawCommand? = runCatching {
         val dto = json.decodeFromString<WithdrawTransferRequest>(body)
         WithdrawCommand(
+            bankTranId = dto.bankTranId,
             fintechUseNum = dto.fintechUseNum,
             tranAmt = dto.tranAmt,
             recvAccountNum = dto.recvClientAccountNum,

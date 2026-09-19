@@ -119,12 +119,44 @@ class KftcBankStateTest {
     @Test
     fun `reset은 잔액과 원장을 시드 초깃값으로 되돌린다`() {
         val state = newState()
-        state.withdraw(externalCommand(from = SALARY, amount = "50000"))
+        state.withdraw(externalCommand(from = SALARY, amount = "50000", bankTranId = REPLAYED_ID))
 
         state.reset()
 
         assertEquals("2847320", state.account(SALARY)!!.balanceAmt)
         assertTrue(state.transactions(SALARY).isEmpty())
+        // 멱등 기록도 비워져야 한다 — 남아 있으면 초기화 후 같은 번호의 송금이 중복으로 판정된다.
+        state.withdraw(externalCommand(from = SALARY, amount = "50000", bankTranId = REPLAYED_ID))
+        assertEquals("2797320", state.account(SALARY)!!.balanceAmt)
+    }
+
+    // --- 멱등성(bank_tran_id 중복 판정) ---
+
+    @Test
+    fun `같은 bank_tran_id로 다시 출금하면 한 번만 차감하고 같은 응답을 돌려준다`() {
+        val state = newState()
+
+        // 응답이 유실돼 클라이언트가 같은 멱등성 키로 재시도하는 상황.
+        val first = state.withdraw(externalCommand(from = SALARY, amount = "50000", bankTranId = REPLAYED_ID))
+        val second = state.withdraw(externalCommand(from = SALARY, amount = "50000", bankTranId = REPLAYED_ID))
+
+        assertEquals("2797320", state.account(SALARY)!!.balanceAmt)
+        assertEquals(1, state.transactions(SALARY).size)
+        // 재요청은 원장을 변경하지 않고 처음 체결한 응답을 그대로 반환한다(거래고유번호까지 동일).
+        assertEquals(first, second)
+        assertEquals(REPLAYED_ID, (second as WithdrawResult.Success).bankTranId)
+    }
+
+    @Test
+    fun `거절된 요청은 같은 bank_tran_id로 다시 시도할 수 있다`() {
+        val state = newState()
+
+        // 잔액 부족으로 거절 = 원장 미변경. 같은 번호로 다시 보내면 정상 체결돼야 한다.
+        state.withdraw(externalCommand(from = SALARY, amount = "999999999", bankTranId = REPLAYED_ID))
+        val retried = state.withdraw(externalCommand(from = SALARY, amount = "50000", bankTranId = REPLAYED_ID))
+
+        assertTrue(retried is WithdrawResult.Success)
+        assertEquals("2797320", state.account(SALARY)!!.balanceAmt)
     }
 
     @Test
@@ -191,7 +223,17 @@ class KftcBankStateTest {
         assertTrue("seq가 엄격히 내림차순이어야", statement.zipWithNext().all { (a, b) -> a.seq > b.seq })
     }
 
-    private fun externalCommand(from: String, amount: String, recvName: String = "외부수취인") = WithdrawCommand(
+    // 명시하지 않으면 호출마다 새 거래고유번호를 부여한다 — 서로 다른 송금이 중복 판정에 걸리지 않게.
+    private var tranSeq = 0
+    private fun newTranId(): String = "M202300001U%09d".format(++tranSeq)
+
+    private fun externalCommand(
+        from: String,
+        amount: String,
+        recvName: String = "외부수취인",
+        bankTranId: String = newTranId(),
+    ) = WithdrawCommand(
+        bankTranId = bankTranId,
         fintechUseNum = from,
         tranAmt = amount,
         recvAccountNum = "9999-99-9999999", // 시드에 없는 계좌번호 → 외부 이체
@@ -203,6 +245,7 @@ class KftcBankStateTest {
     )
 
     private fun internalCommand(from: String, toAccountNum: String, amount: String) = WithdrawCommand(
+        bankTranId = newTranId(),
         fintechUseNum = from,
         tranAmt = amount,
         recvAccountNum = toAccountNum,
@@ -214,6 +257,8 @@ class KftcBankStateTest {
     )
 
     private companion object {
+        // 재시도가 같은 송금임을 나타내는 고정 거래고유번호.
+        const val REPLAYED_ID = "M202300001U000000777"
         const val SALARY = KftcSeedAccountIds.PAYROLL_KRW
         const val USD = KftcSeedAccountIds.FX_USD
         const val SAFEBOX = KftcSeedAccountIds.SAFEBOX_KRW
