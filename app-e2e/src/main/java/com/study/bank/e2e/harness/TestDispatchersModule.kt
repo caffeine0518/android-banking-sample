@@ -1,4 +1,4 @@
-package com.study.bank
+package com.study.bank.e2e.harness
 
 import com.study.bank.data.di.coroutine.DispatchersModule
 import com.study.bank.domain.coroutine.DispatcherProvider

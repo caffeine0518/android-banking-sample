@@ -1,4 +1,4 @@
-package com.study.bank
+package com.study.bank.e2e.support
 
 import com.study.bank.data.remote.kftc.mock.KftcSeedAccountIds
 import com.study.bank.domain.model.Currency

@@ -26,7 +26,7 @@ android {
         minSdk = 26
         targetSdk = 36
         // @HiltAndroidTest가 HiltTestApplication 위에서 돌도록 커스텀 러너 사용.
-        testInstrumentationRunner = "com.study.bank.HiltTestRunner"
+        testInstrumentationRunner = "com.study.bank.e2e.harness.HiltTestRunner"
     }
 
     compileOptions {

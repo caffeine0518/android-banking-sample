@@ -1,14 +1,18 @@
-package com.study.bank
+package com.study.bank.e2e.feature.home
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import com.study.bank.MainActivity
 import com.study.bank.core.ui.testing.BankTestTags.HOME_REFRESH
 import com.study.bank.core.ui.testing.BankTestTags.HOME_SNACKBAR
 import com.study.bank.core.ui.testing.BankTestTags.accountItem
 import com.study.bank.data.di.kftc.NetworkFaultController
 import com.study.bank.domain.model.Currency
+import com.study.bank.e2e.support.E2eAccounts
+import com.study.bank.e2e.support.awaitNotLoading
+import com.study.bank.e2e.support.awaitTag
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import javax.inject.Inject
