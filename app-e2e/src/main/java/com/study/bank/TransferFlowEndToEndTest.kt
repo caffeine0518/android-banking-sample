@@ -24,18 +24,6 @@ import org.junit.Test
 
 /**
  * 송금 풀 플로우 E2E: 홈 → 계좌 상세 → 수취인 → 금액 → 확인 → 결과.
- *
- * 화면별로 끊어 보는 단일 화면 테스트(RecipientScreenTest/AmountScreenTest/…)와 달리, 실제
- * MainActivity → BankNavHost → 각 화면 hiltViewModel → AccountRepository/ExecuteTransferUseCase →
- * KFTC MockWebServer까지 송금 한 건을 끝에서 끝까지 실행한다(실 DI·실 네비게이션·실 HTTP).
- *
- * 출금계좌는 시드 KRW '월급통장'. 같은 통화(KRW) 내 계좌로 보내면 성공하고, 다른 통화(USD) 계좌로
- * 보내면 mock 서버가 통화 불일치로 업무 거절(A0001)해 실패 화면이 뜬다 — 다통화 거절 경로까지 검증.
- *
- * 비-시작 목적지를 여럿 거치므로, 파괴 시 NavBackStackEntry 전이 크래시를 막는 [TestDispatchersModule]이
- * 필수다(MviStore reducer를 메인에 묶어 전환이 settle되게 함 — 자세한 사유는 그 KDoc 참고).
- *
- * 에뮬레이터/디바이스에서 실행: ./gradlew :app-e2e:connectedDebugAndroidTest
  */
 @HiltAndroidTest
 class TransferFlowEndToEndTest {

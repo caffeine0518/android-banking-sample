@@ -14,18 +14,6 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
 
-/**
- * QA의 수동 테스트를 재현하는 퍼스트 파티 E2E(end-to-end).
- *
- * 단일 화면을 격리하는 [com.study.bank.feature.home.ui.HomeScreenTest]와 달리, 실제 [MainActivity] →
- * BankNavHost → HomeRoute → hiltViewModel() → AccountRepository → KFTC MockWebServer까지 **앱 전체를
- * 진짜로 부팅**해, 시드된 계좌가 끝까지 흐르는 사용자 여정을 검증한다(실 DI·실 네비게이션·실 HTTP).
- *
- * Hilt 그래프를 그대로 쓰므로(@TestInstallIn 교체 없음) 화면에 뜨는 데이터는 KftcAccountSeed가 정답.
- * KftcMockServer가 메인 스레드 안전하게 바뀌어, 컴포지션 중 네트워크 스택이 생성돼도 안전하다(별도 warmup 불필요).
- *
- * 에뮬레이터/디바이스에서 실행: ./gradlew :app:connectedDebugAndroidTest
- */
 @HiltAndroidTest
 class HomeFlowEndToEndTest {
 

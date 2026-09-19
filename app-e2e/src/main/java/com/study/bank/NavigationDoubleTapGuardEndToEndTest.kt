@@ -25,8 +25,7 @@ import org.junit.Test
  * - 전진 더블탭 → 동일 NavKey 중복 push(contentKey 공유로 상태·VM 섞임, 뒤로가기 2번 필요)
  * - 백버튼 더블탭 → 백스택 소진 → "NavDisplay backstack cannot be empty" 크래시
  *
- * [performTouchInput] 한 배치에 클릭 2회(120ms 간격)를 넣어 중간 동기화(waitForIdle) 없는
- * 실제 더블탭을 재현한다 — performClick 2회는 사이에 idle 동기화가 끼어 재현이 안 된다.
+ * [performTouchInput] 한 배치에 클릭 2회를 넣어야 재현된다 — performClick 2회는 사이에 idle 동기화가 낀다.
  */
 @HiltAndroidTest
 class NavigationDoubleTapGuardEndToEndTest {
