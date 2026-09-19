@@ -46,10 +46,10 @@ class TotalAssetsUseCaseTest {
         val krwTotal = useCase(Currency.KRW).first()
         val usdTotal = useCase(Currency.USD).first()
 
-        // KRW total: 1,000,000 + 1000*1350 = 2,350,000
+        // KRW 합계: 1,000,000 + 1000*1350 = 2,350,000
         assertEquals(Money.of(2_350_000, Currency.KRW), krwTotal.converted)
         assertTrue(krwTotal.unconverted.isEmpty())
-        // USD total: 1,000,000*0.00074074 + 1000 ≈ 1740.74
+        // USD 합계: 1,000,000*0.00074074 + 1000 ≈ 1740.74
         assertEquals(Currency.USD, usdTotal.converted.currency)
         assertTrue(
             usdTotal.converted.amount > BigDecimal("1740") && usdTotal.converted.amount < BigDecimal("1741"),
@@ -77,7 +77,6 @@ class TotalAssetsUseCaseTest {
         assertTrue(totals.unconverted.isEmpty())
     }
 
-    // 빈 입력의 zero가 target에 종속 — 잘못된 통화로 0이 흘러가지 않게.
     @Test
     fun `계좌가 없으면 어떤 target이든 그 통화의 0과 빈 unconverted`() = runTest {
         val useCase = TotalAssetsUseCase(

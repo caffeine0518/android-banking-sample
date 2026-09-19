@@ -17,18 +17,6 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
 
-/**
- * "홈에서 계좌 탭 → 계좌 상세 → 뒤로 홈" 화면 전환을 검증하는 E2E.
- *
- * 홈 한 화면에 머무는 [HomeFlowEndToEndTest]와 달리 실제 네비게이션(BankNavHost)을 타고
- * HomeRoute → AccountDetailRoute로 이동해 상세 헤더(마스킹 번호·잔액)와 거래내역 영역이 끝까지 흐르는지 본다.
- * 상단 백 버튼으로 홈에 복귀하는 popBackStack 경로까지 함께 확인한다.
- *
- * 네비게이션 후 파괴 시 NavBackStackEntry 전이 크래시를 피하려면 [TestDispatchersModule]이 필수다
- * (MviStore reducer를 메인 디스패처에 묶어 진입 전환이 settle되게 함 — 자세한 사유는 그 KDoc 참고).
- *
- * 에뮬레이터/디바이스에서 실행: ./gradlew :app-e2e:connectedDebugAndroidTest
- */
 @HiltAndroidTest
 class AccountDetailFlowEndToEndTest {
 
@@ -40,7 +28,7 @@ class AccountDetailFlowEndToEndTest {
 
     @Test
     fun 계좌를_탭하면_상세_화면이_보인다() {
-        // 이 테스트는 통화 무관 — 아무 계좌나 하나 열어 상세가 끝까지 뜨는지 본다(거래내역 적재는 페이징·비동기라 단정하지 않음).
+        // 이 테스트는 통화 무관 — 아무 계좌나 하나 열어 상세가 끝까지 표시되는지 검증한다(거래내역 적재는 페이징·비동기라 단정하지 않음).
         val account = E2eAccounts.firstOf(Currency.KRW)
         // 표시명이 아니라 안정적 id 태그로 그 계좌 행을 지목해 클릭.
         composeRule.awaitTag(accountItem(account))

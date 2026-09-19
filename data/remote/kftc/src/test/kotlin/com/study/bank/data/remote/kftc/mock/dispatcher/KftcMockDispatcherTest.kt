@@ -18,10 +18,10 @@ import org.junit.Before
 import org.junit.Test
 
 /**
- * [KftcMockDispatcher] 라우팅/에러 분기 단독 검증.
+ * [KftcMockDispatcher]의 라우팅·에러 분기 단독 검증.
  *
- * Retrofit/DTO 직렬화 경로는 [com.study.bank.data.remote.kftc.api.KftcApiServiceTest]에서 다루므로
- * 여기선 raw HTTP body 문자열만 보고 dispatcher 책임(경로 매칭, 시드 조회, [MockError] 분기)에 집중한다.
+ * Retrofit/DTO 직렬화를 거치지 않고 raw HTTP body 문자열만 보므로, 경로 매칭·시드 조회·[MockError] 분기에
+ * 실패가 국한된다.
  */
 class KftcMockDispatcherTest {
 
@@ -54,7 +54,6 @@ class KftcMockDispatcherTest {
         server.shutdown()
     }
 
-    // happy path baseline — 첫 라우트가 200 + envelope 골격을 그대로 돌려주는지.
     @Test
     fun `list_finuse는 200과 KFTC 성공 envelope을 돌려준다`() {
         val (code, body) = get("/v2.0/account/list_finuse")
@@ -66,7 +65,6 @@ class KftcMockDispatcherTest {
             body.contains(""""res_cnt":"${KftcAccountSeed.accounts.size}""""))
     }
 
-    // seed lookup 정확성 — fintechUseNum 키로 매칭된 계좌의 잔액/통화가 응답에 그대로 흘러가는지.
     @Test
     fun `balance fin_num + 유효한 fintech_use_num은 200과 해당 시드 잔액을 돌려준다`() {
         val krw = KftcAccountSeed.accounts.firstOrNull { it.currencyCode == "KRW" }
@@ -100,7 +98,6 @@ class KftcMockDispatcherTest {
             body.contains("fintech_use_num 쿼리 누락"))
     }
 
-    // UnknownFintechUseNum — 404 + 메시지에 입력값 echo (디버깅 가능성 보장).
     @Test
     fun `존재하지 않는 fintech_use_num은 404와 입력값을 포함한 메시지`() {
         val bogus = "999999999999999999999999"

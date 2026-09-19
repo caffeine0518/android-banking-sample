@@ -24,12 +24,12 @@ android {
 }
 
 dependencies {
-    // ── Production: 모듈 그래프 ──────────────────────────────────────────
+    // ── 프로덕션: 모듈 그래프 ────────────────────────────────────────────
     implementation(projects.navigation)
     implementation(projects.dataDi)
     implementation(projects.coreUi.designsystem)
 
-    // ── Production: Compose / AndroidX ──────────────────────────────────
+    // ── 프로덕션: Compose / AndroidX ─────────────────────────────────────
     implementation(libs.androidx.activity.compose)
 
     // Hilt(DI), Compose 컴파일러/BOM, compileSdk/minSdk/Java 11은

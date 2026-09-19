@@ -25,7 +25,7 @@ internal class AccountRequestHandler(
 
     /**
      * 거래내역 한 페이지(KFTC 연속조회). 전체 명세서(시드 과거 + 세션 이체)에서 [beforInquiryTraceInfo](커서)가
-     * 가리키는 지점부터 서버가 정한 [PAGE_SIZE]건을 돌려준다. 커서가 없으면 첫 페이지.
+     * 가리키는 지점부터 서버가 정한 [PAGE_SIZE]건을 반환한다. 커서가 없으면 첫 페이지.
      * next_page_yn과 다음 커서(befor_inquiry_trace_info)를 함께 실어 클라가 연속조회를 이어가게 한다.
      */
     fun transactionList(fintechUseNum: String?, beforInquiryTraceInfo: String?): MockResponse {

@@ -73,7 +73,6 @@ class AccountDetailViewModelTest {
 
     @Test
     fun `거래내역 페이징이 UI 모델로 매핑된다`() = runTest {
-        // VM이 적용하는 변환(PagingData.map(uiMapper))을 cachedIn 없이 그대로 검증한다.
         val tx = transaction("tx-1", TransactionType.TRANSFER_OUT, 50_000)
 
         val snapshot = flowOf(PagingData.from(listOf(tx)))

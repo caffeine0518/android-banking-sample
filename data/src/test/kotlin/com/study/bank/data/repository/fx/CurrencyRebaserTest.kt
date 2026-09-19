@@ -17,7 +17,6 @@ class CurrencyRebaserTest {
         rebaser = CurrencyRebaser()
     }
 
-    // 사용자 로케일과 무관하게 항상 성립할 핵심 invariant.
     @Test
     fun `어떤 target이든 자기 자신을 identity로 반환`() {
         val anchored = sampleAnchored()
@@ -28,7 +27,7 @@ class CurrencyRebaserTest {
         }
     }
 
-    // 단방향 환산만 옳고 역방향이 깨지는 수학 오류 방지.
+    // 단방향 환산만 옳고 역방향이 어긋나는 수학 오류 방지.
     @Test
     fun `source-target 역수 관계를 만족`() {
         val anchored = sampleAnchored()
@@ -57,7 +56,6 @@ class CurrencyRebaserTest {
         }
     }
 
-    // SCALE=8 / HALF_UP 정책이 적용되는지 (반올림 정책 변경 회귀 방지).
     @Test
     fun `8자리 HALF_UP으로 라운딩`() {
         // 1 / 3 = 0.33333333... (9번째 자리 3 → 버림) → 0.33333333

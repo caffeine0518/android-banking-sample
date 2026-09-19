@@ -37,10 +37,9 @@ import javax.inject.Inject
  * 데이터 레이어 E2E(L3) — UI 없이 **앱의 실제 Hilt 그래프**를 Robolectric(JVM)에서 부팅해
  * KFTC mock 서버 + Room SSOT + 실제 레포/유스케이스가 끝까지 흐르는지 검증한다.
  *
- * 수동 와이어가 아니라 @HiltAndroidTest 주입이므로 LocalModule/RepositoryModule/NetworkModule의 실제 DI
- * 배선까지 런타임 검증된다(그래프 성립 여부는 :app:kspDebugKotlin이 컴파일타임에 담당). 앱이 설계상 mock KFTC +
- * 인메모리 Room으로 돌기 때문에, 주입받은 스택이 곧 실 런타임 스택이다. HiltAndroidRule이 테스트마다 컴포넌트를
- * 새로 구성 → KftcMockServer 시드/Room이 테스트별로 초기화된다.
+ * 수동 와이어가 아니라 @HiltAndroidTest 주입이므로 실제 DI 배선까지 런타임 검증된다. 앱이 설계상 mock
+ * KFTC + 인메모리 Room으로 실행되기 때문에 주입받은 스택이 곧 실 런타임 스택이고, HiltAndroidRule이
+ * 테스트마다 컴포넌트를 새로 구성하므로 시드/Room도 테스트별로 초기화된다.
  */
 @HiltAndroidTest
 @RunWith(RobolectricTestRunner::class)
@@ -109,7 +108,7 @@ class DataFlowIntegrationTest {
         assertEquals(0, safebox.balance.amount.compareTo(BigDecimal("12050000")))
 
         // 거래내역: execute가 출금계좌 내역을 refresh → 첫 페이지(PAGE_SIZE건) = 방금 송금분(최신) + 시드 과거.
-        // 건수는 한 페이지로 고정되고, 맨 앞(최신)이 이번 송금 TRANSFER_OUT인지 본다.
+        // 건수는 한 페이지로 고정되고, 맨 앞(최신)이 이번 송금 TRANSFER_OUT인지 확인한다.
         val salaryTxns = transactionRepository.observeTransactions(SALARY).first()
         assertEquals(PAGE_SIZE, salaryTxns.size)
         assertEquals(TransactionType.TRANSFER_OUT, salaryTxns.first().type)

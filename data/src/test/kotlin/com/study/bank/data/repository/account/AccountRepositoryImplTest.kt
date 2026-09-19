@@ -38,7 +38,7 @@ class AccountRepositoryImplTest {
         assertEquals(1, dao.count())
     }
 
-    // ----- SSOT: refresh 후 여러 구독자가 같은 DAO source를 본다 -----
+    // ----- SSOT: refresh 후 여러 구독자가 같은 DAO source를 구독한다 -----
 
     @Test
     fun `refresh 1회 후 여러 구독자가 observeAccounts를 collect해도 fetch는 1회`() = runTest {
@@ -50,7 +50,7 @@ class AccountRepositoryImplTest {
         val byVm = repo.observeAccounts().first()
         val byUseCase = repo.observeAccounts().first()
 
-        // primary: 같은 source(DAO)에서 흘러나오니 두 collect가 같은 데이터
+        // primary: 같은 source(DAO)에서 발행되니 두 collect가 같은 데이터
         assertEquals(byVm, byUseCase)
         assertEquals(2, byVm.size)
         // secondary: 구독 횟수가 fetch 횟수를 늘리지 않는다 — cold flow 회귀 방지
@@ -105,7 +105,7 @@ class AccountRepositoryImplTest {
             assertEquals(listOf(krwId), initialIds)
 
             // 동일 스냅샷 재방출(테이블 쓰기만 발생)은 흡수돼야 하므로 다음 방출은 '실제 변경'이어야 한다.
-            // 흡수 안 되면 [KRW]가 먼저 와서 nextIds 단언이 깨진다.
+            // 흡수 안 되면 [KRW]가 먼저 와서 nextIds 단언이 실패한다.
             dao.emit(listOf(ENTITY_KRW))
             dao.emit(listOf(ENTITY_KRW, ENTITY_USD))
             val nextIds = awaitItem().map { it.id }
@@ -136,7 +136,7 @@ class AccountRepositoryImplTest {
         }
     }
 
-    // ----- Helpers -----
+    // ----- 헬퍼 -----
 
     private fun buildRepo(api: KftcApiService, dao: AccountDao) = AccountRepositoryImpl(
         api = api,
@@ -301,7 +301,7 @@ class AccountRepositoryImplTest {
             insertAll(entities)
         }
 
-        // 보장: Fake가 인터페이스에 정확히 맞춰 깜빡 누락 안 했는지 컴파일러로 잡힘
+        // 보장: Fake가 인터페이스에 정확히 맞춰 누락 없이 구현됐는지 컴파일러가 검출
         init { assertTrue(true) }
     }
 

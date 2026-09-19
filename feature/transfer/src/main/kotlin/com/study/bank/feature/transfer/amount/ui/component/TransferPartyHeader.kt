@@ -71,7 +71,7 @@ private fun RecipientParty(recipient: AmountRecipientUi) {
     )
 }
 
-/** FROM/TO 캡션. 작고 흐린 대문자 라벨로 본문 위에 얹는다. */
+/** FROM/TO 캡션. 작고 흐린 대문자 라벨로 본문 위에 배치한다. */
 @Composable
 private fun PartyLabel(text: String) {
     Text(

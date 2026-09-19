@@ -25,9 +25,9 @@ class FxRateRepositoryImpl @Inject constructor(
     }
 
     /**
-     * KEXIM publishes the day's rates around 11:00 KST and skips weekends/holidays.
-     * Walk back up to [MAX_WALKBACK] days from yesterday until a non-empty result=1
-     * response is found.
+     * KEXIM은 당일 환율을 KST 11:00 무렵 공시하고 주말·공휴일에는 공시하지 않는다.
+     * 그래서 어제부터 최대 [MAX_WALKBACK]일까지 거슬러 올라가며, result=1이면서 비어 있지 않은
+     * 응답이 나올 때까지 조회한다.
      */
     private suspend fun fetchRates(target: Currency): Map<Currency, BigDecimal> {
         var date = LocalDate.now(clock).minusDays(1)

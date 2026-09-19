@@ -35,8 +35,7 @@ class CancellableCatchingTest {
         }
     }
 
-    // 핵심 회귀 보호: 취소가 정상 전파되어 블록 이후 로직이 실행되지 않아야 한다.
-    // 표준 runCatching이라면 취소를 삼켜 afterBlock이 true가 되며 테스트가 깨진다.
+    // 표준 runCatching이라면 취소를 무시해 afterBlock이 true가 되며 테스트가 실패한다.
     @Test
     fun `cancellation propagates so post-block work does not run`() = runTest {
         val started = CompletableDeferred<Unit>()

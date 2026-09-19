@@ -1,4 +1,4 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+// 모든 서브프로젝트·모듈에 공통으로 적용할 설정을 두는 최상위 빌드 파일.
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.library) apply false

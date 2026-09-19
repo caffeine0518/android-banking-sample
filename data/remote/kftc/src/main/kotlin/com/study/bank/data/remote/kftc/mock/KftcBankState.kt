@@ -8,9 +8,6 @@ import java.time.format.DateTimeFormatter
 /**
  * KFTC mock의 가변 인메모리 상태(잔액 + 거래원장).
  *
- * 시드에서 초기화되고 [withdraw]로 잔액이 변하며 양쪽 계좌에 [TransactionRecord]를 남긴다.
- * 디스크 영속이 없어 프로세스 재시작(=앱 재실행)이 곧 초깃값 리셋이며, [reset]은 같은 효과를 명시적으로 낸다.
- *
  * 여러 스레드(요청 디스패치 vs 검증)가 접근하므로 모든 진입점을 [lock]으로 직렬화한다.
  * 잔액 문자열의 소수 자릿수(통화 exponent)는 시드 원본 문자열의 scale을 보존해 재포맷한다 —
  * 이 모듈은 :domain의 Currency를 모르기 때문.
@@ -38,7 +35,7 @@ internal class KftcBankState(
         reset()
     }
 
-    /** 잔액·원장·seq 카운터를 시드 초깃값으로 되돌린다. */
+    /** 잔액·원장·seq 카운터를 시드 초깃값으로 초기화한다. */
     fun reset() = synchronized(lock) {
         balances.clear()
         scales.clear()
@@ -62,7 +59,7 @@ internal class KftcBankState(
             ?.copy(balanceAmt = formatBalance(fintechUseNum))
     }
 
-    /** 이번 세션 이체로 쌓인 계좌별 원장(최신 우선). 시드 과거 거래는 빼고 [statement]가 합친다. */
+    /** 이번 세션 이체로 쌓인 계좌별 원장(최신 우선). 시드 과거 거래는 제외하며 [statement]가 합친다. */
     fun transactions(fintechUseNum: String): List<TransactionRecord> = synchronized(lock) {
         ledger[fintechUseNum].orEmpty().toList()
     }
@@ -72,7 +69,7 @@ internal class KftcBankState(
      *
      * seq는 단조 증가 고유값이라 전순서가 보장된다 — 같은 초 행이 있어도 커서가 strict `<`로 빠짐없이 seek할 수 있고
      * (오프셋/초단위 키의 누락 결함 회피), 화면측 Room `ORDER BY occurred_at DESC, id DESC`(id에 seq 내장)와도
-     * 같은 순서가 된다. 연속조회 엔드포인트(transaction_list + befor_inquiry_trace_info 커서)가 이 명세서를 잘라 돌려준다.
+     * 같은 순서가 된다. 연속조회 엔드포인트(transaction_list + befor_inquiry_trace_info 커서)가 이 명세서를 잘라 반환한다.
      */
     fun statement(fintechUseNum: String): List<TransactionRecord> = synchronized(lock) {
         (ledger[fintechUseNum].orEmpty() + seededHistory[fintechUseNum].orEmpty())
@@ -86,7 +83,7 @@ internal class KftcBankState(
         }
     }
 
-    /** 부수효과 없는 검증. 통과하면 실행에 필요한 출금/수취 계좌·금액을 묶어 돌려주고, 아니면 거절 결과를 담는다. */
+    /** 부수효과 없는 검증. 통과하면 실행에 필요한 출금/수취 계좌·금액을 묶어 반환하고, 아니면 거절 결과를 반환한다. */
     private fun planWithdrawal(command: WithdrawCommand): WithdrawPlan {
         val source = seed.firstOrNull { it.fintechUseNum == command.fintechUseNum }
         if (source == null) {
@@ -176,7 +173,7 @@ internal class KftcBankState(
 
     /**
      * 한 계좌에 입출 1건을 적용한다 — 잔액을 [direction]대로 갱신하고 원장 맨 앞에 레코드를 얹은 뒤,
-     * 갱신된 잔액을 돌려준다. 호출자가 이미 [lock]을 쥔 단일 임계구역([withdraw]) 안에서만 부른다.
+     * 갱신된 잔액을 반환한다. 호출자가 이미 [lock]을 획득한 단일 임계구역([withdraw]) 안에서만 호출한다.
      */
     private fun post(
         fintechUseNum: String,

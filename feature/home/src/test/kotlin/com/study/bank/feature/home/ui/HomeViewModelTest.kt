@@ -66,7 +66,6 @@ class HomeViewModelTest {
 
         repo.emit(account("acc-1", 1_000_000, Currency.KRW))
 
-        // 환산·합산 정합성은 TotalAssetsUseCaseTest 담당. 여기선 usecase 결과가 state로 '연결'되는지만 본다.
         assertEquals(moneyUiMapper.map(Money.of(1_000_000, Currency.KRW)), vm.state.value.totalAssets)
     }
 
@@ -99,7 +98,7 @@ class HomeViewModelTest {
 
     @Test
     fun `로딩 중에는 추가 Refresh가 무시돼 refresh가 중복 호출되지 않는다`() = runTest {
-        // 첫 refresh를 gate로 붙잡아 isLoading=true 상태를 유지시킨다.
+        // 첫 refresh를 gate로 붙잡아 isLoading=true 상태를 유지한다.
         val gate = CompletableDeferred<Unit>()
         val repo = FakeAccountRepository().apply { onRefresh = { gate.await() } }
         val vm = buildViewModel(repo)

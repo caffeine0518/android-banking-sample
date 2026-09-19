@@ -6,14 +6,6 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * [KeximApiService] 구현체.
- *
- * 책임:
- *  - 호출마다 [authKey] 자동 주입
- *  - [LocalDate] → KEXIM `yyyyMMdd` 포맷 변환
- *  - 그 외 HTTP 디테일은 [httpApi]로 위임
- */
 @Singleton
 class KeximApiServiceImpl @Inject constructor(
     private val httpApi: KeximHttpApi,

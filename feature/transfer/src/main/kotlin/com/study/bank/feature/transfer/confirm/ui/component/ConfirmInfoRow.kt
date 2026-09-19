@@ -21,7 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 /**
- * "라벨 ─ 값 ›" 한 줄. [onClick]이 있으면 끝에 chevron을 붙여 편집 가능함을 표시하고,
+ * "라벨 ─ 값 ›" 한 줄. [onClick]이 있으면 끝에 chevron을 노출해 편집 가능함을 표시하고,
  * [leadingIcon]은 값 앞에 작은 아이콘(예: 입금계좌 확인 배지)을 둔다.
  */
 @Composable

@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
 /**
  * 송금 플로우 동안 화면 사이를 흐르는 수취인 신원. 실명조회(외부 계좌)나 "내 계좌" 선택(picker)에서 한 번
  * 확정돼 금액→확인→결과까지 그대로 전달된다 — 출금계좌 저장소에 없는 외부 계좌도 식별자 재조회 없이 처리된다.
- * Nav3 내비 키는 kotlinx 직렬화로 통째 저장되므로 [TransferAmountRoute] 등에 중첩 필드로 그대로 싣는다.
+ * Nav3 내비 키는 kotlinx 직렬화로 통째 저장되므로 [TransferAmountRoute] 등에 중첩 필드로 그대로 포함한다.
  */
 @Serializable
 data class TransferRecipientArg(
@@ -34,7 +34,7 @@ data class TransferRecipientRoute(val sourceAccountId: String) : NavKey
 @Serializable
 data class TransferAccountInputRoute(val sourceAccountId: String) : NavKey
 
-/** 송금 2번째 화면: 금액 입력. 수취인 신원을 함께 싣는다. */
+/** 송금 2번째 화면: 금액 입력. 수취인 신원을 함께 포함한다. */
 @Serializable
 data class TransferAmountRoute(
     val sourceAccountId: String,

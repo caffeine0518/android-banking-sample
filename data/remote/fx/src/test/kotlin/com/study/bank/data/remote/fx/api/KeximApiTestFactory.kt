@@ -9,11 +9,9 @@ import retrofit2.Retrofit
 internal const val KEXIM_PROD_BASE_URL = "https://oapi.koreaexim.go.kr/"
 
 /**
- * 테스트용 [KeximApiService] 빌더. 실제 앱에선 DI 프레임워크가 처리할 의존성 묶음을 수동으로 구성.
+ * 테스트용 [KeximApiService] 빌더 — 앱에선 DI가 하는 조립을 수동으로 한다.
  *
- * 라이브 테스트는 디폴트(KEXIM 운영 baseUrl + BuildConfig 인증키),
- * 미래에 MockWebServer 기반 테스트가 추가되면 [baseUrl]에 `mockServer.url("/")` 주입.
- * 인증 실패 시나리오는 [authKey]에 임의 문자열 주입.
+ * 디폴트는 KEXIM 운영 baseUrl + BuildConfig 인증키. 인증 실패 시나리오는 [authKey]에 임의 문자열을 준다.
  */
 internal fun createKeximApiService(
     baseUrl: String = KEXIM_PROD_BASE_URL,

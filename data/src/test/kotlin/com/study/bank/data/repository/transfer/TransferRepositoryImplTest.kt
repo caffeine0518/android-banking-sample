@@ -29,10 +29,7 @@ import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset
 
-/**
- * [TransferRepositoryImpl] 검증. KFTC withdraw 응답을 모사하고, 성공 시 SSOT 재동기화(refresh) 호출과
- * 결과/실패 매핑을 본다. AccountRepository/TransactionRepository는 refresh 호출만 기록하는 페이크.
- */
+/** KFTC withdraw 응답을 모사해 [TransferRepositoryImpl]의 결과·실패 매핑과 SSOT 재동기화 호출을 검증한다. */
 class TransferRepositoryImplTest {
 
     private val fixedClock = Clock.fixed(Instant.parse("2026-06-18T01:30:00Z"), ZoneOffset.UTC)
@@ -54,7 +51,6 @@ class TransferRepositoryImplTest {
         assertEquals(0, outcome.result.balanceAfter.amount.compareTo(BigDecimal("2797320")))
         assertEquals(Instant.parse("2026-06-18T01:30:00Z"), outcome.result.completedAt)
 
-        // SSOT 재동기화 호출 확인.
         assertEquals(1, accounts.refreshCount)
         assertEquals(listOf(AccountId("120220112345678901234001")), transactions.refreshedAccounts)
     }

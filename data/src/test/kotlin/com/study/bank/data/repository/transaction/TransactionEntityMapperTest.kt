@@ -46,7 +46,6 @@ class TransactionEntityMapperTest {
         assertEquals(original.status, restored.status)
     }
 
-    // B안 핵심: 우리가 저장한 값의 복원 실패 = 스키마-코드 정합성 붕괴 → check(IllegalStateException).
     @Test
     fun `알 수 없는 통화는 IllegalStateException으로 fail-fast`() {
         assertThrows(IllegalStateException::class.java) { mapper.toDomain(entity(currency = "XXX")) }

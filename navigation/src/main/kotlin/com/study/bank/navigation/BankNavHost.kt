@@ -85,17 +85,17 @@ private fun NavBackStack<NavKey>.push(key: NavKey) {
 }
 
 /**
- * pop 플로어 가드. 백버튼 더블탭이 removeLastOrNull을 두 번 태우면 백스택이 비어 NavDisplay가
- * 즉시 죽는다("NavDisplay backstack cannot be empty" — 에뮬레이터 실증). 루트 엔트리는 항상 남긴다.
+ * pop 플로어 가드. 백버튼 더블탭이 removeLastOrNull을 두 번 실행하면 백스택이 비어 NavDisplay가
+ * 즉시 크래시한다("NavDisplay backstack cannot be empty" — 에뮬레이터 실증). 루트 엔트리는 항상 남긴다.
  */
 private fun NavBackStack<NavKey>.pop() {
     if (size > 1) removeLastOrNull()
 }
 
 /**
- * popUpTo. [predicate]에 처음 걸리는(위에서 아래로) 엔트리가 최상단이 되도록 그 위를 모두 걷어낸다
+ * popUpTo. [predicate]에 처음 걸리는(위에서 아래로) 엔트리가 최상단이 되도록 그 위를 모두 제거한다
  * (Nav2 popUpTo, inclusive=false 대응). 앵커를 값이 아니라 식별 필드로 참조하므로 라우트에 필드가
- * 늘어도 매칭이 깨지지 않는다. 걸리는 엔트리가 없으면 스택 불변. 앵커는 남으므로 스택이 빌 수 없고, 재호출도 멱등이다.
+ * 늘어도 매칭이 어긋나지 않는다. 걸리는 엔트리가 없으면 스택 불변. 앵커는 남으므로 스택이 빌 수 없고, 재호출도 멱등이다.
  */
 private inline fun NavBackStack<NavKey>.popUpTo(predicate: (NavKey) -> Boolean) {
     val index = indexOfLast(predicate)

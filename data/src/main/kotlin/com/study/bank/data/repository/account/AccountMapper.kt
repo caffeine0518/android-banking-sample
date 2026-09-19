@@ -16,7 +16,7 @@ import javax.inject.Singleton
 class AccountMapper @Inject constructor() {
 
     /**
-     * @throws IllegalArgumentException if currency code is unsupported or bank code is unknown
+     * @throws IllegalArgumentException 지원하지 않는 통화 코드이거나 알 수 없는 은행 코드일 때 발생한다
      */
     fun map(dto: FintechAccountDto, balance: AccountBalanceResponse): Account {
         val currency = requireNotNull(Currency.byCode(balance.currencyCode)) {
