@@ -1,4 +1,4 @@
-package com.study.bank
+package com.study.bank.e2e.support
 
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.SemanticsProperties

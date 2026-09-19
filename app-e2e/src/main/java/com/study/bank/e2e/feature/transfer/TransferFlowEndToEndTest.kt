@@ -1,10 +1,11 @@
-package com.study.bank
+package com.study.bank.e2e.feature.transfer
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import com.study.bank.MainActivity
 import com.study.bank.core.ui.testing.BankTestTags.AMOUNT_NEXT
 import com.study.bank.core.ui.testing.BankTestTags.CONFIRM_SEND
 import com.study.bank.core.ui.testing.BankTestTags.DETAIL_SEND
@@ -17,6 +18,8 @@ import com.study.bank.core.ui.testing.BankTestTags.SCREEN_RECIPIENT
 import com.study.bank.core.ui.testing.BankTestTags.accountDetail
 import com.study.bank.core.ui.testing.BankTestTags.accountItem
 import com.study.bank.domain.model.Currency
+import com.study.bank.e2e.support.E2eAccounts
+import com.study.bank.e2e.support.awaitTag
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule

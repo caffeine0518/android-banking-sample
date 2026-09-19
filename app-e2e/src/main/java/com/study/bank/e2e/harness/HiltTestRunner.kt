@@ -1,4 +1,4 @@
-package com.study.bank
+package com.study.bank.e2e.harness
 
 import android.app.Application
 import android.content.Context
