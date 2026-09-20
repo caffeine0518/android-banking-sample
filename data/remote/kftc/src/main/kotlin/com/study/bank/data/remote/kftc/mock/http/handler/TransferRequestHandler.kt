@@ -5,7 +5,9 @@ import com.study.bank.data.remote.kftc.api.BANK_RSP_INSUFFICIENT_FUNDS
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
 import com.study.bank.data.remote.kftc.mock.KftcMockServerImpl
 import com.study.bank.data.remote.kftc.mock.http.MockError
-import com.study.bank.data.remote.kftc.mock.http.response.KftcMockResponses
+import com.study.bank.data.remote.kftc.mock.http.response.ok
+import com.study.bank.data.remote.kftc.mock.mapper.ErrorResponseMapper
+import com.study.bank.data.remote.kftc.mock.mapper.TransferResponseMapper
 import com.study.bank.data.remote.kftc.mock.service.KftcWithdrawalService
 import com.study.bank.data.remote.kftc.mock.service.WithdrawCommand
 import com.study.bank.data.remote.kftc.mock.service.WithdrawResult
@@ -22,13 +24,14 @@ import okhttp3.mockwebserver.MockResponse
  */
 internal class TransferRequestHandler(
     private val withdrawalService: KftcWithdrawalService,
-    private val responses: KftcMockResponses,
+    private val mapper: TransferResponseMapper,
+    private val errors: ErrorResponseMapper,
     private val json: Json,
     private val responseDelayMillis: Long = 0,
 ) {
     fun withdraw(body: String): MockResponse {
-        val command = parseWithdraw(body) ?: return responses.error(MockError.MissingTransferBody)
-        val response = withdrawalService.withdraw(command).toResponse()
+        val command = parseWithdraw(body) ?: return errors.toResponse(MockError.MissingTransferBody)
+        val response = withdrawalService.withdraw(command).toMockResponse()
         return if (responseDelayMillis > 0) {
             response.setBodyDelay(responseDelayMillis, TimeUnit.MILLISECONDS)
         } else {
@@ -36,25 +39,25 @@ internal class TransferRequestHandler(
         }
     }
 
-    private fun WithdrawResult.toResponse(): MockResponse = when (this) {
+    private fun WithdrawResult.toMockResponse(): MockResponse = when (this) {
         is WithdrawResult.Success -> {
-            responses.withdrawSuccess(this)
+            mapper.toResponse(this).ok()
         }
 
         is WithdrawResult.UnknownSender -> {
-            responses.error(MockError.UnknownFintechUseNum(fintechUseNum))
+            errors.toResponse(MockError.UnknownFintechUseNum(fintechUseNum))
         }
 
         is WithdrawResult.InvalidAmount -> {
-            responses.error(MockError.InvalidTranAmt(raw))
+            errors.toResponse(MockError.InvalidTranAmt(raw))
         }
 
         is WithdrawResult.InsufficientFunds -> {
-            responses.withdrawFailure(BANK_RSP_INSUFFICIENT_FUNDS, "출금계좌 잔액 부족")
+            mapper.toRejectedResponse(BANK_RSP_INSUFFICIENT_FUNDS, "출금계좌 잔액 부족").ok()
         }
 
         is WithdrawResult.CurrencyMismatch -> {
-            responses.withdrawFailure(BANK_RSP_CURRENCY_MISMATCH, "통화 불일치: $from→$to")
+            mapper.toRejectedResponse(BANK_RSP_CURRENCY_MISMATCH, "통화 불일치: $from→$to").ok()
         }
     }
 

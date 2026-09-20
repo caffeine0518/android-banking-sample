@@ -2,7 +2,9 @@ package com.study.bank.data.remote.kftc.mock.http.handler
 
 import com.study.bank.data.remote.kftc.api.KFTC_TRANSACTION_PAGE_SIZE
 import com.study.bank.data.remote.kftc.mock.http.MockError
-import com.study.bank.data.remote.kftc.mock.http.response.KftcMockResponses
+import com.study.bank.data.remote.kftc.mock.http.response.ok
+import com.study.bank.data.remote.kftc.mock.mapper.AccountResponseMapper
+import com.study.bank.data.remote.kftc.mock.mapper.ErrorResponseMapper
 import com.study.bank.data.remote.kftc.mock.service.KftcWithdrawalService
 import com.study.bank.data.remote.kftc.mock.storage.SeedAccount
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockAccountDao
@@ -17,13 +19,14 @@ import okhttp3.mockwebserver.MockResponse
 internal class AccountRequestHandler(
     private val accountDao: MockAccountDao,
     private val transactionDao: MockTransactionDao,
-    private val responses: KftcMockResponses,
+    private val mapper: AccountResponseMapper,
+    private val errors: ErrorResponseMapper,
 ) {
-    fun list(): MockResponse = responses.listFinuse(accountDao.findAll())
+    fun list(): MockResponse = mapper.toListResponse(accountDao.findAll()).ok()
 
     fun balance(fintechUseNum: String?): MockResponse {
         val account = resolveAccount(fintechUseNum) ?: return missingOrUnknown(fintechUseNum)
-        return responses.balanceFinNum(account)
+        return mapper.toBalanceResponse(account).ok()
     }
 
     fun transactionList(fintechUseNum: String?, beforInquiryTraceInfo: String?): MockResponse {
@@ -35,12 +38,12 @@ internal class AccountRequestHandler(
         )
         val records = fetched.take(PAGE_SIZE)
         val hasNext = fetched.size > PAGE_SIZE
-        return responses.transactionList(
+        return mapper.toTransactionListResponse(
             account = account,
             records = records,
             hasNext = hasNext,
             nextCursor = if (hasNext) encodeCursor(records.last().seq) else "",
-        )
+        ).ok()
     }
 
     private fun resolveAccount(fintechUseNum: String?): SeedAccount? {
@@ -50,9 +53,9 @@ internal class AccountRequestHandler(
 
     private fun missingOrUnknown(fintechUseNum: String?): MockResponse =
         if (fintechUseNum.isNullOrBlank()) {
-            responses.error(MockError.MissingFintechUseNum)
+            errors.toResponse(MockError.MissingFintechUseNum)
         } else {
-            responses.error(MockError.UnknownFintechUseNum(fintechUseNum))
+            errors.toResponse(MockError.UnknownFintechUseNum(fintechUseNum))
         }
 
     private companion object {

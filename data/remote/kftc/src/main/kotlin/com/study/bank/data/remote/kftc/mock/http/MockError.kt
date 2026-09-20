@@ -1,14 +1,14 @@
 package com.study.bank.data.remote.kftc.mock.http
 
 import com.study.bank.data.remote.kftc.api.RSP_ERROR
-import com.study.bank.data.remote.kftc.mock.http.response.KftcMockResponses
+import com.study.bank.data.remote.kftc.mock.mapper.ErrorResponseMapper
 
 /**
  * Mock 디스패처가 만들어내는 에러 케이스.
  *
  * 메시지/HTTP 상태코드를 호출 측에서 하드코딩하지 않도록 격리. 케이스 이름이 곧 의도가 되어
- * [KftcMockDispatcher]가 `responses.error(MockError.UnknownEndpoint(path))` 같은 문장으로 읽힘.
- * KFTC envelope의 rsp_code는 [KftcMockResponses]가 모두 [RSP_ERROR]로 통일.
+ * [KftcMockDispatcher]가 `errors.toResponse(MockError.UnknownEndpoint(path))` 같은 문장으로 읽힘.
+ * 응답 조립은 [ErrorResponseMapper]가 맡고 rsp_code는 모두 [RSP_ERROR]로 통일한다.
  */
 internal sealed interface MockError {
     val httpCode: Int

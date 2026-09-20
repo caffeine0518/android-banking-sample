@@ -5,7 +5,11 @@ import com.study.bank.data.remote.kftc.mock.http.handler.AccountRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.handler.InquiryRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.handler.TransferRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.kftcRoutes
-import com.study.bank.data.remote.kftc.mock.http.response.KftcMockResponses
+import com.study.bank.data.remote.kftc.mock.http.response.KftcTranIds
+import com.study.bank.data.remote.kftc.mock.mapper.AccountResponseMapper
+import com.study.bank.data.remote.kftc.mock.mapper.ErrorResponseMapper
+import com.study.bank.data.remote.kftc.mock.mapper.InquiryResponseMapper
+import com.study.bank.data.remote.kftc.mock.mapper.TransferResponseMapper
 import com.study.bank.data.remote.kftc.mock.seed.KftcAccountSeed
 import com.study.bank.data.remote.kftc.mock.seed.KftcRecipientSeed
 import com.study.bank.data.remote.kftc.mock.service.KftcWithdrawalService
@@ -37,24 +41,31 @@ internal class KftcMockServerImpl @Inject constructor(
 ) : KftcMockServer {
 
     private val server: MockWebServer = MockWebServer()
-    // responses는 단일 인스턴스를 공유해야 api_tran_id 시퀀스가 엔드포인트 전역으로 1씩 증가한다.
-    private val responses = KftcMockResponses()
+    private val tranIds = KftcTranIds()
+    private val errors = ErrorResponseMapper(tranIds)
     private val dispatcher = KftcMockDispatcher(
         routes = kftcRoutes(
-            account = AccountRequestHandler(accountDao, transactionDao, responses),
+            account = AccountRequestHandler(
+                accountDao,
+                transactionDao,
+                AccountResponseMapper(tranIds),
+                errors,
+            ),
             transfer = TransferRequestHandler(
                 withdrawalService,
-                responses,
+                TransferResponseMapper(tranIds),
+                errors,
                 networkJson.value,
                 responseDelayMillis = WITHDRAW_RESPONSE_DELAY_MS,
             ),
             inquiry = InquiryRequestHandler(
                 KftcRecipientSeed.directory(KftcAccountSeed.accounts),
-                responses,
+                InquiryResponseMapper(tranIds),
+                errors,
                 networkJson.value,
             ),
         ),
-        responses = responses,
+        errors = errors,
     )
     private val localhostCertificate: HeldCertificate = HeldCertificate.Builder()
         .addSubjectAlternativeName("localhost")
