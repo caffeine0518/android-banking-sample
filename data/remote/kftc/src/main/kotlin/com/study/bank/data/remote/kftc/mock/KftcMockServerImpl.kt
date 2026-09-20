@@ -76,7 +76,6 @@ internal class KftcMockServerImpl @Inject constructor(
     internal fun takeRequest(timeoutMs: Long = 1_000): RecordedRequest? =
         server.takeRequest(timeoutMs, TimeUnit.MILLISECONDS)
 
-    /** @Singleton이라 주입받은 인스턴스가 곧 API가 호출하는 그 서버다. */
     override fun startDroppingConnections() {
         dispatcher.dropConnections = true
     }

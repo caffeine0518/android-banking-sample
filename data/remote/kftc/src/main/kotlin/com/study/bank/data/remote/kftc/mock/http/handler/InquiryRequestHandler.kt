@@ -10,9 +10,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 
-/**
- * KFTC `/v2.0/inquiry/…` 계좌실명조회 핸들러.
- */
+/** KFTC `/v2.0/inquiry/…` 계좌실명조회 핸들러. */
 internal class InquiryRequestHandler(
     private val recipients: List<SeedRecipient>,
     private val mapper: InquiryResponseMapper,

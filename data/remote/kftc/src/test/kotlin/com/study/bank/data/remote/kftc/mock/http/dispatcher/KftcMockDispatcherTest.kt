@@ -41,7 +41,6 @@ class KftcMockDispatcherTest {
         client = OkHttpClient()
     }
 
-    // 조립은 프로덕션과 같은 팩토리를 쓴다 — 테스트가 정하는 건 시드뿐(송금 응답 지연은 기본값 0).
     private fun newDispatcher(seed: List<SeedAccount> = KftcAccountSeed.accounts): KftcMockDispatcher {
         val bank = TestMockBank(seed)
         return kftcMockDispatcher(

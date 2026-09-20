@@ -23,6 +23,5 @@ internal class RoutingBuilder {
     }
 }
 
-/** mock 서버가 노출하는 엔드포인트 전체를 한 곳에 선언한다. */
 internal fun routing(block: RoutingBuilder.() -> Unit): List<Route> =
     RoutingBuilder().apply(block).build()
