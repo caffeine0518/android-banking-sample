@@ -1,114 +1,34 @@
 package com.study.bank.data.remote.kftc.mock
 
-import com.study.bank.data.remote.kftc.mock.dispatcher.AccountRequestHandler
-import com.study.bank.data.remote.kftc.mock.dispatcher.InquiryRequestHandler
-import com.study.bank.data.remote.kftc.mock.dispatcher.KftcMockDispatcher
-import com.study.bank.data.remote.kftc.mock.dispatcher.KftcMockResponses
-import com.study.bank.data.remote.kftc.mock.dispatcher.TransferRequestHandler
-import com.study.bank.data.remote.kftc.network.NetworkJson
-import javax.inject.Inject
-import javax.inject.Singleton
 import okhttp3.HttpUrl
-import okhttp3.mockwebserver.MockWebServer
-import okhttp3.mockwebserver.RecordedRequest
 import okhttp3.tls.HandshakeCertificates
-import okhttp3.tls.HeldCertificate
-import java.net.InetAddress
-import java.util.concurrent.TimeUnit
 
 /**
- * KFTC v2.0 mock 서버의 라이프사이클 래퍼.
+ * KFTC v2.0 mock 서버의 계약 — 라이프사이클과 네트워크 장애 주입.
  *
  * [com.study.bank.data.remote.kftc.api.KftcApiService]가 실제 네트워크 스택을 그대로 거치게 해서
- * 인터셉터·직렬화·에러 경로까지 in-process로 검증한다. 매니페스트에 cleartext 허용을 남기지 않으려고
- * 자체 서명 loopback 인증서로 HTTPS를 제공하고, 클라이언트는 [clientCertificates]로 이 CA를 신뢰한다.
+ * 인터셉터·직렬화·에러 경로까지 in-process로 검증한다. 구현이 HTTPS를 제공하므로 클라이언트는
+ * [clientCertificates]로 그 CA를 신뢰해야 한다.
  */
-@Singleton
-class KftcMockServer @Inject constructor(
-    networkJson: NetworkJson,
-) {
+interface KftcMockServer {
 
-    private val server: MockWebServer = MockWebServer()
-    // responses는 단일 인스턴스를 공유해야 api_tran_id 시퀀스가 엔드포인트 전역으로 1씩 증가한다.
-    private val state = KftcBankState(KftcAccountSeed.accounts)
-    private val responses = KftcMockResponses()
-    private val dispatcher = KftcMockDispatcher(
-        accountHandler = AccountRequestHandler(state, responses),
-        transferHandler = TransferRequestHandler(
-            state,
-            responses,
-            networkJson.value,
-            responseDelayMillis = WITHDRAW_RESPONSE_DELAY_MS,
-        ),
-        inquiryHandler = InquiryRequestHandler(
-            KftcRecipientSeed.directory(KftcAccountSeed.accounts),
-            responses,
-            networkJson.value,
-        ),
-        responses = responses,
-    )
-    private val localhostCertificate: HeldCertificate = HeldCertificate.Builder()
-        .addSubjectAlternativeName("localhost")
-        .addSubjectAlternativeName("127.0.0.1")
-        .build()
+    /** 이 서버의 인증서를 신뢰하는 클라이언트 측 인증서 묶음. */
+    val clientCertificates: HandshakeCertificates
 
-    val clientCertificates: HandshakeCertificates = HandshakeCertificates.Builder()
-        .addTrustedCertificate(localhostCertificate.certificate)
-        .build()
+    /** 실행 중인 서버 주소. [start] 전에 호출하면 실패한다. */
+    fun baseUrl(): HttpUrl
 
-    private var started: Boolean = false
+    /** 이미 실행 중이면 아무것도 하지 않는다. */
+    fun start()
 
-    init {
-        start()
-    }
+    /** 실행 중이 아니면 아무것도 하지 않는다. */
+    fun shutdown()
 
-    fun start() {
-        if (started) return
-        val serverCertificates = HandshakeCertificates.Builder()
-            .heldCertificate(localhostCertificate)
-            .build()
-        server.useHttps(serverCertificates.sslSocketFactory(), false)
-        server.dispatcher = dispatcher
-        // start()는 getByName("localhost")로 이름 해석 → 메인 스레드면 NetworkOnMainThreadException.
-        // raw IPv4 바이트로 바인딩해 해석 없이(메인 스레드 안전) ::1 매칭까지 회피한다.
-        server.start(LOOPBACK_ADDRESS, 0)
-        started = true
-    }
+    /**
+     * 이후 요청의 **응답만** 유실시킨다 — 서버 상태는 이미 반영된 뒤라, 응답을 받지 못한 클라이언트가
+     * 재시도하는 상황(이중출금 후보)을 재현한다.
+     */
+    fun startDroppingConnections()
 
-    fun baseUrl(): HttpUrl {
-        check(started) { "KftcMockServer가 아직 start되지 않았다" }
-        // server.url("/")은 canonicalHostName(역DNS)을 타 메인 스레드 네트워크가 된다. 바인딩과 같은 IPv4로 직접 구성.
-        return HttpUrl.Builder()
-            .scheme("https")
-            .host(LOOPBACK_HOST)
-            .port(server.port)
-            .build()
-    }
-
-    fun shutdown() {
-        if (!started) return
-        server.shutdown()
-        started = false
-    }
-
-    /** 테스트 전용: 큐에 쌓인 수신 요청 중 가장 오래된 1건을 반환한다. */
-    internal fun takeRequest(timeoutMs: Long = 1_000): RecordedRequest? =
-        server.takeRequest(timeoutMs, TimeUnit.MILLISECONDS)
-
-    /** 테스트 전용. @Singleton이라 주입받은 인스턴스가 곧 API가 호출하는 그 서버다. */
-    fun startDroppingConnections() {
-        dispatcher.dropConnections = true
-    }
-
-    fun stopDroppingConnections() {
-        dispatcher.dropConnections = false
-    }
-
-    private companion object {
-        const val LOOPBACK_HOST = "127.0.0.1"
-        // 이름 해석 없이 IPv4 루프백 생성(메인 스레드 안전).
-        val LOOPBACK_ADDRESS: InetAddress = InetAddress.getByAddress(byteArrayOf(127, 0, 0, 1))
-        // 데모/수동 테스트용: 송금 응답을 지연시켜 "보내는 중이에요" 로딩 화면이 최소 1초 보이게 한다.
-        const val WITHDRAW_RESPONSE_DELAY_MS = 1_000L
-    }
+    fun stopDroppingConnections()
 }

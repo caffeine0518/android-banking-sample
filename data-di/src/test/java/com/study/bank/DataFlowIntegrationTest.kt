@@ -1,10 +1,10 @@
 package com.study.bank
 
+import com.study.bank.data.remote.kftc.api.KFTC_TRANSACTION_PAGE_SIZE
+import com.study.bank.data.remote.kftc.mock.seed.KftcSeedAccountIds
 import com.study.bank.domain.model.BankCode
 import com.study.bank.domain.model.Currency
 import com.study.bank.domain.model.Money
-import com.study.bank.data.remote.kftc.api.KFTC_TRANSACTION_PAGE_SIZE
-import com.study.bank.data.remote.kftc.mock.KftcSeedAccountIds
 import com.study.bank.domain.model.account.AccountId
 import com.study.bank.domain.model.account.AccountNumber
 import com.study.bank.domain.model.transaction.TransactionType
@@ -20,6 +20,8 @@ import com.study.bank.domain.usecase.transfer.ValidateRecipientUseCase
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.HiltTestApplication
+import java.math.BigDecimal
+import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -30,8 +32,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import java.math.BigDecimal
-import javax.inject.Inject
 
 /**
  * 데이터 레이어 E2E(L3) — UI 없이 **앱의 실제 Hilt 그래프**를 Robolectric(JVM)에서 부팅해
