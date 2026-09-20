@@ -6,13 +6,10 @@ import com.study.bank.data.remote.kftc.api.RSP_SUCCESS
 import com.study.bank.data.remote.kftc.dto.account.AccountBalanceResponse
 import com.study.bank.data.remote.kftc.dto.account.AccountListResponse
 import com.study.bank.data.remote.kftc.dto.account.FintechAccountDto
+import com.study.bank.data.remote.kftc.mock.model.KftcEnvelope
 import com.study.bank.data.remote.kftc.mock.storage.SeedAccount
 
-/**
- * [SeedAccount] → KFTC DTO 순수 매퍼.
- *
- * tran_id, dtm 등 envelope 추적 필드는 호출 측이 채워 넣는다(생성기 의존성을 매퍼에서 분리하기 위함).
- */
+/** [SeedAccount] → KFTC DTO 순수 매퍼. */
 
 internal fun SeedAccount.toListItem(): FintechAccountDto = FintechAccountDto(
     fintechUseNum = fintechUseNum,
@@ -26,12 +23,11 @@ internal fun SeedAccount.toListItem(): FintechAccountDto = FintechAccountDto(
 )
 
 internal fun List<SeedAccount>.toListResponse(
-    apiTranId: String,
-    apiTranDtm: String,
+    envelope: KftcEnvelope,
     userSeqNo: String,
 ): AccountListResponse = AccountListResponse(
-    apiTranId = apiTranId,
-    apiTranDtm = apiTranDtm,
+    apiTranId = envelope.apiTranId,
+    apiTranDtm = envelope.apiTranDtm,
     rspCode = RSP_SUCCESS,
     rspMessage = "",
     userSeqNo = userSeqNo,
@@ -39,22 +35,19 @@ internal fun List<SeedAccount>.toListResponse(
     resList = map { it.toListItem() },
 )
 
-internal fun SeedAccount.toBalanceResponse(
-    apiTranId: String,
-    apiTranDtm: String,
-    bankTranId: String,
-): AccountBalanceResponse = AccountBalanceResponse(
-    apiTranId = apiTranId,
-    apiTranDtm = apiTranDtm,
-    rspCode = RSP_SUCCESS,
-    rspMessage = "",
-    bankTranId = bankTranId,
-    bankCodeTran = bankCodeStd,
-    bankRspCode = BANK_RSP_OK,
-    fintechUseNum = fintechUseNum,
-    balanceAmt = balanceAmt,
-    availableAmt = balanceAmt,
-    accountType = accountType,
-    productName = productName,
-    currencyCode = currencyCode,
-)
+internal fun SeedAccount.toBalanceResponse(envelope: KftcEnvelope): AccountBalanceResponse =
+    AccountBalanceResponse(
+        apiTranId = envelope.apiTranId,
+        apiTranDtm = envelope.apiTranDtm,
+        rspCode = RSP_SUCCESS,
+        rspMessage = "",
+        bankTranId = envelope.bankTranId,
+        bankCodeTran = bankCodeStd,
+        bankRspCode = BANK_RSP_OK,
+        fintechUseNum = fintechUseNum,
+        balanceAmt = balanceAmt,
+        availableAmt = balanceAmt,
+        accountType = accountType,
+        productName = productName,
+        currencyCode = currencyCode,
+    )
