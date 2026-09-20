@@ -4,7 +4,11 @@ import com.study.bank.data.remote.kftc.mock.TestMockBank
 import com.study.bank.data.remote.kftc.mock.http.handler.AccountRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.handler.InquiryRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.handler.TransferRequestHandler
-import com.study.bank.data.remote.kftc.mock.http.response.KftcEnvelopes
+import com.study.bank.data.remote.kftc.mock.http.response.KftcTranIds
+import com.study.bank.data.remote.kftc.mock.mapper.AccountResponseMapper
+import com.study.bank.data.remote.kftc.mock.mapper.ErrorResponseMapper
+import com.study.bank.data.remote.kftc.mock.mapper.InquiryResponseMapper
+import com.study.bank.data.remote.kftc.mock.mapper.TransferResponseMapper
 import com.study.bank.data.remote.kftc.mock.seed.KftcAccountSeed
 import com.study.bank.data.remote.kftc.mock.seed.KftcRecipientSeed
 import com.study.bank.data.remote.kftc.mock.seed.KftcSeedAccountIds
@@ -45,17 +49,33 @@ class KftcMockDispatcherTest {
         client = OkHttpClient()
     }
 
-    // 협력자를 명시 주입해 디스패처를 조립한다(구성 책임은 호출 측). envelopes는 단일 인스턴스 공유.
+    // 협력자를 명시 주입해 디스패처를 조립한다(구성 책임은 호출 측). tranIds는 단일 인스턴스 공유.
     private fun newDispatcher(seed: List<SeedAccount> = KftcAccountSeed.accounts): KftcMockDispatcher {
         val bank = TestMockBank(seed)
-        val envelopes = KftcEnvelopes()
+        val tranIds = KftcTranIds()
+        val errors = ErrorResponseMapper(tranIds)
         return KftcMockDispatcher(
             routes = kftcRoutes(
-                account = AccountRequestHandler(bank.accountDao, bank.transactionDao, envelopes),
-                transfer = TransferRequestHandler(bank.withdrawalService, envelopes, MOCK_JSON),
-                inquiry = InquiryRequestHandler(KftcRecipientSeed.directory(seed), envelopes, MOCK_JSON),
+                account = AccountRequestHandler(
+                    bank.accountDao,
+                    bank.transactionDao,
+                    AccountResponseMapper(tranIds),
+                    errors,
+                ),
+                transfer = TransferRequestHandler(
+                    bank.withdrawalService,
+                    TransferResponseMapper(tranIds),
+                    errors,
+                    MOCK_JSON,
+                ),
+                inquiry = InquiryRequestHandler(
+                    KftcRecipientSeed.directory(seed),
+                    InquiryResponseMapper(tranIds),
+                    errors,
+                    MOCK_JSON,
+                ),
             ),
-            envelopes = envelopes,
+            errors = errors,
         )
     }
 

@@ -5,7 +5,11 @@ import com.study.bank.data.remote.kftc.mock.http.handler.AccountRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.handler.InquiryRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.handler.TransferRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.kftcRoutes
-import com.study.bank.data.remote.kftc.mock.http.response.KftcEnvelopes
+import com.study.bank.data.remote.kftc.mock.http.response.KftcTranIds
+import com.study.bank.data.remote.kftc.mock.mapper.AccountResponseMapper
+import com.study.bank.data.remote.kftc.mock.mapper.ErrorResponseMapper
+import com.study.bank.data.remote.kftc.mock.mapper.InquiryResponseMapper
+import com.study.bank.data.remote.kftc.mock.mapper.TransferResponseMapper
 import com.study.bank.data.remote.kftc.mock.seed.KftcAccountSeed
 import com.study.bank.data.remote.kftc.mock.seed.KftcRecipientSeed
 import com.study.bank.data.remote.kftc.mock.service.KftcWithdrawalService
@@ -37,23 +41,31 @@ internal class KftcMockServerImpl @Inject constructor(
 ) : KftcMockServer {
 
     private val server: MockWebServer = MockWebServer()
-    private val envelopes = KftcEnvelopes()
+    private val tranIds = KftcTranIds()
+    private val errors = ErrorResponseMapper(tranIds)
     private val dispatcher = KftcMockDispatcher(
         routes = kftcRoutes(
-            account = AccountRequestHandler(accountDao, transactionDao, envelopes),
+            account = AccountRequestHandler(
+                accountDao,
+                transactionDao,
+                AccountResponseMapper(tranIds),
+                errors,
+            ),
             transfer = TransferRequestHandler(
                 withdrawalService,
-                envelopes,
+                TransferResponseMapper(tranIds),
+                errors,
                 networkJson.value,
                 responseDelayMillis = WITHDRAW_RESPONSE_DELAY_MS,
             ),
             inquiry = InquiryRequestHandler(
                 KftcRecipientSeed.directory(KftcAccountSeed.accounts),
-                envelopes,
+                InquiryResponseMapper(tranIds),
+                errors,
                 networkJson.value,
             ),
         ),
-        envelopes = envelopes,
+        errors = errors,
     )
     private val localhostCertificate: HeldCertificate = HeldCertificate.Builder()
         .addSubjectAlternativeName("localhost")

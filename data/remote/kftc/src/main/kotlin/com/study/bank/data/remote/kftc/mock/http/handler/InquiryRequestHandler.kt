@@ -2,11 +2,9 @@ package com.study.bank.data.remote.kftc.mock.http.handler
 
 import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryRequest
 import com.study.bank.data.remote.kftc.mock.http.MockError
-import com.study.bank.data.remote.kftc.mock.http.response.KftcEnvelopes
 import com.study.bank.data.remote.kftc.mock.http.response.ok
-import com.study.bank.data.remote.kftc.mock.http.response.toResponse
-import com.study.bank.data.remote.kftc.mock.mapper.realNameNotFound
-import com.study.bank.data.remote.kftc.mock.mapper.toRealNameResponse
+import com.study.bank.data.remote.kftc.mock.mapper.ErrorResponseMapper
+import com.study.bank.data.remote.kftc.mock.mapper.InquiryResponseMapper
 import com.study.bank.data.remote.kftc.mock.seed.SeedRecipient
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -17,17 +15,17 @@ import okhttp3.mockwebserver.MockResponse
  */
 internal class InquiryRequestHandler(
     private val recipients: List<SeedRecipient>,
-    private val envelopes: KftcEnvelopes,
+    private val mapper: InquiryResponseMapper,
+    private val errors: ErrorResponseMapper,
     private val json: Json,
 ) {
     fun realName(body: String): MockResponse {
-        val request = parse(body)
-            ?: return MockError.MissingInquiryBody.toResponse(envelopes.next())
+        val request = parse(body) ?: return errors.toResponse(MockError.MissingInquiryBody)
         val requestDigits = request.accountNum.digitsOnly()
         val match = recipients.firstOrNull {
             it.accountNum.digitsOnly() == requestDigits && it.bankCodeStd == request.bankCodeStd
-        } ?: return realNameNotFound(envelopes.next(), request.accountNum).ok()
-        return match.toRealNameResponse(envelopes.next()).ok()
+        } ?: return mapper.toNotFoundResponse(request.accountNum).ok()
+        return mapper.toResponse(match).ok()
     }
 
     private fun parse(body: String): RealNameInquiryRequest? =

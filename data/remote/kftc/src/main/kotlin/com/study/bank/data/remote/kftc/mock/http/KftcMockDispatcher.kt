@@ -1,7 +1,6 @@
 package com.study.bank.data.remote.kftc.mock.http
 
-import com.study.bank.data.remote.kftc.mock.http.response.KftcEnvelopes
-import com.study.bank.data.remote.kftc.mock.http.response.toResponse
+import com.study.bank.data.remote.kftc.mock.mapper.ErrorResponseMapper
 import com.study.bank.data.remote.kftc.mock.http.routing.Route
 import com.study.bank.data.remote.kftc.mock.http.routing.RoutedRequest
 import okhttp3.mockwebserver.Dispatcher
@@ -17,7 +16,7 @@ import okhttp3.mockwebserver.SocketPolicy
  */
 internal class KftcMockDispatcher(
     private val routes: List<Route>,
-    private val envelopes: KftcEnvelopes,
+    private val errors: ErrorResponseMapper,
 ) : Dispatcher() {
 
     @Volatile
@@ -35,14 +34,14 @@ internal class KftcMockDispatcher(
      * 갈라야 하기 때문. 한 번에 (메서드, 경로)로 찾으면 둘을 구분할 수 없다.
      */
     private fun route(request: RecordedRequest): MockResponse {
-        val url = request.requestUrl ?: return MockError.InvalidUrl.toResponse(envelopes.next())
+        val url = request.requestUrl ?: return errors.toResponse(MockError.InvalidUrl)
         val path = url.encodedPath
         val samePath = routes.filter { it.path == path }
-        if (samePath.isEmpty()) return MockError.UnknownEndpoint(path).toResponse(envelopes.next())
+        if (samePath.isEmpty()) return errors.toResponse(MockError.UnknownEndpoint(path))
 
         val method = request.method.orEmpty()
         val route = samePath.firstOrNull { it.method == method }
-            ?: return MockError.MethodNotAllowed(method, path).toResponse(envelopes.next())
+            ?: return errors.toResponse(MockError.MethodNotAllowed(method, path))
         return route.handle(RoutedRequest(request))
     }
 }
