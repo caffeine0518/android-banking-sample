@@ -1,11 +1,11 @@
 package com.study.bank.data.remote.kftc.mock.mapper
 
 import com.study.bank.data.remote.kftc.api.RSP_ERROR
-import com.study.bank.data.remote.kftc.mock.http.response.MockError
 import com.study.bank.data.remote.kftc.mock.http.response.KftcTranIds
-import com.study.bank.data.remote.kftc.mock.http.response.MockJson
+import com.study.bank.data.remote.kftc.mock.http.response.MockError
 import com.study.bank.data.remote.kftc.mock.http.response.jsonResponse
 import com.study.bank.data.remote.kftc.mock.model.ErrorEnvelope
+import com.study.bank.data.remote.kftc.network.KftcJson
 import okhttp3.mockwebserver.MockResponse
 
 /**
@@ -27,7 +27,7 @@ internal class ErrorResponseMapper(private val tranIds: KftcTranIds) {
         // opt-in을 요구한다(컴파일러는 경고하지 않지만 에디터에 계속 남는다).
         return jsonResponse(
             error.httpCode,
-            MockJson.encodeToString(ErrorEnvelope.serializer(), envelope),
+            KftcJson.encodeToString(ErrorEnvelope.serializer(), envelope),
         )
     }
 }
