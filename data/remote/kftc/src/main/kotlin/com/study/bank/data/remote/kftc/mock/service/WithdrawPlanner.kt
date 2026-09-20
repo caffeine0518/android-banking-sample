@@ -17,19 +17,23 @@ internal class WithdrawPlanner @Inject constructor(
 
     fun plan(command: WithdrawCommand): WithdrawPlan {
         val source = accountDao.find(command.fintechUseNum)
-            ?: return WithdrawPlan.Reject(WithdrawResult.UnknownSender(command.fintechUseNum))
+            ?: return reject(WithdrawResult.UnknownSender(command.fintechUseNum))
 
-        val amount = command.tranAmt.toBigDecimalOrNull()?.takeIf { it.signum() > 0 }
-            ?: return WithdrawPlan.Reject(WithdrawResult.InvalidAmount(command.tranAmt))
+        val amount = command.positiveAmountOrNull()
+            ?: return reject(WithdrawResult.InvalidAmount(command.tranAmt))
 
         // 수취계좌가 내 시드에 있으면 내부 이체(복식부기 대상), 없으면(null) 외부 이체.
         val recipient = accountDao.findByAccountNum(command.recvBankCode, command.recvAccountNum)
 
-        insufficientFunds(source, amount)?.let { return WithdrawPlan.Reject(it) }
-        currencyMismatch(source, recipient)?.let { return WithdrawPlan.Reject(it) }
+        insufficientFunds(source, amount)?.let { return reject(it) }
+        currencyMismatch(source, recipient)?.let { return reject(it) }
 
         return WithdrawPlan.Approved(source, amount, recipient)
     }
+
+    /** 숫자로 읽히고 0보다 커야 유효하다. 아니면 null. */
+    private fun WithdrawCommand.positiveAmountOrNull(): BigDecimal? =
+        tranAmt.toBigDecimalOrNull()?.takeIf { it.signum() > 0 }
 
     /** 잔액이 모자라면 거절 사유, 충분하면 null. */
     private fun insufficientFunds(source: SeedAccount, amount: BigDecimal): WithdrawResult? {
@@ -48,4 +52,6 @@ internal class WithdrawPlanner @Inject constructor(
         } else {
             null
         }
+
+    private fun reject(result: WithdrawResult) = WithdrawPlan.Reject(result)
 }
