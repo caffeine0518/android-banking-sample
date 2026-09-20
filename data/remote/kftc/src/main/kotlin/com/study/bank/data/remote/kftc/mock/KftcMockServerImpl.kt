@@ -5,7 +5,7 @@ import com.study.bank.data.remote.kftc.mock.http.handler.AccountRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.handler.InquiryRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.handler.TransferRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.kftcRoutes
-import com.study.bank.data.remote.kftc.mock.http.response.KftcMockResponses
+import com.study.bank.data.remote.kftc.mock.http.response.KftcEnvelopes
 import com.study.bank.data.remote.kftc.mock.seed.KftcAccountSeed
 import com.study.bank.data.remote.kftc.mock.seed.KftcRecipientSeed
 import com.study.bank.data.remote.kftc.mock.service.KftcWithdrawalService
@@ -37,24 +37,23 @@ internal class KftcMockServerImpl @Inject constructor(
 ) : KftcMockServer {
 
     private val server: MockWebServer = MockWebServer()
-    // responses는 단일 인스턴스를 공유해야 api_tran_id 시퀀스가 엔드포인트 전역으로 1씩 증가한다.
-    private val responses = KftcMockResponses()
+    private val envelopes = KftcEnvelopes()
     private val dispatcher = KftcMockDispatcher(
         routes = kftcRoutes(
-            account = AccountRequestHandler(accountDao, transactionDao, responses),
+            account = AccountRequestHandler(accountDao, transactionDao, envelopes),
             transfer = TransferRequestHandler(
                 withdrawalService,
-                responses,
+                envelopes,
                 networkJson.value,
                 responseDelayMillis = WITHDRAW_RESPONSE_DELAY_MS,
             ),
             inquiry = InquiryRequestHandler(
                 KftcRecipientSeed.directory(KftcAccountSeed.accounts),
-                responses,
+                envelopes,
                 networkJson.value,
             ),
         ),
-        responses = responses,
+        envelopes = envelopes,
     )
     private val localhostCertificate: HeldCertificate = HeldCertificate.Builder()
         .addSubjectAlternativeName("localhost")

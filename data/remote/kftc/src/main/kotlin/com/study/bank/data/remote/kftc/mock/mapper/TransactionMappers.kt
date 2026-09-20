@@ -33,8 +33,8 @@ internal fun TransactionRecord.toItemDto(): TransactionItemDto = TransactionItem
 internal fun List<TransactionRecord>.toTransactionListResponse(
     envelope: KftcEnvelope,
     account: SeedAccount,
-    nextPageYn: String = "N",
-    beforInquiryTraceInfo: String = "",
+    hasNext: Boolean,
+    nextCursor: String,
 ): TransactionListResponse = TransactionListResponse(
     apiTranId = envelope.apiTranId,
     apiTranDtm = envelope.apiTranDtm,
@@ -46,6 +46,6 @@ internal fun List<TransactionRecord>.toTransactionListResponse(
     currencyCode = account.currencyCode,
     resCnt = size.toString(),
     resList = map { it.toItemDto() },
-    nextPageYn = nextPageYn,
-    beforInquiryTraceInfo = beforInquiryTraceInfo,
+    nextPageYn = if (hasNext) "Y" else "N",
+    beforInquiryTraceInfo = nextCursor,
 )

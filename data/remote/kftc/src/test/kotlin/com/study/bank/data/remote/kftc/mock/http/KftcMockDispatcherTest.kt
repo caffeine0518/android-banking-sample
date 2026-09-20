@@ -4,7 +4,7 @@ import com.study.bank.data.remote.kftc.mock.TestMockBank
 import com.study.bank.data.remote.kftc.mock.http.handler.AccountRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.handler.InquiryRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.handler.TransferRequestHandler
-import com.study.bank.data.remote.kftc.mock.http.response.KftcMockResponses
+import com.study.bank.data.remote.kftc.mock.http.response.KftcEnvelopes
 import com.study.bank.data.remote.kftc.mock.seed.KftcAccountSeed
 import com.study.bank.data.remote.kftc.mock.seed.KftcRecipientSeed
 import com.study.bank.data.remote.kftc.mock.seed.KftcSeedAccountIds
@@ -45,17 +45,17 @@ class KftcMockDispatcherTest {
         client = OkHttpClient()
     }
 
-    // 협력자를 명시 주입해 디스패처를 조립한다(구성 책임은 호출 측). responses는 단일 인스턴스 공유.
+    // 협력자를 명시 주입해 디스패처를 조립한다(구성 책임은 호출 측). envelopes는 단일 인스턴스 공유.
     private fun newDispatcher(seed: List<SeedAccount> = KftcAccountSeed.accounts): KftcMockDispatcher {
         val bank = TestMockBank(seed)
-        val responses = KftcMockResponses()
+        val envelopes = KftcEnvelopes()
         return KftcMockDispatcher(
             routes = kftcRoutes(
-                account = AccountRequestHandler(bank.accountDao, bank.transactionDao, responses),
-                transfer = TransferRequestHandler(bank.withdrawalService, responses, MOCK_JSON),
-                inquiry = InquiryRequestHandler(KftcRecipientSeed.directory(seed), responses, MOCK_JSON),
+                account = AccountRequestHandler(bank.accountDao, bank.transactionDao, envelopes),
+                transfer = TransferRequestHandler(bank.withdrawalService, envelopes, MOCK_JSON),
+                inquiry = InquiryRequestHandler(KftcRecipientSeed.directory(seed), envelopes, MOCK_JSON),
             ),
-            responses = responses,
+            envelopes = envelopes,
         )
     }
 
