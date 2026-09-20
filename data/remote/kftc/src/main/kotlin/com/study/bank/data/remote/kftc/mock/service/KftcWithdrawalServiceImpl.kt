@@ -18,10 +18,10 @@ internal class KftcWithdrawalServiceImpl @Inject constructor(
 ) : KftcWithdrawalService {
 
     override fun withdraw(command: WithdrawCommand): WithdrawResult = transactionScope.inTransaction {
-        withdrawalDao.find(command.bankTranId)
-            ?: when (val plan = planner.plan(command)) {
-                is WithdrawPlan.Reject -> plan.result
-                is WithdrawPlan.Approved -> executor.execute(plan, command).also(withdrawalDao::insert)
-            }
+        val settled = withdrawalDao.findSettled(command.bankTranId)
+        settled ?: when (val plan = planner.plan(command)) {
+            is WithdrawPlan.Reject -> plan.result
+            is WithdrawPlan.Approved -> executor.execute(plan, command).also(withdrawalDao::insertSettled)
+        }
     }
 }

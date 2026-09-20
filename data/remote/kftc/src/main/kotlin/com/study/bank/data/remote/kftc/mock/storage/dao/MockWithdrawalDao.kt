@@ -14,11 +14,12 @@ import com.study.bank.data.remote.kftc.mock.service.WithdrawResult
 @Dao
 internal interface MockWithdrawalDao {
 
+    /** 이 거래고유번호로 이미 체결된 건이 있으면 그때 돌려준 응답, 없으면 null. */
     @Query("SELECT * FROM mock_settled_withdrawals WHERE bank_tran_id = :bankTranId")
-    fun find(bankTranId: String): WithdrawResult.Success?
+    fun findSettled(bankTranId: String): WithdrawResult.Success?
 
     @Insert
-    fun insert(settled: WithdrawResult.Success)
+    fun insertSettled(settled: WithdrawResult.Success)
 
     @Query("DELETE FROM mock_settled_withdrawals")
     fun clear()
