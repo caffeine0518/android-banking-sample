@@ -9,8 +9,8 @@ import com.study.bank.data.remote.kftc.mock.http.response.ok
 import com.study.bank.data.remote.kftc.mock.mapper.ErrorResponseMapper
 import com.study.bank.data.remote.kftc.mock.mapper.TransferResponseMapper
 import com.study.bank.data.remote.kftc.mock.service.KftcWithdrawalService
-import com.study.bank.data.remote.kftc.mock.service.WithdrawCommand
-import com.study.bank.data.remote.kftc.mock.service.WithdrawResult
+import com.study.bank.data.remote.kftc.mock.service.model.WithdrawCommand
+import com.study.bank.data.remote.kftc.mock.service.model.WithdrawResult
 import java.util.concurrent.TimeUnit
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json

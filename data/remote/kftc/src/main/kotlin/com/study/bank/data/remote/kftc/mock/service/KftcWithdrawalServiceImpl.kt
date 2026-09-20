@@ -1,5 +1,8 @@
 package com.study.bank.data.remote.kftc.mock.service
 
+import com.study.bank.data.remote.kftc.mock.service.model.WithdrawCommand
+import com.study.bank.data.remote.kftc.mock.service.model.WithdrawPlan
+import com.study.bank.data.remote.kftc.mock.service.model.WithdrawResult
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockTransactionScopeDao
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockWithdrawalDao
 import javax.inject.Inject

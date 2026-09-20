@@ -3,6 +3,8 @@ package com.study.bank.data.remote.kftc.mock.service
 import com.study.bank.data.remote.kftc.mock.TestMockBank
 import com.study.bank.data.remote.kftc.mock.seed.KftcSeedAccountIds
 import com.study.bank.data.remote.kftc.mock.seed.KftcTransactionSeed
+import com.study.bank.data.remote.kftc.mock.service.model.WithdrawCommand
+import com.study.bank.data.remote.kftc.mock.service.model.WithdrawResult
 import com.study.bank.data.remote.kftc.mock.storage.TransactionDirection
 import java.time.Clock
 import java.time.LocalDateTime

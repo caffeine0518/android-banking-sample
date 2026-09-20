@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.study.bank.data.remote.kftc.mock.service.WithdrawResult
+import com.study.bank.data.remote.kftc.mock.service.model.WithdrawResult
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockAccountDao
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockTransactionDao
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockTransactionScopeDao

@@ -1,4 +1,4 @@
-package com.study.bank.data.remote.kftc.mock.service
+package com.study.bank.data.remote.kftc.mock.service.model
 
 import com.study.bank.data.remote.kftc.mock.storage.SeedAccount
 import java.math.BigDecimal
