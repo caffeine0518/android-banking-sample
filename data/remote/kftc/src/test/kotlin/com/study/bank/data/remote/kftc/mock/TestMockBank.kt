@@ -1,7 +1,9 @@
 package com.study.bank.data.remote.kftc.mock
 
 import com.study.bank.data.remote.kftc.mock.seed.KftcAccountSeed
-import com.study.bank.data.remote.kftc.mock.service.KftcWithdrawalService
+import com.study.bank.data.remote.kftc.mock.service.KftcWithdrawalServiceImpl
+import com.study.bank.data.remote.kftc.mock.service.WithdrawExecutor
+import com.study.bank.data.remote.kftc.mock.service.WithdrawPlanner
 import com.study.bank.data.remote.kftc.mock.storage.MockKftcDatabase
 import com.study.bank.data.remote.kftc.mock.storage.SeedAccount
 import com.study.bank.data.remote.kftc.mock.storage.seed
@@ -24,12 +26,11 @@ internal class TestMockBank(
     val accountDao = database.accountDao()
     val transactionDao = database.transactionDao()
 
-    val withdrawalService = KftcWithdrawalService(
+    val withdrawalService = KftcWithdrawalServiceImpl(
         transactionScope = database.transactionScopeDao(),
-        accountDao = accountDao,
-        transactionDao = transactionDao,
+        planner = WithdrawPlanner(accountDao),
+        executor = WithdrawExecutor(accountDao, transactionDao, clock),
         withdrawalDao = database.withdrawalDao(),
-        clock = clock,
     )
 
     /** 시드 초깃값으로 되돌린다. 프로덕션에선 DB 프로바이더가 부팅 시 한 번 수행하는 그 적재다. */
