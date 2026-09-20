@@ -2,6 +2,7 @@ package com.study.bank.data.remote.kftc.mock
 
 import com.study.bank.data.remote.kftc.mock.seed.KftcAccountSeed
 import com.study.bank.data.remote.kftc.mock.service.KftcWithdrawalServiceImpl
+import com.study.bank.data.remote.kftc.mock.service.WithdrawPlanner
 import com.study.bank.data.remote.kftc.mock.storage.MockKftcDatabase
 import com.study.bank.data.remote.kftc.mock.storage.SeedAccount
 import com.study.bank.data.remote.kftc.mock.storage.seed
@@ -26,6 +27,7 @@ internal class TestMockBank(
 
     val withdrawalService = KftcWithdrawalServiceImpl(
         transactionScope = database.transactionScopeDao(),
+        planner = WithdrawPlanner(accountDao),
         accountDao = accountDao,
         transactionDao = transactionDao,
         withdrawalDao = database.withdrawalDao(),

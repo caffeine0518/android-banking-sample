@@ -14,14 +14,13 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 /**
- * [KftcWithdrawalService]를 Room 원장 위에 구현한다.
+ * [KftcWithdrawalService]를 Room 원장 위에 구현한다. 검증은 [WithdrawPlanner]가 맡고 여기는 적용만 한다.
  *
  * 원자성은 [transactionScope]가 보장한다 — 세 테이블을 함께 바꾸기 때문.
- * 잔액 문자열의 소수 자릿수(통화 exponent)는 저장된 문자열의 scale을 그대로 보존해 재포맷한다 —
- * 이 모듈은 :domain의 Currency를 모르기 때문.
  */
 internal class KftcWithdrawalServiceImpl @Inject constructor(
     private val transactionScope: MockTransactionScopeDao,
+    private val planner: WithdrawPlanner,
     private val accountDao: MockAccountDao,
     private val transactionDao: MockTransactionDao,
     private val withdrawalDao: MockWithdrawalDao,
@@ -30,38 +29,12 @@ internal class KftcWithdrawalServiceImpl @Inject constructor(
 
     override fun withdraw(command: WithdrawCommand): WithdrawResult = transactionScope.inTransaction {
         withdrawalDao.find(command.bankTranId)
-            ?: when (val plan = planWithdrawal(command)) {
+            ?: when (val plan = planner.plan(command)) {
                 is WithdrawPlan.Reject -> plan.result
                 is WithdrawPlan.Approved -> applyTransfer(plan, command).also(withdrawalDao::insert)
             }
     }
 
-    /** 부수효과 없는 검증. 통과하면 실행에 필요한 출금/수취 계좌·금액을 묶어 반환하고, 아니면 거절 결과를 반환한다. */
-    private fun planWithdrawal(command: WithdrawCommand): WithdrawPlan {
-        val source = accountDao.find(command.fintechUseNum)
-            ?: return WithdrawPlan.Reject(WithdrawResult.UnknownSender(command.fintechUseNum))
-
-        val amount = command.tranAmt.toBigDecimalOrNull()?.takeIf { it.signum() > 0 }
-            ?: return WithdrawPlan.Reject(WithdrawResult.InvalidAmount(command.tranAmt))
-
-        val balance = BigDecimal(source.balanceAmt)
-        if (balance < amount) {
-            val insufficientFunds = WithdrawResult.InsufficientFunds(
-                balance = source.balanceAmt,
-                attempted = format(amount, balance.scale()),
-            )
-            return WithdrawPlan.Reject(insufficientFunds)
-        }
-
-        // 수취계좌가 내 시드에 있으면 내부 이체(복식부기 대상), 없으면(null) 외부 이체.
-        val recipient = accountDao.findByAccountNum(command.recvBankCode, command.recvAccountNum)
-        if (recipient != null && recipient.currencyCode != source.currencyCode) {
-            return WithdrawPlan.Reject(
-                WithdrawResult.CurrencyMismatch(source.currencyCode, recipient.currencyCode),
-            )
-        }
-        return WithdrawPlan.Approved(source, amount, recipient)
-    }
 
     /** 검증 통과분에 복식부기를 적용한다 — 출금계좌 차감, 내부 수취면 같은 시각으로 입금까지(외부면 차감만). */
     private fun applyTransfer(plan: WithdrawPlan.Approved, command: WithdrawCommand): WithdrawResult.Success {
@@ -91,7 +64,7 @@ internal class KftcWithdrawalServiceImpl @Inject constructor(
             bankCodeStd = source.bankCodeStd,
             accountNumMasked = source.accountNumMasked,
             accountHolderName = source.accountHolderName,
-            tranAmt = format(amount, BigDecimal(source.balanceAmt).scale()),
+            tranAmt = amount.toLedgerString(BigDecimal(source.balanceAmt).scale()),
             afterBalanceAmt = afterSource,
         )
     }
@@ -116,7 +89,7 @@ internal class KftcWithdrawalServiceImpl @Inject constructor(
         val newBalance = when (direction) {
             TransactionDirection.WITHDRAWAL -> balance - amount
             TransactionDirection.DEPOSIT -> balance + amount
-        }.let { format(it, scale) }
+        }.toLedgerString(scale)
 
         accountDao.updateBalance(fintechUseNum, newBalance)
         transactionDao.insert(
@@ -126,7 +99,7 @@ internal class KftcWithdrawalServiceImpl @Inject constructor(
                 tranTime = at.format(TIME_FORMATTER),
                 direction = direction,
                 printContent = printContent,
-                tranAmt = format(amount, scale),
+                tranAmt = amount.toLedgerString(scale),
                 afterBalanceAmt = newBalance,
                 counterpartyName = counterpartyName,
             ),
@@ -134,11 +107,13 @@ internal class KftcWithdrawalServiceImpl @Inject constructor(
         return newBalance
     }
 
-    private fun format(value: BigDecimal, scale: Int): String =
-        value.setScale(scale, RoundingMode.HALF_UP).toPlainString()
 
     private companion object {
         val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
         val TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("HHmmss")
     }
 }
+
+/** 원장 문자열은 저장된 scale을 그대로 유지한다 — 이 모듈은 :domain의 Currency를 몰라 통화별 자릿수를 알 수 없다. */
+internal fun BigDecimal.toLedgerString(scale: Int): String =
+    setScale(scale, RoundingMode.HALF_UP).toPlainString()
