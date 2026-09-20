@@ -1,4 +1,4 @@
-package com.study.bank.data.remote.kftc.mock.http.response
+package com.study.bank.data.remote.kftc.mock.model
 
 // KFTC 오픈뱅킹 v2.0이 envelope/payload에 그대로 포함해 보내는 고정값.
 internal const val RSP_SUCCESS = "A0000"

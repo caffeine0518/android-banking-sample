@@ -5,6 +5,15 @@ import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferResponse
 import com.study.bank.data.remote.kftc.mock.http.HTTP_OK
 import com.study.bank.data.remote.kftc.mock.http.KftcMockDispatcher
 import com.study.bank.data.remote.kftc.mock.http.MockError
+import com.study.bank.data.remote.kftc.mock.mapper.toBalanceResponse
+import com.study.bank.data.remote.kftc.mock.mapper.toListResponse
+import com.study.bank.data.remote.kftc.mock.mapper.toRealNameResponse
+import com.study.bank.data.remote.kftc.mock.mapper.toResponse
+import com.study.bank.data.remote.kftc.mock.mapper.toTransactionListResponse
+import com.study.bank.data.remote.kftc.mock.model.BANK_RSP_RECIPIENT_NOT_FOUND
+import com.study.bank.data.remote.kftc.mock.model.ErrorEnvelope
+import com.study.bank.data.remote.kftc.mock.model.RSP_ERROR
+import com.study.bank.data.remote.kftc.mock.model.USER_SEQ_NO
 import com.study.bank.data.remote.kftc.mock.seed.SeedRecipient
 import com.study.bank.data.remote.kftc.mock.service.WithdrawResult
 import com.study.bank.data.remote.kftc.mock.storage.SeedAccount
@@ -12,8 +21,6 @@ import com.study.bank.data.remote.kftc.mock.storage.TransactionRecord
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.atomic.AtomicLong
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
@@ -126,12 +133,4 @@ internal class KftcMockResponses(
     private fun newBankTranId(): String = "M202300001U%06d".format(bankTranSeq.incrementAndGet())
     private fun nowDtm(): String = clock().format(DTM_FORMATTER)
     private fun nowDate(): String = clock().format(DATE_FORMATTER)
-
-    @Serializable
-    private data class ErrorEnvelope(
-        @SerialName("api_tran_id") val apiTranId: String,
-        @SerialName("api_tran_dtm") val apiTranDtm: String,
-        @SerialName("rsp_code") val rspCode: String,
-        @SerialName("rsp_message") val rspMessage: String,
-    )
 }

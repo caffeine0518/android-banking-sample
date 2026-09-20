@@ -1,7 +1,7 @@
 package com.study.bank.data.remote.kftc.mock.http
 
 import com.study.bank.data.remote.kftc.mock.http.response.KftcMockResponses
-import com.study.bank.data.remote.kftc.mock.http.response.RSP_ERROR
+import com.study.bank.data.remote.kftc.mock.model.RSP_ERROR
 
 /**
  * Mock 디스패처가 만들어내는 에러 케이스.
