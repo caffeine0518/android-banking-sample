@@ -3,8 +3,8 @@ package com.study.bank.data.remote.kftc.mock.mapper
 import com.study.bank.data.remote.kftc.api.RSP_ERROR
 import com.study.bank.data.remote.kftc.mock.http.MockError
 import com.study.bank.data.remote.kftc.mock.http.response.KftcTranIds
+import com.study.bank.data.remote.kftc.mock.http.response.MockJson
 import com.study.bank.data.remote.kftc.mock.http.response.jsonResponse
-import com.study.bank.data.remote.kftc.mock.http.response.toJson
 import com.study.bank.data.remote.kftc.mock.model.ErrorEnvelope
 import okhttp3.mockwebserver.MockResponse
 
@@ -16,13 +16,18 @@ import okhttp3.mockwebserver.MockResponse
  */
 internal class ErrorResponseMapper(private val tranIds: KftcTranIds) {
 
-    fun toResponse(error: MockError): MockResponse = jsonResponse(
-        error.httpCode,
-        ErrorEnvelope(
+    fun toResponse(error: MockError): MockResponse {
+        val envelope = ErrorEnvelope(
             apiTranId = tranIds.newApiTranId(),
             apiTranDtm = tranIds.nowDtm(),
             rspCode = RSP_ERROR,
             rspMessage = error.message,
-        ).toJson(),
-    )
+        )
+        // 생성된 serializer를 직접 넘긴다 — reified 경로를 타면 IDE가 InternalSerializationApi
+        // opt-in을 요구한다(컴파일러는 경고하지 않지만 에디터에 계속 남는다).
+        return jsonResponse(
+            error.httpCode,
+            MockJson.encodeToString(ErrorEnvelope.serializer(), envelope),
+        )
+    }
 }
