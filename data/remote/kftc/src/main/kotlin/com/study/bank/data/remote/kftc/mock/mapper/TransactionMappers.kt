@@ -6,7 +6,7 @@ import com.study.bank.data.remote.kftc.api.RSP_SUCCESS
 import com.study.bank.data.remote.kftc.api.TRAN_TYPE_TRANSFER
 import com.study.bank.data.remote.kftc.dto.transaction.TransactionItemDto
 import com.study.bank.data.remote.kftc.dto.transaction.TransactionListResponse
-import com.study.bank.data.remote.kftc.mock.http.response.KftcMockResponses
+import com.study.bank.data.remote.kftc.mock.model.KftcEnvelope
 import com.study.bank.data.remote.kftc.mock.storage.SeedAccount
 import com.study.bank.data.remote.kftc.mock.storage.TransactionDirection
 import com.study.bank.data.remote.kftc.mock.storage.TransactionRecord
@@ -15,7 +15,6 @@ import com.study.bank.data.remote.kftc.mock.storage.TransactionRecord
  * [TransactionRecord] → KFTC 거래내역 DTO 순수 매퍼.
  *
  * 방향 enum을 와이어 문자열("입금"/"출금")로, tran_type를 "이체"로 고정 변환한다.
- * envelope 추적 필드는 호출 측([KftcMockResponses])이 채운다.
  */
 internal fun TransactionRecord.toItemDto(): TransactionItemDto = TransactionItemDto(
     tranSeq = seq,
@@ -32,18 +31,16 @@ internal fun TransactionRecord.toItemDto(): TransactionItemDto = TransactionItem
 )
 
 internal fun List<TransactionRecord>.toTransactionListResponse(
+    envelope: KftcEnvelope,
     account: SeedAccount,
-    apiTranId: String,
-    apiTranDtm: String,
-    bankTranId: String,
     nextPageYn: String = "N",
     beforInquiryTraceInfo: String = "",
 ): TransactionListResponse = TransactionListResponse(
-    apiTranId = apiTranId,
-    apiTranDtm = apiTranDtm,
+    apiTranId = envelope.apiTranId,
+    apiTranDtm = envelope.apiTranDtm,
     rspCode = RSP_SUCCESS,
     rspMessage = "",
-    bankTranId = bankTranId,
+    bankTranId = envelope.bankTranId,
     fintechUseNum = account.fintechUseNum,
     balanceAmt = account.balanceAmt,
     currencyCode = account.currencyCode,
