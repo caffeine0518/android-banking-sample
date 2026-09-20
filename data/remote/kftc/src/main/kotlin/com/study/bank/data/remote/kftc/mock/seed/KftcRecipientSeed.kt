@@ -1,7 +1,7 @@
 package com.study.bank.data.remote.kftc.mock.seed
 
 import com.study.bank.data.remote.kftc.mock.model.SeedRecipient
-import com.study.bank.data.remote.kftc.mock.storage.SeedAccount
+import com.study.bank.data.remote.kftc.mock.storage.entity.SeedAccount
 
 /**
  * 계좌실명조회가 조회하는 수취 계좌 디렉터리.

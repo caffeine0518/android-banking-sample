@@ -12,7 +12,7 @@ import com.study.bank.data.remote.kftc.mock.mapper.TransferResponseMapper
 import com.study.bank.data.remote.kftc.mock.seed.KftcAccountSeed
 import com.study.bank.data.remote.kftc.mock.seed.KftcRecipientSeed
 import com.study.bank.data.remote.kftc.mock.seed.KftcSeedAccountIds
-import com.study.bank.data.remote.kftc.mock.storage.SeedAccount
+import com.study.bank.data.remote.kftc.mock.storage.entity.SeedAccount
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient

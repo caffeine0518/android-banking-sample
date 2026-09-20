@@ -1,6 +1,6 @@
 package com.study.bank.data.remote.kftc.mock.seed
 
-import com.study.bank.data.remote.kftc.mock.storage.SeedAccount
+import com.study.bank.data.remote.kftc.mock.storage.entity.SeedAccount
 
 /**
  * KFTC mock 서버가 부팅 시 적재하는 시드 계좌.

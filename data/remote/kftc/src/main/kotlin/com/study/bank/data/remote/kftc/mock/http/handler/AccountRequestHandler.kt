@@ -6,9 +6,9 @@ import com.study.bank.data.remote.kftc.mock.http.response.ok
 import com.study.bank.data.remote.kftc.mock.mapper.AccountResponseMapper
 import com.study.bank.data.remote.kftc.mock.mapper.ErrorResponseMapper
 import com.study.bank.data.remote.kftc.mock.service.KftcWithdrawalService
-import com.study.bank.data.remote.kftc.mock.storage.SeedAccount
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockAccountDao
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockTransactionDao
+import com.study.bank.data.remote.kftc.mock.storage.entity.SeedAccount
 import okhttp3.mockwebserver.MockResponse
 
 /**

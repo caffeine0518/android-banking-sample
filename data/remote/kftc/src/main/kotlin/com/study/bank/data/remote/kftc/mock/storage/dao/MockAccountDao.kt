@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.study.bank.data.remote.kftc.mock.storage.SeedAccount
+import com.study.bank.data.remote.kftc.mock.storage.entity.SeedAccount
 
 /** `mock_accounts` 접근. 디스패처 스레드에서 동기 호출하므로 suspend가 아니다. */
 @Dao

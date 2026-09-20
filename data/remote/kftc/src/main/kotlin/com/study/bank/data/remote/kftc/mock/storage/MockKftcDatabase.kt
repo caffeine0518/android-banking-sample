@@ -10,6 +10,9 @@ import com.study.bank.data.remote.kftc.mock.storage.dao.MockAccountDao
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockTransactionDao
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockTransactionScopeDao
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockWithdrawalDao
+import com.study.bank.data.remote.kftc.mock.storage.entity.MockDirectionConverter
+import com.study.bank.data.remote.kftc.mock.storage.entity.SeedAccount
+import com.study.bank.data.remote.kftc.mock.storage.entity.TransactionRecord
 
 /**
  * Mock 서버가 들고 있는 인메모리 은행 DB — 잔액·거래원장·멱등 기록.

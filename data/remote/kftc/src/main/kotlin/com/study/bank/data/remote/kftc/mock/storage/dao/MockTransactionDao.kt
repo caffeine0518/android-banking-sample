@@ -3,7 +3,7 @@ package com.study.bank.data.remote.kftc.mock.storage.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.study.bank.data.remote.kftc.mock.storage.TransactionRecord
+import com.study.bank.data.remote.kftc.mock.storage.entity.TransactionRecord
 
 /** `mock_transactions` 접근. 모든 조회는 KFTC `sort_order=D`에 맞춰 seq 내림차순(최신 우선)이다. */
 @Dao

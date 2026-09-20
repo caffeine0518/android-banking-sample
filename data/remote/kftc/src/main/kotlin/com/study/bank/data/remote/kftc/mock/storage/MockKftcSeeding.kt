@@ -1,6 +1,7 @@
 package com.study.bank.data.remote.kftc.mock.storage
 
 import com.study.bank.data.remote.kftc.mock.seed.KftcTransactionSeed
+import com.study.bank.data.remote.kftc.mock.storage.entity.SeedAccount
 
 /**
  * 세 테이블을 비우고 시드(계좌 + 과거 거래내역)를 적재한다.
