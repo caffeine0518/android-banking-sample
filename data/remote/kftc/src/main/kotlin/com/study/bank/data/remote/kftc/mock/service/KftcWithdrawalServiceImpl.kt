@@ -1,6 +1,5 @@
 package com.study.bank.data.remote.kftc.mock.service
 
-import com.study.bank.data.remote.kftc.mock.storage.SeedAccount
 import com.study.bank.data.remote.kftc.mock.storage.TransactionDirection
 import com.study.bank.data.remote.kftc.mock.storage.TransactionRecord
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockAccountDao
@@ -95,16 +94,6 @@ internal class KftcWithdrawalServiceImpl @Inject constructor(
             tranAmt = format(amount, BigDecimal(source.balanceAmt).scale()),
             afterBalanceAmt = afterSource,
         )
-    }
-
-    /** [planWithdrawal]의 판정 결과 — 거절(이유 포함)이거나, 실행에 필요한 입력을 묶은 승인. */
-    private sealed interface WithdrawPlan {
-        data class Reject(val result: WithdrawResult) : WithdrawPlan
-        data class Approved(
-            val source: SeedAccount,
-            val amount: BigDecimal,
-            val recipient: SeedAccount?,
-        ) : WithdrawPlan
     }
 
     /**
