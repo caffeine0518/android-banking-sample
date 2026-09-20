@@ -28,20 +28,33 @@ internal class TransferRequestHandler(
 ) {
     fun withdraw(body: String): MockResponse {
         val command = parseWithdraw(body) ?: return responses.error(MockError.MissingTransferBody)
-        val response = when (val result = withdrawalService.withdraw(command)) {
-            is WithdrawResult.Success -> responses.withdrawSuccess(result)
-            is WithdrawResult.UnknownSender ->
-                responses.error(MockError.UnknownFintechUseNum(result.fintechUseNum))
-            is WithdrawResult.InvalidAmount -> responses.error(MockError.InvalidTranAmt(result.raw))
-            is WithdrawResult.InsufficientFunds ->
-                responses.withdrawFailure(BANK_RSP_INSUFFICIENT_FUNDS, "출금계좌 잔액 부족")
-            is WithdrawResult.CurrencyMismatch ->
-                responses.withdrawFailure(BANK_RSP_CURRENCY_MISMATCH, "통화 불일치: ${result.from}→${result.to}")
-        }
+        val response = withdrawalService.withdraw(command).toResponse()
         return if (responseDelayMillis > 0) {
             response.setBodyDelay(responseDelayMillis, TimeUnit.MILLISECONDS)
         } else {
             response
+        }
+    }
+
+    private fun WithdrawResult.toResponse(): MockResponse = when (this) {
+        is WithdrawResult.Success -> {
+            responses.withdrawSuccess(this)
+        }
+
+        is WithdrawResult.UnknownSender -> {
+            responses.error(MockError.UnknownFintechUseNum(fintechUseNum))
+        }
+
+        is WithdrawResult.InvalidAmount -> {
+            responses.error(MockError.InvalidTranAmt(raw))
+        }
+
+        is WithdrawResult.InsufficientFunds -> {
+            responses.withdrawFailure(BANK_RSP_INSUFFICIENT_FUNDS, "출금계좌 잔액 부족")
+        }
+
+        is WithdrawResult.CurrencyMismatch -> {
+            responses.withdrawFailure(BANK_RSP_CURRENCY_MISMATCH, "통화 불일치: $from→$to")
         }
     }
 
