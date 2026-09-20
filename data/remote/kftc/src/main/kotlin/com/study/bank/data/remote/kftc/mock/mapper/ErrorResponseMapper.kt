@@ -1,7 +1,7 @@
 package com.study.bank.data.remote.kftc.mock.mapper
 
 import com.study.bank.data.remote.kftc.api.RSP_ERROR
-import com.study.bank.data.remote.kftc.mock.http.MockError
+import com.study.bank.data.remote.kftc.mock.http.response.MockError
 import com.study.bank.data.remote.kftc.mock.http.response.KftcTranIds
 import com.study.bank.data.remote.kftc.mock.http.response.MockJson
 import com.study.bank.data.remote.kftc.mock.http.response.jsonResponse

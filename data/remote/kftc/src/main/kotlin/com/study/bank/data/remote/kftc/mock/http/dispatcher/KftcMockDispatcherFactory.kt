@@ -1,9 +1,10 @@
-package com.study.bank.data.remote.kftc.mock.http
+package com.study.bank.data.remote.kftc.mock.http.dispatcher
 
 import com.study.bank.data.remote.kftc.mock.http.handler.AccountRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.handler.InquiryRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.handler.TransferRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.response.KftcTranIds
+import com.study.bank.data.remote.kftc.mock.http.routing.kftcRoutes
 import com.study.bank.data.remote.kftc.mock.mapper.AccountResponseMapper
 import com.study.bank.data.remote.kftc.mock.mapper.ErrorResponseMapper
 import com.study.bank.data.remote.kftc.mock.mapper.InquiryResponseMapper

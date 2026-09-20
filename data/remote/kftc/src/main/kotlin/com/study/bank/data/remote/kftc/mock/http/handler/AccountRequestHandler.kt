@@ -1,7 +1,7 @@
 package com.study.bank.data.remote.kftc.mock.http.handler
 
 import com.study.bank.data.remote.kftc.api.KFTC_TRANSACTION_PAGE_SIZE
-import com.study.bank.data.remote.kftc.mock.http.MockError
+import com.study.bank.data.remote.kftc.mock.http.response.MockError
 import com.study.bank.data.remote.kftc.mock.http.response.ok
 import com.study.bank.data.remote.kftc.mock.mapper.AccountResponseMapper
 import com.study.bank.data.remote.kftc.mock.mapper.ErrorResponseMapper

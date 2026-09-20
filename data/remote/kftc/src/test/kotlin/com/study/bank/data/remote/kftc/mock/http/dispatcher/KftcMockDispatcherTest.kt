@@ -1,6 +1,7 @@
-package com.study.bank.data.remote.kftc.mock.http
+package com.study.bank.data.remote.kftc.mock.http.dispatcher
 
 import com.study.bank.data.remote.kftc.mock.TestMockBank
+import com.study.bank.data.remote.kftc.mock.http.response.MockError
 import com.study.bank.data.remote.kftc.mock.seed.KftcAccountSeed
 import com.study.bank.data.remote.kftc.mock.seed.KftcSeedAccountIds
 import com.study.bank.data.remote.kftc.mock.storage.entity.SeedAccount

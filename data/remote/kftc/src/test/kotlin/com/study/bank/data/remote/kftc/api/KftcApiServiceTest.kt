@@ -5,7 +5,7 @@ import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryRequest
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
 import com.study.bank.data.remote.kftc.mock.KftcMockServerImpl
 import com.study.bank.data.remote.kftc.mock.TestMockBank
-import com.study.bank.data.remote.kftc.mock.http.kftcMockDispatcher
+import com.study.bank.data.remote.kftc.mock.http.dispatcher.kftcMockDispatcher
 import com.study.bank.data.remote.kftc.mock.seed.KftcAccountSeed
 import com.study.bank.data.remote.kftc.mock.seed.KftcSeedAccountIds
 import com.study.bank.data.remote.kftc.mock.seed.KftcTransactionSeed

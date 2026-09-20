@@ -1,6 +1,6 @@
 package com.study.bank.data.remote.kftc.mock
 
-import com.study.bank.data.remote.kftc.mock.http.KftcMockDispatcher
+import com.study.bank.data.remote.kftc.mock.http.dispatcher.KftcMockDispatcher
 import java.net.InetAddress
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject

@@ -2,8 +2,8 @@ package com.study.bank.data.remote.kftc.mock.di
 
 import com.study.bank.data.remote.kftc.mock.KftcMockServer
 import com.study.bank.data.remote.kftc.mock.KftcMockServerImpl
-import com.study.bank.data.remote.kftc.mock.http.KftcMockDispatcher
-import com.study.bank.data.remote.kftc.mock.http.kftcMockDispatcher
+import com.study.bank.data.remote.kftc.mock.http.dispatcher.KftcMockDispatcher
+import com.study.bank.data.remote.kftc.mock.http.dispatcher.kftcMockDispatcher
 import com.study.bank.data.remote.kftc.mock.service.KftcWithdrawalService
 import com.study.bank.data.remote.kftc.mock.service.KftcWithdrawalServiceImpl
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockAccountDao
