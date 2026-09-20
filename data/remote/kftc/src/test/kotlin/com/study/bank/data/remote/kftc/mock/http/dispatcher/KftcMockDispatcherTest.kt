@@ -5,7 +5,7 @@ import com.study.bank.data.remote.kftc.mock.http.response.MockError
 import com.study.bank.data.remote.kftc.mock.seed.KftcAccountSeed
 import com.study.bank.data.remote.kftc.mock.seed.KftcSeedAccountIds
 import com.study.bank.data.remote.kftc.mock.storage.entity.SeedAccount
-import kotlinx.serialization.json.Json
+import com.study.bank.data.remote.kftc.network.KftcJson
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -48,7 +48,7 @@ class KftcMockDispatcherTest {
             transactionDao = bank.transactionDao,
             withdrawalService = bank.withdrawalService,
             accountSeed = seed,
-            json = MOCK_JSON,
+            json = KftcJson,
         )
     }
 
@@ -371,7 +371,6 @@ class KftcMockDispatcherTest {
     }
 
     private companion object {
-        val MOCK_JSON = Json { ignoreUnknownKeys = true; explicitNulls = false }
         val TRAN_ID_REGEX = Regex(""""api_tran_id":"([^"]+)"""")
         val SEQ_DIGITS_REGEX = Regex("""\d+""")
 

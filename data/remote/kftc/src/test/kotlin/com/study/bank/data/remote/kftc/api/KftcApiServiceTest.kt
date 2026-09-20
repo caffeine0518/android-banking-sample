@@ -1,6 +1,5 @@
 package com.study.bank.data.remote.kftc.api
 
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryRequest
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
 import com.study.bank.data.remote.kftc.mock.KftcMockServerImpl
@@ -11,8 +10,6 @@ import com.study.bank.data.remote.kftc.mock.seed.KftcSeedAccountIds
 import com.study.bank.data.remote.kftc.mock.seed.KftcTransactionSeed
 import com.study.bank.data.remote.kftc.network.NetworkJson
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.json.Json
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -36,20 +33,17 @@ class KftcApiServiceTest {
     @Before
     fun setUp() {
         val bank = TestMockBank()
+        val networkJson = NetworkJson()
         mockServer = KftcMockServerImpl(
             kftcMockDispatcher(
                 accountDao = bank.accountDao,
                 transactionDao = bank.transactionDao,
                 withdrawalService = bank.withdrawalService,
                 accountSeed = KftcAccountSeed.accounts,
-                json = NetworkJson().value,
+                json = networkJson.value,
             ),
         ).apply { start() }
 
-        val json = Json {
-            ignoreUnknownKeys = true
-            explicitNulls = false
-        }
         val client = OkHttpClient.Builder()
             .sslSocketFactory(
                 mockServer.clientCertificates.sslSocketFactory(),
@@ -59,7 +53,7 @@ class KftcApiServiceTest {
         val retrofit = Retrofit.Builder()
             .baseUrl(mockServer.baseUrl().toString())
             .client(client)
-            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .addConverterFactory(networkJson.converterFactory)
             .build()
         api = retrofit.create(KftcApiService::class.java)
     }
@@ -338,6 +332,8 @@ class KftcApiServiceTest {
         assertTrue("fintech_use_num 필드: $body", body.contains("fintech_use_num"))
         assertTrue("recv_client_account_num 필드: $body", body.contains("recv_client_account_num"))
         assertTrue("tran_amt 필드: $body", body.contains("tran_amt"))
+        // 기본값("TR")뿐이어도 KFTC 필수 필드라 반드시 실려야 한다 — encodeDefaults 회귀 방지.
+        assertTrue("transfer_purpose 필드: $body", body.contains("transfer_purpose"))
     }
 
     // --- 계좌실명조회 E2E ---
