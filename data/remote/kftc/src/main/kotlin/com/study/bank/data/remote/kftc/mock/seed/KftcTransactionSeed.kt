@@ -12,24 +12,25 @@ import java.time.format.DateTimeFormatter
  * 페이지네이션 시연용 거래내역 시드 — 부팅 시 `mock_transactions`에 적재된다.
  *
  * 월급통장(PAYROLL_KRW)에만 [HISTORY_COUNT]건을 생성한다 — 1천 건이 넘어 "무한 스크롤로 페이지 단위
- * 로딩"을 실제로 검증할 수 있다. 잔액은 최신 거래의 after_balance가 시드 잔액과 일치하도록 **현재 잔액에서
- * 과거로 거꾸로** 계산하고, 시각/금액/적요는 인덱스로만 정해 clock·난수에 의존하지 않는다(테스트 결정성).
+ * 로딩"을 실제로 검증할 수 있다. 시각·금액·적요는 인덱스로만 정해 clock·난수에 의존하지 않는다(테스트 결정성).
  *
- * [rows]는 **오래된 순**으로 반환한다 — 그 순서로 삽입하면 SQLite가 부여하는 seq가 시간순과 일치하고,
+ * [rows]는 오래된 순으로 반환한다 — 그 순서로 삽입하면 SQLite가 부여하는 seq가 시간순과 일치하고,
  * 이후 세션 이체는 자동으로 더 큰 seq를 받는다.
  */
 internal object KftcTransactionSeed {
 
     const val HISTORY_COUNT = 1_200
 
-    /** 시드 계좌에 딸린 과거 거래 전체(오래된 순). 월급통장이 시드에 없으면 빈 목록. */
     fun rows(accounts: List<SeedAccount>): List<TransactionRecord> {
         val payroll = accounts.firstOrNull { it.fintechUseNum == KftcSeedAccountIds.PAYROLL_KRW }
             ?: return emptyList()
         return historyFor(payroll).asReversed()
     }
 
-    /** 최신 → 과거 순으로 생성한다(잔액을 거꾸로 계산해야 하므로). 호출 측이 뒤집어 적재한다. */
+    /**
+     * 최신 → 과거 순으로 생성한다. 최신 거래의 after_balance가 시드 잔액과 일치해야 해서 현재 잔액에서
+     * 거꾸로 계산하기 때문이다. 뒤집어 적재하는 것은 호출 측 몫.
+     */
     private fun historyFor(account: SeedAccount): List<TransactionRecord> {
         val scale = BigDecimal(account.balanceAmt).scale()
         var running = BigDecimal(account.balanceAmt)

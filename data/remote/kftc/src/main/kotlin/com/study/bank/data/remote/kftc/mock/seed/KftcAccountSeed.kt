@@ -3,11 +3,9 @@ package com.study.bank.data.remote.kftc.mock.seed
 import com.study.bank.data.remote.kftc.mock.storage.SeedAccount
 
 /**
- * KFTC mock 서버가 부팅 시 로드하는 시드 데이터.
+ * KFTC mock 서버가 부팅 시 적재하는 시드 계좌.
  *
- * 토스뱅크 KRW 2 + 외화(USD 2·TWD·VND) + 신한 KRW 1. 토스뱅크 외환을 시드에 포함해
- * 다통화 도메인이 실제 호출 흐름까지 끝까지 흐르는지 통합 테스트가 검증할 수 있게 한다.
- * USD 2개는 동일 통화 외화 송금(소수점 보존)을 끝까지 검증하는 출금·수취 짝이다.
+ * 외화 계좌를 함께 두어 다통화 도메인이 실제 호출 흐름 끝까지 흐르는지 통합 테스트가 검증할 수 있게 한다.
  */
 internal object KftcAccountSeed {
 
@@ -91,7 +89,7 @@ internal object KftcAccountSeed {
             currencyCode = "VND",
             productName = "토스뱅크 외화통장",
         ),
-        // 동일 통화(USD) 송금의 수취 짝. '외화통장 USD'와 함께 소수점 보존 E2E를 가능케 한다.
+        // '외화통장 USD'의 수취 짝 — 동일 통화 송금의 소수점 보존을 E2E로 검증한다.
         SeedAccount(
             fintechUseNum = KftcSeedAccountIds.FX_USD_2,
             bankCodeStd = "092",
