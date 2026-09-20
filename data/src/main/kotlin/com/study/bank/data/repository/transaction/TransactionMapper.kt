@@ -1,5 +1,7 @@
 package com.study.bank.data.repository.transaction
 
+import com.study.bank.data.remote.kftc.api.INOUT_DEPOSIT
+import com.study.bank.data.remote.kftc.api.TRAN_TYPE_TRANSFER
 import com.study.bank.data.remote.kftc.dto.transaction.TransactionItemDto
 import com.study.bank.domain.model.Currency
 import com.study.bank.domain.model.Money
@@ -56,9 +58,6 @@ class TransactionMapper @Inject constructor() {
         LocalDateTime.parse(tranDate + tranTime, OCCURRED_AT_FORMAT).atZone(KST).toInstant()
 
     private companion object {
-        // KFTC 와이어 계약값(:data:remote:kftc의 KftcProtocol과 동일 문자열).
-        const val INOUT_DEPOSIT = "입금"
-        const val TRAN_TYPE_TRANSFER = "이체"
         val KST: ZoneId = ZoneId.of("Asia/Seoul")
         val OCCURRED_AT_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
     }

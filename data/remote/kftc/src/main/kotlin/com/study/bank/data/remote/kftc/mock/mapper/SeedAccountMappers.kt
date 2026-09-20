@@ -1,11 +1,11 @@
 package com.study.bank.data.remote.kftc.mock.mapper
 
+import com.study.bank.data.remote.kftc.api.BANK_RSP_OK
+import com.study.bank.data.remote.kftc.api.HOLDER_TYPE_PERSONAL
+import com.study.bank.data.remote.kftc.api.RSP_SUCCESS
 import com.study.bank.data.remote.kftc.dto.account.AccountBalanceResponse
 import com.study.bank.data.remote.kftc.dto.account.AccountListResponse
 import com.study.bank.data.remote.kftc.dto.account.FintechAccountDto
-import com.study.bank.data.remote.kftc.mock.model.BANK_RSP_OK
-import com.study.bank.data.remote.kftc.mock.model.HOLDER_TYPE_PERSONAL
-import com.study.bank.data.remote.kftc.mock.model.RSP_SUCCESS
 import com.study.bank.data.remote.kftc.mock.storage.SeedAccount
 
 /**

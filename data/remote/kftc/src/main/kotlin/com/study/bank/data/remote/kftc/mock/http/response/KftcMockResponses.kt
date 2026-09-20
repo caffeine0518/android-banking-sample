@@ -1,5 +1,7 @@
 package com.study.bank.data.remote.kftc.mock.http.response
 
+import com.study.bank.data.remote.kftc.api.BANK_RSP_RECIPIENT_NOT_FOUND
+import com.study.bank.data.remote.kftc.api.RSP_ERROR
 import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryResponse
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferResponse
 import com.study.bank.data.remote.kftc.mock.http.HTTP_OK
@@ -10,10 +12,7 @@ import com.study.bank.data.remote.kftc.mock.mapper.toListResponse
 import com.study.bank.data.remote.kftc.mock.mapper.toRealNameResponse
 import com.study.bank.data.remote.kftc.mock.mapper.toResponse
 import com.study.bank.data.remote.kftc.mock.mapper.toTransactionListResponse
-import com.study.bank.data.remote.kftc.mock.model.BANK_RSP_RECIPIENT_NOT_FOUND
 import com.study.bank.data.remote.kftc.mock.model.ErrorEnvelope
-import com.study.bank.data.remote.kftc.mock.model.RSP_ERROR
-import com.study.bank.data.remote.kftc.mock.model.USER_SEQ_NO
 import com.study.bank.data.remote.kftc.mock.seed.SeedRecipient
 import com.study.bank.data.remote.kftc.mock.service.WithdrawResult
 import com.study.bank.data.remote.kftc.mock.storage.SeedAccount
@@ -30,6 +29,9 @@ private val DefaultMockJson: Json = Json {
     explicitNulls = false
     encodeDefaults = true
 }
+
+// 사용자 일련번호. 실서비스에선 OAuth 토큰에서 유도되지만 mock은 고정값을 응답에 넣는다.
+private const val USER_SEQ_NO = "1100000001"
 
 private val DTM_FORMATTER: DateTimeFormatter =
     DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS")

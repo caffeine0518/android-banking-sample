@@ -1,11 +1,11 @@
 package com.study.bank.data.remote.kftc.mock.http.handler
 
+import com.study.bank.data.remote.kftc.api.BANK_RSP_CURRENCY_MISMATCH
+import com.study.bank.data.remote.kftc.api.BANK_RSP_INSUFFICIENT_FUNDS
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
 import com.study.bank.data.remote.kftc.mock.KftcMockServerImpl
 import com.study.bank.data.remote.kftc.mock.http.MockError
 import com.study.bank.data.remote.kftc.mock.http.response.KftcMockResponses
-import com.study.bank.data.remote.kftc.mock.model.BANK_RSP_CURRENCY_MISMATCH
-import com.study.bank.data.remote.kftc.mock.model.BANK_RSP_INSUFFICIENT_FUNDS
 import com.study.bank.data.remote.kftc.mock.service.KftcWithdrawalService
 import com.study.bank.data.remote.kftc.mock.service.WithdrawCommand
 import com.study.bank.data.remote.kftc.mock.service.WithdrawResult
