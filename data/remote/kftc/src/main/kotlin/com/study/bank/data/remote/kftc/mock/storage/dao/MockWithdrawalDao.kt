@@ -3,7 +3,7 @@ package com.study.bank.data.remote.kftc.mock.storage.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.study.bank.data.remote.kftc.mock.service.WithdrawResult
+import com.study.bank.data.remote.kftc.mock.service.model.WithdrawResult
 
 /**
  * `mock_settled_withdrawals` — 체결된 출금이체를 거래고유번호(bank_tran_id)로 기록한다.

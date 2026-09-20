@@ -5,7 +5,7 @@ import com.study.bank.data.remote.kftc.api.RSP_ERROR
 import com.study.bank.data.remote.kftc.api.RSP_SUCCESS
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferResponse
 import com.study.bank.data.remote.kftc.mock.http.response.KftcTranIds
-import com.study.bank.data.remote.kftc.mock.service.WithdrawResult
+import com.study.bank.data.remote.kftc.mock.service.model.WithdrawResult
 
 /** 출금 결과 → KFTC `/v2.0/transfer/…` 응답 DTO. 성공과 업무 거절이 같은 DTO를 쓴다. */
 internal class TransferResponseMapper(private val tranIds: KftcTranIds) {

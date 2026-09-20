@@ -1,5 +1,8 @@
 package com.study.bank.data.remote.kftc.mock.service
 
+import com.study.bank.data.remote.kftc.mock.service.model.WithdrawCommand
+import com.study.bank.data.remote.kftc.mock.service.model.WithdrawResult
+
 /**
  * Mock 은행의 출금이체 — 실제 KFTC 뒤에 있을 코어뱅킹에 해당한다.
  *

@@ -1,21 +1,6 @@
 package com.study.bank.data.remote.kftc.mock
 
-import com.study.bank.data.remote.kftc.mock.http.KftcMockDispatcher
-import com.study.bank.data.remote.kftc.mock.http.handler.AccountRequestHandler
-import com.study.bank.data.remote.kftc.mock.http.handler.InquiryRequestHandler
-import com.study.bank.data.remote.kftc.mock.http.handler.TransferRequestHandler
-import com.study.bank.data.remote.kftc.mock.http.kftcRoutes
-import com.study.bank.data.remote.kftc.mock.http.response.KftcTranIds
-import com.study.bank.data.remote.kftc.mock.mapper.AccountResponseMapper
-import com.study.bank.data.remote.kftc.mock.mapper.ErrorResponseMapper
-import com.study.bank.data.remote.kftc.mock.mapper.InquiryResponseMapper
-import com.study.bank.data.remote.kftc.mock.mapper.TransferResponseMapper
-import com.study.bank.data.remote.kftc.mock.seed.KftcAccountSeed
-import com.study.bank.data.remote.kftc.mock.seed.KftcRecipientSeed
-import com.study.bank.data.remote.kftc.mock.service.KftcWithdrawalService
-import com.study.bank.data.remote.kftc.mock.storage.dao.MockAccountDao
-import com.study.bank.data.remote.kftc.mock.storage.dao.MockTransactionDao
-import com.study.bank.data.remote.kftc.network.NetworkJson
+import com.study.bank.data.remote.kftc.mock.http.dispatcher.KftcMockDispatcher
 import java.net.InetAddress
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -29,44 +14,17 @@ import okhttp3.tls.HeldCertificate
 /**
  * [KftcMockServer]를 MockWebServer로 구현한다.
  *
+ * 라우팅·응답은 주입받은 [dispatcher]가 전부 맡고, 이 클래스의 책임은 라이프사이클과 TLS뿐이다.
  * 매니페스트에 cleartext 허용을 남기지 않으려고 자체 서명 loopback 인증서로 HTTPS를 제공한다.
  * 생성 즉시 [start]하므로 주입받은 시점에 이미 실행 중이다.
  */
 @Singleton
 internal class KftcMockServerImpl @Inject constructor(
-    accountDao: MockAccountDao,
-    transactionDao: MockTransactionDao,
-    withdrawalService: KftcWithdrawalService,
-    networkJson: NetworkJson,
+    private val dispatcher: KftcMockDispatcher,
 ) : KftcMockServer {
 
-    private val server: MockWebServer = MockWebServer()
-    private val tranIds = KftcTranIds()
-    private val errors = ErrorResponseMapper(tranIds)
-    private val dispatcher = KftcMockDispatcher(
-        routes = kftcRoutes(
-            account = AccountRequestHandler(
-                accountDao,
-                transactionDao,
-                AccountResponseMapper(tranIds),
-                errors,
-            ),
-            transfer = TransferRequestHandler(
-                withdrawalService,
-                TransferResponseMapper(tranIds),
-                errors,
-                networkJson.value,
-                responseDelayMillis = WITHDRAW_RESPONSE_DELAY_MS,
-            ),
-            inquiry = InquiryRequestHandler(
-                KftcRecipientSeed.directory(KftcAccountSeed.accounts),
-                InquiryResponseMapper(tranIds),
-                errors,
-                networkJson.value,
-            ),
-        ),
-        errors = errors,
-    )
+    private val server = MockWebServer()
+
     private val localhostCertificate: HeldCertificate = HeldCertificate.Builder()
         .addSubjectAlternativeName("localhost")
         .addSubjectAlternativeName("127.0.0.1")
@@ -118,7 +76,6 @@ internal class KftcMockServerImpl @Inject constructor(
     internal fun takeRequest(timeoutMs: Long = 1_000): RecordedRequest? =
         server.takeRequest(timeoutMs, TimeUnit.MILLISECONDS)
 
-    /** @Singleton이라 주입받은 인스턴스가 곧 API가 호출하는 그 서버다. */
     override fun startDroppingConnections() {
         dispatcher.dropConnections = true
     }
@@ -131,7 +88,5 @@ internal class KftcMockServerImpl @Inject constructor(
         const val LOOPBACK_HOST = "127.0.0.1"
         // 이름 해석 없이 IPv4 루프백 생성(메인 스레드 안전).
         val LOOPBACK_ADDRESS: InetAddress = InetAddress.getByAddress(byteArrayOf(127, 0, 0, 1))
-        // 데모/수동 테스트용: 송금 응답을 지연시켜 "보내는 중이에요" 로딩 화면이 최소 1초 보이게 한다.
-        const val WITHDRAW_RESPONSE_DELAY_MS = 1_000L
     }
 }

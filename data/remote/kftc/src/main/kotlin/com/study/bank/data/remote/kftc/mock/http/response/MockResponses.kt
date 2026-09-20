@@ -1,6 +1,5 @@
 package com.study.bank.data.remote.kftc.mock.http.response
 
-import com.study.bank.data.remote.kftc.mock.http.HTTP_OK
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse

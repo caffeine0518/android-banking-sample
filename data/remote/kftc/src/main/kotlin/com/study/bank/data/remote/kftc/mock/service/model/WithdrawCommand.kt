@@ -1,4 +1,4 @@
-package com.study.bank.data.remote.kftc.mock.service
+package com.study.bank.data.remote.kftc.mock.service.model
 
 /**
  * 출금이체 요청을 상태 계층이 이해하는 형태로 정규화한 명령.

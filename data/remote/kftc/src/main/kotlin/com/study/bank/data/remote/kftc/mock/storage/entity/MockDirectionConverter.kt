@@ -1,4 +1,4 @@
-package com.study.bank.data.remote.kftc.mock.storage
+package com.study.bank.data.remote.kftc.mock.storage.entity
 
 import androidx.room.TypeConverter
 

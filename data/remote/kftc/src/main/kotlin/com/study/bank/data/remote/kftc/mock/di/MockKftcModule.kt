@@ -3,11 +3,11 @@ package com.study.bank.data.remote.kftc.mock.di
 import android.content.Context
 import com.study.bank.data.remote.kftc.mock.seed.KftcAccountSeed
 import com.study.bank.data.remote.kftc.mock.storage.MockKftcDatabase
-import com.study.bank.data.remote.kftc.mock.storage.SeedAccount
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockAccountDao
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockTransactionDao
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockTransactionScopeDao
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockWithdrawalDao
+import com.study.bank.data.remote.kftc.mock.storage.entity.SeedAccount
 import com.study.bank.data.remote.kftc.mock.storage.seed
 import dagger.Module
 import dagger.Provides

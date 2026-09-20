@@ -12,9 +12,9 @@ import com.study.bank.data.remote.kftc.dto.account.FintechAccountDto
 import com.study.bank.data.remote.kftc.dto.transaction.TransactionItemDto
 import com.study.bank.data.remote.kftc.dto.transaction.TransactionListResponse
 import com.study.bank.data.remote.kftc.mock.http.response.KftcTranIds
-import com.study.bank.data.remote.kftc.mock.storage.SeedAccount
-import com.study.bank.data.remote.kftc.mock.storage.TransactionDirection
-import com.study.bank.data.remote.kftc.mock.storage.TransactionRecord
+import com.study.bank.data.remote.kftc.mock.storage.entity.SeedAccount
+import com.study.bank.data.remote.kftc.mock.storage.entity.TransactionDirection
+import com.study.bank.data.remote.kftc.mock.storage.entity.TransactionRecord
 
 /** 저장 모델 → KFTC `/v2.0/account/…` 응답 DTO. */
 internal class AccountResponseMapper(private val tranIds: KftcTranIds) {

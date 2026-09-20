@@ -1,7 +1,7 @@
 package com.study.bank.data.remote.kftc.mock.http.handler
 
 import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryRequest
-import com.study.bank.data.remote.kftc.mock.http.MockError
+import com.study.bank.data.remote.kftc.mock.http.response.MockError
 import com.study.bank.data.remote.kftc.mock.http.response.ok
 import com.study.bank.data.remote.kftc.mock.mapper.ErrorResponseMapper
 import com.study.bank.data.remote.kftc.mock.mapper.InquiryResponseMapper
@@ -10,9 +10,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 
-/**
- * KFTC `/v2.0/inquiry/…` 계좌실명조회 핸들러.
- */
+/** KFTC `/v2.0/inquiry/…` 계좌실명조회 핸들러. */
 internal class InquiryRequestHandler(
     private val recipients: List<SeedRecipient>,
     private val mapper: InquiryResponseMapper,

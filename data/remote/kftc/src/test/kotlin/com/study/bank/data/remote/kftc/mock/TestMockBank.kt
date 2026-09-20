@@ -5,7 +5,7 @@ import com.study.bank.data.remote.kftc.mock.service.KftcWithdrawalServiceImpl
 import com.study.bank.data.remote.kftc.mock.service.WithdrawExecutor
 import com.study.bank.data.remote.kftc.mock.service.WithdrawPlanner
 import com.study.bank.data.remote.kftc.mock.storage.MockKftcDatabase
-import com.study.bank.data.remote.kftc.mock.storage.SeedAccount
+import com.study.bank.data.remote.kftc.mock.storage.entity.SeedAccount
 import com.study.bank.data.remote.kftc.mock.storage.seed
 import java.time.Clock
 import org.robolectric.RuntimeEnvironment

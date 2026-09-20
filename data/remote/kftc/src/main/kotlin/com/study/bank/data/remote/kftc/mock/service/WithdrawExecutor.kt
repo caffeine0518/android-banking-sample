@@ -1,10 +1,13 @@
 package com.study.bank.data.remote.kftc.mock.service
 
-import com.study.bank.data.remote.kftc.mock.storage.SeedAccount
-import com.study.bank.data.remote.kftc.mock.storage.TransactionDirection
-import com.study.bank.data.remote.kftc.mock.storage.TransactionRecord
+import com.study.bank.data.remote.kftc.mock.service.model.WithdrawCommand
+import com.study.bank.data.remote.kftc.mock.service.model.WithdrawPlan
+import com.study.bank.data.remote.kftc.mock.service.model.WithdrawResult
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockAccountDao
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockTransactionDao
+import com.study.bank.data.remote.kftc.mock.storage.entity.SeedAccount
+import com.study.bank.data.remote.kftc.mock.storage.entity.TransactionDirection
+import com.study.bank.data.remote.kftc.mock.storage.entity.TransactionRecord
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.Clock

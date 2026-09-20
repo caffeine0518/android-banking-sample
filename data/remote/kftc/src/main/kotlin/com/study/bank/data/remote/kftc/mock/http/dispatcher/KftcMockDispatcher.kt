@@ -1,8 +1,9 @@
-package com.study.bank.data.remote.kftc.mock.http
+package com.study.bank.data.remote.kftc.mock.http.dispatcher
 
-import com.study.bank.data.remote.kftc.mock.mapper.ErrorResponseMapper
+import com.study.bank.data.remote.kftc.mock.http.response.MockError
 import com.study.bank.data.remote.kftc.mock.http.routing.Route
 import com.study.bank.data.remote.kftc.mock.http.routing.RoutedRequest
+import com.study.bank.data.remote.kftc.mock.mapper.ErrorResponseMapper
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
@@ -11,7 +12,7 @@ import okhttp3.mockwebserver.SocketPolicy
 /**
  * KFTC 오픈뱅킹 v2.0 mock 라우터.
  *
- * 책임은 연결 차단 토글 + [routes] 매칭뿐. 엔드포인트 선언은 [kftcRoutes], 엔드포인트별 로직은 각 핸들러가,
+ * 책임은 연결 차단 토글 + [routes] 매칭뿐. 엔드포인트 선언은 `kftcRoutes`, 엔드포인트별 로직은 각 핸들러가,
  * 라우팅 레벨 에러(잘못된 URL/미등록 경로/미지원 메서드)만 여기서 직접 응답한다.
  */
 internal class KftcMockDispatcher(

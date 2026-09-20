@@ -1,10 +1,8 @@
-package com.study.bank.data.remote.kftc.mock.http
+package com.study.bank.data.remote.kftc.mock.http.routing
 
 import com.study.bank.data.remote.kftc.mock.http.handler.AccountRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.handler.InquiryRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.handler.TransferRequestHandler
-import com.study.bank.data.remote.kftc.mock.http.routing.Route
-import com.study.bank.data.remote.kftc.mock.http.routing.routing
 
 /**
  * mock 서버가 노출하는 KFTC 오픈뱅킹 v2.0 엔드포인트 전체.

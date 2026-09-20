@@ -5,6 +5,8 @@ import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryRequest
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
 import com.study.bank.data.remote.kftc.mock.KftcMockServerImpl
 import com.study.bank.data.remote.kftc.mock.TestMockBank
+import com.study.bank.data.remote.kftc.mock.http.dispatcher.kftcMockDispatcher
+import com.study.bank.data.remote.kftc.mock.seed.KftcAccountSeed
 import com.study.bank.data.remote.kftc.mock.seed.KftcSeedAccountIds
 import com.study.bank.data.remote.kftc.mock.seed.KftcTransactionSeed
 import com.study.bank.data.remote.kftc.network.NetworkJson
@@ -35,10 +37,13 @@ class KftcApiServiceTest {
     fun setUp() {
         val bank = TestMockBank()
         mockServer = KftcMockServerImpl(
-            accountDao = bank.accountDao,
-            transactionDao = bank.transactionDao,
-            withdrawalService = bank.withdrawalService,
-            networkJson = NetworkJson(),
+            kftcMockDispatcher(
+                accountDao = bank.accountDao,
+                transactionDao = bank.transactionDao,
+                withdrawalService = bank.withdrawalService,
+                accountSeed = KftcAccountSeed.accounts,
+                json = NetworkJson().value,
+            ),
         ).apply { start() }
 
         val json = Json {
