@@ -1,6 +1,9 @@
-package com.study.bank.data.remote.kftc.mock.http.response
+package com.study.bank.data.remote.kftc.mock.mapper
 
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferResponse
+import com.study.bank.data.remote.kftc.mock.http.response.KftcMockResponses
+import com.study.bank.data.remote.kftc.mock.model.BANK_RSP_OK
+import com.study.bank.data.remote.kftc.mock.model.RSP_SUCCESS
 import com.study.bank.data.remote.kftc.mock.service.WithdrawResult
 
 /**

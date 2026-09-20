@@ -1,7 +1,12 @@
-package com.study.bank.data.remote.kftc.mock.http.response
+package com.study.bank.data.remote.kftc.mock.mapper
 
 import com.study.bank.data.remote.kftc.dto.transaction.TransactionItemDto
 import com.study.bank.data.remote.kftc.dto.transaction.TransactionListResponse
+import com.study.bank.data.remote.kftc.mock.http.response.KftcMockResponses
+import com.study.bank.data.remote.kftc.mock.model.INOUT_DEPOSIT
+import com.study.bank.data.remote.kftc.mock.model.INOUT_WITHDRAW
+import com.study.bank.data.remote.kftc.mock.model.RSP_SUCCESS
+import com.study.bank.data.remote.kftc.mock.model.TRAN_TYPE_TRANSFER
 import com.study.bank.data.remote.kftc.mock.storage.SeedAccount
 import com.study.bank.data.remote.kftc.mock.storage.TransactionDirection
 import com.study.bank.data.remote.kftc.mock.storage.TransactionRecord

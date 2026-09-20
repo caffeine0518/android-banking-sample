@@ -1,6 +1,11 @@
-package com.study.bank.data.remote.kftc.mock.http.response
+package com.study.bank.data.remote.kftc.mock.mapper
 
 import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryResponse
+import com.study.bank.data.remote.kftc.mock.http.response.KftcMockResponses
+import com.study.bank.data.remote.kftc.mock.model.ACCOUNT_STATUS_ACTIVE
+import com.study.bank.data.remote.kftc.mock.model.ACCOUNT_STATUS_INACTIVE
+import com.study.bank.data.remote.kftc.mock.model.BANK_RSP_OK
+import com.study.bank.data.remote.kftc.mock.model.RSP_SUCCESS
 import com.study.bank.data.remote.kftc.mock.seed.SeedRecipient
 
 /**
