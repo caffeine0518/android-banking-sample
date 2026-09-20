@@ -1,7 +1,10 @@
 package com.study.bank.data.repository.transfer
 
 import android.util.Log
+import com.study.bank.data.remote.kftc.api.BANK_RSP_CURRENCY_MISMATCH
+import com.study.bank.data.remote.kftc.api.BANK_RSP_INSUFFICIENT_FUNDS
 import com.study.bank.data.remote.kftc.api.KftcApiService
+import com.study.bank.data.remote.kftc.api.RSP_SUCCESS
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
 import com.study.bank.data.repository.TRAN_DTIME
 import com.study.bank.data.repository.bankTranIdFor
@@ -91,9 +94,5 @@ class TransferRepositoryImpl @Inject constructor(
 
     private companion object {
         const val TAG = "TransferRepository"
-        // KFTC 와이어 계약값(:data:remote:kftc의 KftcProtocol과 동일).
-        const val RSP_SUCCESS = "A0000"
-        const val BANK_RSP_INSUFFICIENT_FUNDS = "311"
-        const val BANK_RSP_CURRENCY_MISMATCH = "320"
     }
 }
