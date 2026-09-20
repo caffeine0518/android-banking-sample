@@ -1,5 +1,6 @@
 package com.study.bank.data.remote.kftc.mock.seed
 
+import com.study.bank.data.remote.kftc.mock.model.SeedRecipient
 import com.study.bank.data.remote.kftc.mock.storage.SeedAccount
 
 /**

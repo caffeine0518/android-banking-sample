@@ -8,7 +8,7 @@ import com.study.bank.data.remote.kftc.api.RSP_ERROR
 import com.study.bank.data.remote.kftc.api.RSP_SUCCESS
 import com.study.bank.data.remote.kftc.dto.inquiry.RealNameInquiryResponse
 import com.study.bank.data.remote.kftc.mock.http.response.KftcTranIds
-import com.study.bank.data.remote.kftc.mock.seed.SeedRecipient
+import com.study.bank.data.remote.kftc.mock.model.SeedRecipient
 
 /** 수취 디렉터리 → KFTC `/v2.0/inquiry/…` 응답 DTO. */
 internal class InquiryResponseMapper(private val tranIds: KftcTranIds) {

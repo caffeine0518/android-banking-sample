@@ -5,7 +5,7 @@ import com.study.bank.data.remote.kftc.mock.http.MockError
 import com.study.bank.data.remote.kftc.mock.http.response.ok
 import com.study.bank.data.remote.kftc.mock.mapper.ErrorResponseMapper
 import com.study.bank.data.remote.kftc.mock.mapper.InquiryResponseMapper
-import com.study.bank.data.remote.kftc.mock.seed.SeedRecipient
+import com.study.bank.data.remote.kftc.mock.model.SeedRecipient
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
