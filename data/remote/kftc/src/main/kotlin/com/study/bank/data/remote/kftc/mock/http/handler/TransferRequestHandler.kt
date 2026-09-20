@@ -1,7 +1,7 @@
 package com.study.bank.data.remote.kftc.mock.http.handler
 
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
-import com.study.bank.data.remote.kftc.mock.KftcMockServer
+import com.study.bank.data.remote.kftc.mock.KftcMockServerImpl
 import com.study.bank.data.remote.kftc.mock.http.MockError
 import com.study.bank.data.remote.kftc.mock.http.response.BANK_RSP_CURRENCY_MISMATCH
 import com.study.bank.data.remote.kftc.mock.http.response.BANK_RSP_INSUFFICIENT_FUNDS
@@ -15,11 +15,10 @@ import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 
 /**
- * KFTC `/v2.0/transfer/…` 요청 핸들러: 출금이체.
+ * KFTC `/v2.0/transfer/…` 출금이체 핸들러.
  *
- * [responseDelayMillis]>0이면 출금 응답을 그만큼 지연시킨다 — 데모/수동 테스트에서 "보내는 중이에요"
- * 로딩 화면을 눈으로 확인하려는 용도다. 기본 0이라 단위 테스트는 느려지지 않고, 실제 앱
- * wiring([com.study.bank.data.remote.kftc.mock.KftcMockServer])에서만 양수를 준다.
+ * [responseDelayMillis] 기본값 0 — 테스트는 지연 없이 실행되고, 데모용 지연은
+ * [KftcMockServerImpl]에서만 주입한다.
  */
 internal class TransferRequestHandler(
     private val withdrawalService: KftcWithdrawalService,
