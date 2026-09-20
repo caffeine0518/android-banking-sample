@@ -1,16 +1,7 @@
 package com.study.bank.data.remote.kftc.mock.http
 
 import com.study.bank.data.remote.kftc.mock.TestMockBank
-import com.study.bank.data.remote.kftc.mock.http.handler.AccountRequestHandler
-import com.study.bank.data.remote.kftc.mock.http.handler.InquiryRequestHandler
-import com.study.bank.data.remote.kftc.mock.http.handler.TransferRequestHandler
-import com.study.bank.data.remote.kftc.mock.http.response.KftcTranIds
-import com.study.bank.data.remote.kftc.mock.mapper.AccountResponseMapper
-import com.study.bank.data.remote.kftc.mock.mapper.ErrorResponseMapper
-import com.study.bank.data.remote.kftc.mock.mapper.InquiryResponseMapper
-import com.study.bank.data.remote.kftc.mock.mapper.TransferResponseMapper
 import com.study.bank.data.remote.kftc.mock.seed.KftcAccountSeed
-import com.study.bank.data.remote.kftc.mock.seed.KftcRecipientSeed
 import com.study.bank.data.remote.kftc.mock.seed.KftcSeedAccountIds
 import com.study.bank.data.remote.kftc.mock.storage.entity.SeedAccount
 import kotlinx.serialization.json.Json
@@ -49,33 +40,15 @@ class KftcMockDispatcherTest {
         client = OkHttpClient()
     }
 
-    // 협력자를 명시 주입해 디스패처를 조립한다(구성 책임은 호출 측). tranIds는 단일 인스턴스 공유.
+    // 조립은 프로덕션과 같은 팩토리를 쓴다 — 테스트가 정하는 건 시드뿐(송금 응답 지연은 기본값 0).
     private fun newDispatcher(seed: List<SeedAccount> = KftcAccountSeed.accounts): KftcMockDispatcher {
         val bank = TestMockBank(seed)
-        val tranIds = KftcTranIds()
-        val errors = ErrorResponseMapper(tranIds)
-        return KftcMockDispatcher(
-            routes = kftcRoutes(
-                account = AccountRequestHandler(
-                    bank.accountDao,
-                    bank.transactionDao,
-                    AccountResponseMapper(tranIds),
-                    errors,
-                ),
-                transfer = TransferRequestHandler(
-                    bank.withdrawalService,
-                    TransferResponseMapper(tranIds),
-                    errors,
-                    MOCK_JSON,
-                ),
-                inquiry = InquiryRequestHandler(
-                    KftcRecipientSeed.directory(seed),
-                    InquiryResponseMapper(tranIds),
-                    errors,
-                    MOCK_JSON,
-                ),
-            ),
-            errors = errors,
+        return kftcMockDispatcher(
+            accountDao = bank.accountDao,
+            transactionDao = bank.transactionDao,
+            withdrawalService = bank.withdrawalService,
+            accountSeed = seed,
+            json = MOCK_JSON,
         )
     }
 
