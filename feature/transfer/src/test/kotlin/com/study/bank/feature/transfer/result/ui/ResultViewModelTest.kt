@@ -322,9 +322,10 @@ class ResultViewModelTest {
         private vararg val outcomes: TransferOutcome,
     ) : TransferRepository {
         private var index = 0
-        val requests = mutableListOf<TransferRequest>()
+        private val _requests = mutableListOf<TransferRequest>()
+        val requests: List<TransferRequest> get() = _requests
         override suspend fun execute(request: TransferRequest): TransferOutcome {
-            requests += request
+            _requests += request
             return outcomes[index++.coerceAtMost(outcomes.lastIndex)]
         }
     }

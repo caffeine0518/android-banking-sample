@@ -108,7 +108,7 @@ class ResultViewModel @AssistedInject constructor(
             val source = accountRepository.findAccount(sourceAccountId)
             val toBankCode = BankCode.byCode(recipient.bankCode)
             if (source == null || toBankCode == null) {
-                Log.e(TAG, "출금계좌/수취 은행 조회 실패 (source=$source, bank=${recipient.bankCode})")
+                Log.e(TAG, "출금계좌/수취 은행 조회 실패 (source=${source?.id?.value}, bank=${recipient.bankCode})")
                 store.sendIntent(
                     ResultInternalAction.Finished(ResultPhase.Failure(ResultFailureUi.UNKNOWN)),
                 )

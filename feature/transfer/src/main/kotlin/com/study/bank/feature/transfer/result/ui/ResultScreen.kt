@@ -235,7 +235,7 @@ private fun BottomBar(phase: ResultPhase, onIntent: (ResultIntent) -> Unit) {
                 ) {
                     Text(stringResource(R.string.transfer_result_retry))
                 }
-                else -> FilledTonalButton(
+                ResultPhase.Loading, ResultPhase.Success -> FilledTonalButton(
                     onClick = { onIntent(ResultIntent.ShareClicked) },
                     modifier = Modifier.weight(1f),
                 ) {
