@@ -47,31 +47,39 @@
 
 **Clean Architecture × 멀티모듈 × DDD × MVI** 를 결합했습니다.
 
-```
-            ┌┄┄ :app-e2e (테스트 의존성 격리)
-            ┊       
-            ▼
-            ┌─────────────────────────────────────────────┐
-            │                   :app                       │  Application / MainActivity
-            └───────────────┬─────────────────────────────┘  
-                            │
-        ┌───────────────────┼────────────────────┐
-        ▼                   ▼                    ▼
-   :navigation         :data-di          :core-ui:designsystem
-        │      (Hilt 그래프 집결, 구현체 은닉)
-        ▼                   │
-  :feature:home      ┌──────┼──────────┬───────────┐
-  :feature:account   ▼      ▼          ▼           ▼
-  :feature:transfer :data :data:local :data:remote:kftc
-        │                              :data:remote:fx
-        ▼
-     :domain (순수 Kotlin/JVM · 모듈 의존성 0)   ◀── :data 도 도메인에 의존 (DIP)
+### 모듈 의존성
 
-  화면 공용 모듈 — :feature 가 사용 (※ 도메인 계층 아님):
-    :core-ui:mvi     제네릭 MVI 엔진   · 도메인 비의존 (reducer만 주입받아 확장)
-    :core-ui:model   UI 표시 모델      · 도메인 비의존
-    :core-ui:mapper  표시 모델 ↔ 도메인 · 이 모듈만 도메인 의존
+<!-- module-graph:start -->
 ```
+:app
+├── :navigation
+│   ├── :feature:home
+│   │   ├── :core-ui:mvi
+│   │   └── :core-ui:mapper
+│   │       ├── :domain
+│   │       └── :core-ui:model
+│   ├── :feature:account
+│   │   ├── :core-ui:mvi
+│   │   └── :core-ui:mapper (*)
+│   └── :feature:transfer
+│       ├── :core-ui:mvi
+│       └── :core-ui:mapper (*)
+├── :data-di
+│   └── :data
+│       ├── :domain
+│       ├── :data:remote:kftc
+│       ├── :data:remote:fx
+│       └── :data:local
+└── :core-ui:designsystem
+```
+<!-- module-graph:end -->
+
+> main 머지 시 CI가 `./gradlew updateModuleGraph` 로 다시 생성합니다. `(*)` 는 위에서 이미 펼친 모듈이고, 다른 의존성을 거쳐 도달하는 의존성은 생략했습니다.
+
+- `:domain` — 순수 Kotlin/JVM, 모듈 의존성 0. `:feature`·`:data` 모두 도메인에 의존합니다 (DIP)
+- `:data-di` — Hilt 그래프 집결 지점. `:app` 이 이 모듈만 의존해 data 구현체를 숨깁니다
+- `:core-ui:mvi`·`:core-ui:model` 은 도메인 비의존, `:core-ui:mapper` 만 도메인에 의존합니다
+- 테스트 전용 `:app-e2e`(`:app` 을 instrument)는 트리에서 제외했습니다
 
 ### 계층 책임
 
