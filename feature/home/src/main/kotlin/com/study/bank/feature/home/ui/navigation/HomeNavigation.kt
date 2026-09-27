@@ -2,7 +2,6 @@ package com.study.bank.feature.home.ui.navigation
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import com.study.bank.domain.model.account.AccountId
 import com.study.bank.feature.home.ui.HomeRoute as HomeRouteScreen
 import kotlinx.serialization.Serializable
 
@@ -11,7 +10,7 @@ import kotlinx.serialization.Serializable
 data object HomeRoute : NavKey
 
 fun EntryProviderScope<NavKey>.homeEntry(
-    onAccountClick: (AccountId) -> Unit,
+    onAccountClick: (accountId: String) -> Unit,
 ) {
     entry<HomeRoute> {
         HomeRouteScreen(onAccountClick = onAccountClick)

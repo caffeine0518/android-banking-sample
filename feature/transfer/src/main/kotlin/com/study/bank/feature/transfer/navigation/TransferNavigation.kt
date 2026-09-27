@@ -3,7 +3,6 @@ package com.study.bank.feature.transfer.navigation
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.study.bank.domain.model.BankCode
-import com.study.bank.domain.model.account.AccountId
 import com.study.bank.feature.transfer.accountinput.ui.AccountInputRoute
 import com.study.bank.feature.transfer.amount.ui.AmountRoute
 import com.study.bank.feature.transfer.confirm.ui.ConfirmRoute
@@ -56,8 +55,6 @@ data class TransferResultRoute(
     val recipient: TransferRecipientArg,
     val amount: Long,
 ) : NavKey
-
-fun transferRecipientRoute(sourceAccountId: AccountId) = TransferRecipientRoute(sourceAccountId.value)
 
 fun EntryProviderScope<NavKey>.transferRecipientEntry(
     onBack: () -> Unit,

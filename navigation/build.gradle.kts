@@ -7,7 +7,6 @@ android {
 }
 
 dependencies {
-    implementation(projects.domain)
     implementation(projects.feature.home)
     implementation(projects.feature.account)
     implementation(projects.feature.transfer)

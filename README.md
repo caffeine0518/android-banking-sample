@@ -49,6 +49,7 @@
 
 ### 모듈 의존성
 
+<!-- 아래 트리는 main 머지 시 CI(.github/workflows/module-graph.yml)가 `./gradlew updateModuleGraph`로 생성한다. 직접 수정하지 않는다. -->
 <!-- module-graph:start -->
 ```
 :app

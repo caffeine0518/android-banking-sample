@@ -11,15 +11,14 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.study.bank.feature.account.ui.navigation.AccountRoute
 import com.study.bank.feature.account.ui.navigation.accountEntry
-import com.study.bank.feature.account.ui.navigation.accountRoute
 import com.study.bank.feature.home.ui.navigation.HomeRoute
 import com.study.bank.feature.home.ui.navigation.homeEntry
 import com.study.bank.feature.transfer.navigation.TransferAccountInputRoute
+import com.study.bank.feature.transfer.navigation.TransferRecipientRoute
 import com.study.bank.feature.transfer.navigation.transferAccountInputEntry
 import com.study.bank.feature.transfer.navigation.transferAmountEntry
 import com.study.bank.feature.transfer.navigation.transferConfirmEntry
 import com.study.bank.feature.transfer.navigation.transferRecipientEntry
-import com.study.bank.feature.transfer.navigation.transferRecipientRoute
 import com.study.bank.feature.transfer.navigation.transferResultEntry
 
 @Composable
@@ -43,10 +42,10 @@ fun BankNavHost() {
 private fun entryProvider(backStack: NavBackStack<NavKey>): (NavKey) -> NavEntry<NavKey> =
     entryProvider {
         homeEntry(
-            onAccountClick = { accountId -> backStack.push(accountRoute(accountId)) },
+            onAccountClick = { accountId -> backStack.push(AccountRoute(accountId)) },
         )
         accountEntry(
-            onSendClick = { accountId -> backStack.push(transferRecipientRoute(accountId)) },
+            onSendClick = { accountId -> backStack.push(TransferRecipientRoute(accountId)) },
             onBack = { backStack.pop() },
         )
         transferRecipientEntry(
