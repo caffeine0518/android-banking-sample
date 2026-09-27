@@ -15,6 +15,8 @@ pluginManagement {
 }
 plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+    // README 모듈 의존성 그래프 생성 — 루트에 createModuleGraph 태스크를 등록하고 모든 모듈의 의존성을 수집한다
+    id("dev.iurysouza.modulegraph.settings") version "0.15.0"
 }
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
