@@ -26,23 +26,14 @@ tasks.register("updateModuleGraph") {
     outputs.file(readme)
 
     doLast {
-        fun reachable(path: String): Set<String> =
-            deps[path].orEmpty().flatMap { reachable(it) + it }.toSet()
-
-        // 다른 직접 의존성을 거쳐 이미 도달하는 의존성은 생략한다 (예: feature → :domain 은 :core-ui:mapper 를 거쳐 도달)
-        fun children(path: String): List<String> {
-            val direct = deps[path].orEmpty()
-            return direct.filter { dep -> direct.none { other -> other != dep && dep in reachable(other) } }
-        }
-
         // :app 에서 출발한다 — :app 을 instrument 하는 테스트 전용 :app-e2e 는 트리에 포함되지 않는다
         val lines = mutableListOf(":app")
         val expanded = mutableSetOf<String>()
         fun draw(path: String, indent: String) {
-            val deps = children(path)
-            deps.forEachIndexed { i, dep ->
-                val last = i == deps.lastIndex
-                val repeated = dep in expanded && children(dep).isNotEmpty()
+            val children = deps[path].orEmpty()
+            children.forEachIndexed { i, dep ->
+                val last = i == children.lastIndex
+                val repeated = dep in expanded && deps[dep].orEmpty().isNotEmpty()
                 lines += indent + (if (last) "└── " else "├── ") + dep + if (repeated) " (*)" else ""
                 if (!repeated) {
                     expanded += dep

@@ -53,28 +53,39 @@
 ```
 :app
 ├── :navigation
+│   ├── :domain
 │   ├── :feature:home
+│   │   ├── :domain
 │   │   ├── :core-ui:mvi
+│   │   ├── :core-ui:model
 │   │   └── :core-ui:mapper
 │   │       ├── :domain
 │   │       └── :core-ui:model
 │   ├── :feature:account
+│   │   ├── :domain
 │   │   ├── :core-ui:mvi
+│   │   ├── :core-ui:model
 │   │   └── :core-ui:mapper (*)
 │   └── :feature:transfer
+│       ├── :domain
 │       ├── :core-ui:mvi
+│       ├── :core-ui:model
 │       └── :core-ui:mapper (*)
 ├── :data-di
-│   └── :data
-│       ├── :domain
-│       ├── :data:remote:kftc
-│       ├── :data:remote:fx
-│       └── :data:local
+│   ├── :domain
+│   ├── :data
+│   │   ├── :domain
+│   │   ├── :data:remote:kftc
+│   │   ├── :data:remote:fx
+│   │   └── :data:local
+│   ├── :data:remote:kftc
+│   ├── :data:remote:fx
+│   └── :data:local
 └── :core-ui:designsystem
 ```
 <!-- module-graph:end -->
 
-> main 머지 시 CI가 `./gradlew updateModuleGraph` 로 다시 생성합니다. `(*)` 는 위에서 이미 펼친 모듈이고, 다른 의존성을 거쳐 도달하는 의존성은 생략했습니다.
+> main 머지 시 CI가 `./gradlew updateModuleGraph` 로 다시 생성합니다. `(*)` 는 위에서 이미 펼친 모듈입니다.
 
 - `:domain` — 순수 Kotlin/JVM, 모듈 의존성 0. `:feature`·`:data` 모두 도메인에 의존합니다 (DIP)
 - `:data-di` — Hilt 그래프 집결 지점. `:app` 이 이 모듈만 의존해 data 구현체를 숨깁니다
