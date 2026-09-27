@@ -54,34 +54,15 @@
 :app
 ├── :navigation
 │   ├── :domain
-│   ├── :feature:home
-│   │   ├── :domain
-│   │   ├── :core-ui:mvi
-│   │   ├── :core-ui:model
-│   │   └── :core-ui:mapper
-│   │       ├── :domain
-│   │       └── :core-ui:model
-│   ├── :feature:account
-│   │   ├── :domain
-│   │   ├── :core-ui:mvi
-│   │   ├── :core-ui:model
-│   │   └── :core-ui:mapper (*)
-│   └── :feature:transfer
+│   └── :feature (account·home·transfer)
 │       ├── :domain
-│       ├── :core-ui:mvi
-│       ├── :core-ui:model
-│       └── :core-ui:mapper (*)
+│       └── :core-ui (designsystem·mapper·model·mvi)
+│           └── :domain
 ├── :data-di
 │   ├── :domain
-│   ├── :data
-│   │   ├── :domain
-│   │   ├── :data:remote:kftc
-│   │   ├── :data:remote:fx
-│   │   └── :data:local
-│   ├── :data:remote:kftc
-│   ├── :data:remote:fx
-│   └── :data:local
-└── :core-ui:designsystem
+│   └── :data (local·remote:fx·remote:kftc)
+│       └── :domain
+└── :core-ui (designsystem·mapper·model·mvi) (*)
 ```
 <!-- module-graph:end -->
 

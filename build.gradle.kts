@@ -16,7 +16,8 @@ plugins {
 tasks.register("updateModuleGraph") {
     val readme = layout.projectDirectory.file("README.md").asFile
     // main 코드의 모듈 의존성(api·implementation)만 수집한다. test 계열 configuration은 제외한다.
-    val deps: Map<String, List<String>> = subprojects.associate { module ->
+    // 빌드 파일이 없는 중간 프로젝트(:data:remote 등 include 경로가 만든 것)는 제외한다
+    val deps: Map<String, List<String>> = subprojects.filter { it.buildFile.exists() }.associate { module ->
         module.path to listOf("api", "implementation")
             .mapNotNull { module.configurations.findByName(it) }
             .flatMap { it.dependencies.withType<ProjectDependency>().map { dep -> dep.path } }
@@ -26,15 +27,25 @@ tasks.register("updateModuleGraph") {
     outputs.file(readme)
 
     doLast {
+        // 하위 모듈은 첫 경로 단계로 묶는다 (:core-ui:mvi → :core-ui). 같은 묶음 안의 의존은 표시하지 않는다.
+        fun group(path: String) = ":" + path.split(":")[1]
+        val groupDeps = deps.entries.groupBy({ group(it.key) }, { it.value })
+            .mapValues { (g, lists) -> lists.flatten().map(::group).filter { it != g }.distinct() }
+        // 묶인 하위 모듈 이름을 괄호로 표시한다 — :core-ui (mvi·model·mapper·designsystem)
+        fun label(g: String): String {
+            val members = deps.keys.filter { it != g && group(it) == g }.map { it.removePrefix("$g:") }
+            return if (members.isEmpty()) g else "$g (${members.joinToString("·")})"
+        }
+
         // :app 에서 출발한다 — :app 을 instrument 하는 테스트 전용 :app-e2e 는 트리에 포함되지 않는다
         val lines = mutableListOf(":app")
         val expanded = mutableSetOf<String>()
         fun draw(path: String, indent: String) {
-            val children = deps[path].orEmpty()
+            val children = groupDeps[path].orEmpty()
             children.forEachIndexed { i, dep ->
                 val last = i == children.lastIndex
-                val repeated = dep in expanded && deps[dep].orEmpty().isNotEmpty()
-                lines += indent + (if (last) "└── " else "├── ") + dep + if (repeated) " (*)" else ""
+                val repeated = dep in expanded && groupDeps[dep].orEmpty().isNotEmpty()
+                lines += indent + (if (last) "└── " else "├── ") + label(dep) + if (repeated) " (*)" else ""
                 if (!repeated) {
                     expanded += dep
                     draw(dep, indent + if (last) "    " else "│   ")
