@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -23,6 +24,7 @@ fun ResultRoute(
     ),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val currentOnFinish by rememberUpdatedState(onFinish)
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val effects = remember(viewModel.effect, lifecycle) {
         viewModel.effect.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
@@ -37,7 +39,7 @@ fun ResultRoute(
     LaunchedEffect(effects) {
         effects.collect { effect ->
             when (effect) {
-                is ResultEffect.Finish -> onFinish(effect.sourceAccountId)
+                is ResultEffect.Finish -> currentOnFinish(effect.sourceAccountId)
                 // 공유/메모 화면 미구현 — 현재는 무시(placeholder).
                 ResultEffect.Share -> Unit
                 ResultEffect.LeaveMemo -> Unit

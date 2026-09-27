@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -23,6 +24,8 @@ fun AmountRoute(
     ),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val currentOnBack by rememberUpdatedState(onBack)
+    val currentOnNext by rememberUpdatedState(onNext)
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val effects = remember(viewModel.effect, lifecycle) {
         viewModel.effect.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
@@ -31,9 +34,9 @@ fun AmountRoute(
     LaunchedEffect(effects) {
         effects.collect { effect ->
             when (effect) {
-                AmountEffect.NavigateBack -> onBack()
+                AmountEffect.NavigateBack -> currentOnBack()
                 is AmountEffect.NavigateNext ->
-                    onNext(TransferConfirmRoute(effect.sourceAccountId, effect.recipient, effect.amount))
+                    currentOnNext(TransferConfirmRoute(effect.sourceAccountId, effect.recipient, effect.amount))
             }
         }
     }

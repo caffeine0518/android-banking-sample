@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -27,7 +28,9 @@ fun AccountDetailRoute(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val snackbarHostState = remember { SnackbarHostState() }
-    val refreshErrorMessage = stringResource(R.string.account_refresh_error)
+    val currentOnSendClick by rememberUpdatedState(onSendClick)
+    val currentOnBack by rememberUpdatedState(onBack)
+    val refreshErrorMessage by rememberUpdatedState(stringResource(R.string.account_refresh_error))
     val effects = remember(viewModel.effect, lifecycle) {
         viewModel.effect.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
     }
@@ -35,8 +38,8 @@ fun AccountDetailRoute(
     LaunchedEffect(effects) {
         effects.collect { effect ->
             when (effect) {
-                is AccountDetailEffect.NavigateToTransfer -> onSendClick(effect.accountId)
-                AccountDetailEffect.NavigateBack -> onBack()
+                is AccountDetailEffect.NavigateToTransfer -> currentOnSendClick(effect.accountId)
+                AccountDetailEffect.NavigateBack -> currentOnBack()
                 AccountDetailEffect.ShowRefreshError -> snackbarHostState.showSnackbar(refreshErrorMessage)
             }
         }

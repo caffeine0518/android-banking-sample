@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -23,6 +24,8 @@ fun ConfirmRoute(
     ),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val currentOnBack by rememberUpdatedState(onBack)
+    val currentOnSent by rememberUpdatedState(onSent)
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val effects = remember(viewModel.effect, lifecycle) {
         viewModel.effect.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
@@ -31,9 +34,9 @@ fun ConfirmRoute(
     LaunchedEffect(effects) {
         effects.collect { effect ->
             when (effect) {
-                ConfirmEffect.NavigateBack -> onBack()
+                ConfirmEffect.NavigateBack -> currentOnBack()
                 is ConfirmEffect.Submit ->
-                    onSent(TransferResultRoute(effect.sourceAccountId, effect.recipient, effect.amount))
+                    currentOnSent(TransferResultRoute(effect.sourceAccountId, effect.recipient, effect.amount))
                 // 편집/변경 화면 미구현 — 현재는 무시(placeholder).
                 ConfirmEffect.EditDisplayName -> Unit
                 ConfirmEffect.ChangeSource -> Unit
