@@ -11,14 +11,52 @@ plugins {
     alias(libs.plugins.roborazzi) apply false
 }
 
-// README의 모듈 의존성 그래프(Mermaid)를 생성한다 — `./gradlew createModuleGraph`
-moduleGraphConfig {
-    readmePath.set("./README.md")
-    heading.set("### 모듈 의존성")
-    setStyleByModuleType.set(true)
-    orientation.set(dev.iurysouza.modulegraph.Orientation.TOP_TO_BOTTOM)
-    // :app 에서 도달하는 모듈만 그린다 — 테스트 전용 :app-e2e 는 모든 feature를 참조해 그래프를 복잡하게 한다
-    rootModulesRegex.set(":app")
-    // 경로별 subgraph는 :data 모듈과 :data:* 묶음의 id가 같아 렌더링이 깨지므로 전체 경로로 표시한다
-    showFullPath.set(true)
+// README의 모듈 의존성 트리를 실제 의존성으로 다시 생성한다 — `./gradlew updateModuleGraph`
+// main 에 머지되면 .github/workflows/module-graph.yml 이 실행하고 변경분을 커밋한다.
+tasks.register("updateModuleGraph") {
+    val readme = layout.projectDirectory.file("README.md").asFile
+    // main 코드의 모듈 의존성(api·implementation)만 수집한다. test 계열 configuration은 제외한다.
+    val deps: Map<String, List<String>> = subprojects.associate { module ->
+        module.path to listOf("api", "implementation")
+            .mapNotNull { module.configurations.findByName(it) }
+            .flatMap { it.dependencies.withType<ProjectDependency>().map { dep -> dep.path } }
+            .distinct()
+    }
+    inputs.property("deps", deps)
+    outputs.file(readme)
+
+    doLast {
+        fun reachable(path: String): Set<String> =
+            deps[path].orEmpty().flatMap { reachable(it) + it }.toSet()
+
+        // 다른 직접 의존성을 거쳐 이미 도달하는 의존성은 생략한다 (예: feature → :domain 은 :core-ui:mapper 를 거쳐 도달)
+        fun children(path: String): List<String> {
+            val direct = deps[path].orEmpty()
+            return direct.filter { dep -> direct.none { other -> other != dep && dep in reachable(other) } }
+        }
+
+        // :app 에서 출발한다 — :app 을 instrument 하는 테스트 전용 :app-e2e 는 트리에 포함되지 않는다
+        val lines = mutableListOf(":app")
+        val expanded = mutableSetOf<String>()
+        fun draw(path: String, indent: String) {
+            val deps = children(path)
+            deps.forEachIndexed { i, dep ->
+                val last = i == deps.lastIndex
+                val repeated = dep in expanded && children(dep).isNotEmpty()
+                lines += indent + (if (last) "└── " else "├── ") + dep + if (repeated) " (*)" else ""
+                if (!repeated) {
+                    expanded += dep
+                    draw(dep, indent + if (last) "    " else "│   ")
+                }
+            }
+        }
+        draw(":app", "")
+
+        val start = "<!-- module-graph:start -->"
+        val end = "<!-- module-graph:end -->"
+        val text = readme.readText()
+        check(start in text && end in text) { "README.md 에 $start / $end 마커가 없습니다" }
+        val block = lines.joinToString("\n", prefix = "$start\n```\n", postfix = "\n```\n$end")
+        readme.writeText(text.substringBefore(start) + block + text.substringAfter(end))
+    }
 }

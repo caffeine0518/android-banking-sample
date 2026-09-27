@@ -47,73 +47,40 @@
 
 **Clean Architecture × 멀티모듈 × DDD × MVI** 를 결합했습니다.
 
+### 모듈 의존성
+
+<!-- module-graph:start -->
+```
+:app
+├── :navigation
+│   ├── :feature:home
+│   │   ├── :core-ui:mvi
+│   │   └── :core-ui:mapper
+│   │       ├── :domain
+│   │       └── :core-ui:model
+│   ├── :feature:account
+│   │   ├── :core-ui:mvi
+│   │   └── :core-ui:mapper (*)
+│   └── :feature:transfer
+│       ├── :core-ui:mvi
+│       └── :core-ui:mapper (*)
+├── :data-di
+│   └── :data
+│       ├── :domain
+│       ├── :data:remote:kftc
+│       ├── :data:remote:fx
+│       └── :data:local
+└── :core-ui:designsystem
+```
+<!-- module-graph:end -->
+
+> main 머지 시 CI가 `./gradlew updateModuleGraph` 로 다시 생성합니다. `(*)` 는 위에서 이미 펼친 모듈이고, 다른 의존성을 거쳐 도달하는 의존성은 생략했습니다.
+
 - `:domain` — 순수 Kotlin/JVM, 모듈 의존성 0. `:feature`·`:data` 모두 도메인에 의존합니다 (DIP)
 - `:data-di` — Hilt 그래프 집결 지점. `:app` 이 이 모듈만 의존해 data 구현체를 숨깁니다
 - `:core-ui:mvi`·`:core-ui:model` 은 도메인 비의존, `:core-ui:mapper` 만 도메인에 의존합니다
-- 테스트 전용 `:app-e2e`(`:app` 을 instrument)는 그래프에서 제외했습니다
-- 색상: 남색 = Android application · 초록 = Android library · 보라 = 순수 Kotlin/JVM
+- 테스트 전용 `:app-e2e`(`:app` 을 instrument)는 트리에서 제외했습니다
 
-### 모듈 의존성
-
-```mermaid
-%%{
-  init: {
-    'theme': 'neutral'
-  }
-}%%
-
-graph TB
-  :feature:account --> :domain
-  :feature:account --> :core-ui:mvi
-  :feature:account --> :core-ui:model
-  :feature:account --> :core-ui:mapper
-  :app --> :navigation
-  :app --> :data-di
-  :app --> :core-ui:designsystem
-  :feature:home --> :domain
-  :feature:home --> :core-ui:mvi
-  :feature:home --> :core-ui:model
-  :feature:home --> :core-ui:mapper
-  :navigation --> :domain
-  :navigation --> :feature:home
-  :navigation --> :feature:account
-  :navigation --> :feature:transfer
-  :core-ui:mapper --> :domain
-  :core-ui:mapper --> :core-ui:model
-  :data-di --> :domain
-  :data-di --> :data
-  :data-di --> :data:remote:kftc
-  :data-di --> :data:remote:fx
-  :data-di --> :data:local
-  :data --> :domain
-  :data --> :data:remote:kftc
-  :data --> :data:remote:fx
-  :data --> :data:local
-  :feature:transfer --> :domain
-  :feature:transfer --> :core-ui:mvi
-  :feature:transfer --> :core-ui:model
-  :feature:transfer --> :core-ui:mapper
-
-classDef android-library fill:#3BD482,stroke:#fff,stroke-width:2px,color:#fff;
-classDef kotlin-jvm fill:#8150FF,stroke:#fff,stroke-width:2px,color:#fff;
-classDef android-application fill:#2C4162,stroke:#fff,stroke-width:2px,color:#fff;
-class :feature:account android-library
-class :domain kotlin-jvm
-class :core-ui:mvi kotlin-jvm
-class :core-ui:model android-library
-class :core-ui:mapper android-library
-class :app android-application
-class :navigation android-library
-class :data-di android-library
-class :core-ui:designsystem android-library
-class :feature:home android-library
-class :feature:transfer android-library
-class :data android-library
-class :data:remote:kftc android-library
-class :data:remote:fx android-library
-class :data:local android-library
-
-```
 ### 계층 책임
 
 - **domain** — 리치 도메인 모델(`Money`, `Currency`, `Account`, `TransferRequest`…), Repository 인터페이스, UseCase. `BigDecimal` 기반 통화-안전 연산
