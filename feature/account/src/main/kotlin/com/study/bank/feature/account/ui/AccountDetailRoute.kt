@@ -11,7 +11,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
-import com.study.bank.domain.model.account.AccountId
 import com.study.bank.feature.account.R
 import com.study.bank.feature.account.contract.AccountDetailEffect
 import com.study.bank.feature.account.ui.navigation.AccountRoute
@@ -19,7 +18,7 @@ import com.study.bank.feature.account.ui.navigation.AccountRoute
 @Composable
 fun AccountDetailRoute(
     route: AccountRoute,
-    onSendClick: (AccountId) -> Unit,
+    onSendClick: (accountId: String) -> Unit,
     onBack: () -> Unit,
     viewModel: AccountDetailViewModel = hiltViewModel<AccountDetailViewModel, AccountDetailViewModel.Factory>(
         creationCallback = { factory -> factory.create(route) },
@@ -36,7 +35,7 @@ fun AccountDetailRoute(
     LaunchedEffect(effects) {
         effects.collect { effect ->
             when (effect) {
-                is AccountDetailEffect.NavigateToTransfer -> onSendClick(AccountId(effect.accountId))
+                is AccountDetailEffect.NavigateToTransfer -> onSendClick(effect.accountId)
                 AccountDetailEffect.NavigateBack -> onBack()
                 AccountDetailEffect.ShowRefreshError -> snackbarHostState.showSnackbar(refreshErrorMessage)
             }

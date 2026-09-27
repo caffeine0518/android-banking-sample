@@ -2,7 +2,6 @@ package com.study.bank.feature.account.ui.navigation
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import com.study.bank.domain.model.account.AccountId
 import com.study.bank.feature.account.ui.AccountDetailRoute
 import kotlinx.serialization.Serializable
 
@@ -13,10 +12,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class AccountRoute(val accountId: String) : NavKey
 
-fun accountRoute(accountId: AccountId) = AccountRoute(accountId.value)
-
 fun EntryProviderScope<NavKey>.accountEntry(
-    onSendClick: (AccountId) -> Unit,
+    onSendClick: (accountId: String) -> Unit,
     onBack: () -> Unit,
 ) {
     entry<AccountRoute> { key ->

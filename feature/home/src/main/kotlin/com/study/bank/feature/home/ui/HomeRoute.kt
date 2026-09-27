@@ -11,13 +11,12 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.study.bank.domain.model.account.AccountId
 import com.study.bank.feature.home.R
 import com.study.bank.feature.home.contract.HomeEffect
 
 @Composable
 fun HomeRoute(
-    onAccountClick: (AccountId) -> Unit,
+    onAccountClick: (accountId: String) -> Unit,
     viewModel: HomeViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -31,7 +30,7 @@ fun HomeRoute(
     LaunchedEffect(effects) {
         effects.collect { effect ->
             when (effect) {
-                is HomeEffect.NavigateToAccountDetail -> onAccountClick(AccountId(effect.accountId))
+                is HomeEffect.NavigateToAccountDetail -> onAccountClick(effect.accountId)
                 HomeEffect.ShowRefreshError -> snackbarHostState.showSnackbar(refreshErrorMessage)
             }
         }
