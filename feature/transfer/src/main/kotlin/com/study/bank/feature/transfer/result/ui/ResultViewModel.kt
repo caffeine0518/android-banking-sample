@@ -105,7 +105,10 @@ class ResultViewModel @AssistedInject constructor(
     /** 두 계좌를 조회해 송금 요청을 만들고 실행한 뒤, 결과를 phase로 반영한다. */
     private fun execute() {
         viewModelScope.launch {
-            val source = accountRepository.findAccount(sourceAccountId)
+            // 조회 실패는 계좌를 찾지 못한 경우와 같이 UNKNOWN 실패로 표시해 재시도할 수 있게 한다.
+            val source = cancellableCatching { accountRepository.findAccount(sourceAccountId) }
+                .onFailure { Log.e(TAG, "출금계좌 조회 중 예외", it) }
+                .getOrNull()
             val toBankCode = BankCode.byCode(recipient.bankCode)
             if (source == null || toBankCode == null) {
                 Log.e(TAG, "출금계좌/수취 은행 조회 실패 (source=${source?.id?.value}, bank=${recipient.bankCode})")

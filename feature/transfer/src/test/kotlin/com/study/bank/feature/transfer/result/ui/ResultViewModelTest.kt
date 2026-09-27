@@ -114,6 +114,14 @@ class ResultViewModelTest {
     }
 
     @Test
+    fun `출금계좌 조회 중 예외가 발생하면 UNKNOWN 실패가 된다`() = runTest {
+        val accounts = FakeAccountRepository(findError = IllegalStateException("db"))
+        val vm = buildViewModel(accounts, FakeTransferRepository(success()), amount = 1)
+
+        assertEquals(ResultPhase.Failure(ResultFailureUi.UNKNOWN), vm.state.value.phase)
+    }
+
+    @Test
     fun `외부 수취인은 출금계좌 저장소에 없어도 라우트 신원으로 송금된다`() = runTest {
         // 출금계좌만 저장소에 있고, 외부(타행) 수취인은 라우트 신원으로만 전달된다(재조회 없음).
         val accounts = FakeAccountRepository().apply { emit(account(SOURCE_ID, holder = "강남규")) }
@@ -294,7 +302,9 @@ class ResultViewModelTest {
         nickname = "통장 $id",
     )
 
-    private class FakeAccountRepository : AccountRepository {
+    private class FakeAccountRepository(
+        private val findError: Throwable? = null,
+    ) : AccountRepository {
         private val accountsFlow = MutableStateFlow<List<Account>>(emptyList())
 
         fun emit(vararg accounts: Account) {
@@ -304,8 +314,10 @@ class ResultViewModelTest {
         override fun observeAccounts(): Flow<List<Account>> = accountsFlow
         override fun observeAccount(id: AccountId): Flow<Account?> =
             accountsFlow.map { list -> list.firstOrNull { it.id == id } }
-        override suspend fun findAccount(id: AccountId): Account? =
-            accountsFlow.value.firstOrNull { it.id == id }
+        override suspend fun findAccount(id: AccountId): Account? {
+            findError?.let { throw it }
+            return accountsFlow.value.firstOrNull { it.id == id }
+        }
         override suspend fun refresh() = Unit
     }
 
