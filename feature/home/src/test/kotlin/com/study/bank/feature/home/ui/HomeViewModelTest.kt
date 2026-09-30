@@ -57,19 +57,15 @@ class HomeViewModelTest {
         Locale.setDefault(originalLocale)
     }
 
-    // ----- 스트림 구독 → state 노출 -----
-
     @Test
     fun `총자산 스트림이 방출되면 state_totalAssets로 노출된다`() = runTest {
         val repo = FakeAccountRepository()
         val vm = buildViewModel(repo) // 기본 fx: KRW→1(항등)이라 환산 없이 그대로 흐른다.
 
-        repo.emit(account("acc-1", 1_000_000, Currency.KRW))
+        repo.emit(account(id = "acc-1", amount = 1_000_000, currency = Currency.KRW))
 
         assertEquals(moneyUiMapper.map(Money.of(1_000_000, Currency.KRW)), vm.state.value.totalAssets)
     }
-
-    // ----- intent → effect -----
 
     @Test
     fun `AccountClicked 인텐트는 해당 accountId로 NavigateToAccountDetail effect를 보낸다`() = runTest {
@@ -82,8 +78,6 @@ class HomeViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
     }
-
-    // ----- refresh 생명주기 -----
 
     @Test
     fun `init 시 Refresh가 발행돼 refresh가 1회 호출되고 완료 후 로딩이 해제된다`() = runTest {
@@ -107,7 +101,7 @@ class HomeViewModelTest {
         assertTrue(vm.state.value.isLoading)
         assertEquals(1, repo.refreshCount)
 
-        vm.onIntent(HomeIntent.Refresh) // 로딩 중 → 가드돼야 함
+        vm.onIntent(HomeIntent.Refresh)
 
         assertEquals("로딩 중 발행된 Refresh는 무시돼야 한다", 1, repo.refreshCount)
         gate.complete(Unit) // 첫 refresh를 끝내 정리
@@ -117,7 +111,7 @@ class HomeViewModelTest {
     fun `refresh가 실패하면 크래시 없이 계좌 스트림은 흐르고 로딩이 풀리며 ShowRefreshError가 발행된다`() = runTest {
         val repo = FakeAccountRepository().apply { onRefresh = { throw IOException("network down") } }
         val vm = buildViewModel(repo)
-        val account = account("acc-1", 1_000_000, Currency.KRW)
+        val account = account(id = "acc-1", amount = 1_000_000, currency = Currency.KRW)
 
         repo.emit(account)
 
@@ -131,8 +125,6 @@ class HomeViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
     }
-
-    // ----- 테스트 픽스처 -----
 
     private fun buildViewModel(
         repo: FakeAccountRepository,

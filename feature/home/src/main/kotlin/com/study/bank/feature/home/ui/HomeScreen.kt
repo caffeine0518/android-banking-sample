@@ -71,10 +71,7 @@ internal fun HomeScreen(
                 .testTag(BankTestTags.SCREEN_HOME),
             color = MaterialTheme.colorScheme.background,
         ) {
-            HomeContent(
-                state = state,
-                onAccountClick = { onIntent(HomeIntent.AccountClicked(it)) },
-            )
+            HomeContent(state = state) { onIntent(HomeIntent.AccountClicked(it)) }
         }
     }
 }

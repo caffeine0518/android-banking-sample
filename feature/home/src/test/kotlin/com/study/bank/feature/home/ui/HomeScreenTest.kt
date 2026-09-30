@@ -35,8 +35,7 @@ class HomeScreenTest {
     @get:Rule
     val composeRule = createComposeRule()
 
-    /** HomeScreen이 발행한 인텐트를 기록하는 스파이. */
-    private val intents = mutableListOf<HomeIntent>()
+    private val emittedIntents = mutableListOf<HomeIntent>()
 
     /** UI 카피는 이 모듈이 소유한 string 리소스가 정답이므로, 리터럴 중복 대신 리소스를 참조한다. */
     private fun string(id: Int) = RuntimeEnvironment.getApplication().getString(id)
@@ -44,18 +43,19 @@ class HomeScreenTest {
     private fun setHomeScreen(state: HomeState) {
         composeRule.setContent {
             MaterialTheme {
-                HomeScreen(state = state, onIntent = { intents += it })
+                HomeScreen(state = state, onIntent = { emittedIntents += it })
             }
         }
     }
-
-    // ----- 렌더링 -----
 
     @Test
     fun `state의 계좌 목록이 화면에 표시된다`() {
         setHomeScreen(
             HomeState(
-                accounts = listOf(account("acc-1", "월급통장"), account("acc-2", "비상금")),
+                accounts = listOf(
+                    account(id = "acc-1", nickname = "월급통장"),
+                    account(id = "acc-2", nickname = "비상금"),
+                ),
             ),
         )
 
@@ -77,28 +77,24 @@ class HomeScreenTest {
         composeRule.onNode(indeterminateProgress).assertDoesNotExist()
     }
 
-    // ----- 동작 → 인텐트 -----
-
     @Test
     fun `새로고침 버튼을 누르면 Refresh 인텐트가 방출된다`() {
         setHomeScreen(HomeState())
 
         composeRule.onNodeWithText(string(R.string.home_action_refresh)).performClick()
 
-        assertEquals(listOf(HomeIntent.Refresh), intents)
+        assertEquals(listOf(HomeIntent.Refresh), emittedIntents)
     }
 
     @Test
     fun `계좌 항목을 누르면 해당 accountId로 AccountClicked 인텐트가 방출된다`() {
-        setHomeScreen(HomeState(accounts = listOf(account("acc-1", "월급통장"))))
+        setHomeScreen(HomeState(accounts = listOf(account(id = "acc-1", nickname = "월급통장"))))
 
         // Card의 clickable이 자식 텍스트를 머지하므로, 머지 노드 자신의 텍스트로 클릭 대상을 특정한다.
         composeRule.onNode(hasClickAction() and hasText("월급통장")).performClick()
 
-        assertEquals(listOf(HomeIntent.AccountClicked("acc-1")), intents)
+        assertEquals(listOf(HomeIntent.AccountClicked("acc-1")), emittedIntents)
     }
-
-    // ----- 픽스처 -----
 
     private fun account(id: String, nickname: String) = AccountUi(
         id = id,
@@ -109,7 +105,6 @@ class HomeScreenTest {
     )
 
     private companion object {
-        /** Material3 무한(indeterminate) 진행 인디케이터의 시맨틱과 매칭. */
         val indeterminateProgress = SemanticsMatcher.expectValue(
             SemanticsProperties.ProgressBarRangeInfo,
             ProgressBarRangeInfo.Indeterminate,

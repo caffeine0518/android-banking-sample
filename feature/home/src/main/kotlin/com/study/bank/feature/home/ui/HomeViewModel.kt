@@ -86,9 +86,8 @@ class HomeViewModel @Inject constructor(
 
     private fun startRefresh() {
         viewModelScope.launch {
-            val error = cancellableCatching { accountRepository.refresh() }
-                .exceptionOrNull()
-                ?.also { Log.e(TAG, "refresh failed", it) }
+            val error = cancellableCatching { accountRepository.refresh() }.exceptionOrNull()
+            if (error != null) Log.e(TAG, "refresh failed", error)
             store.sendIntent(HomeInternalAction.RefreshFinished(error))
         }
     }
