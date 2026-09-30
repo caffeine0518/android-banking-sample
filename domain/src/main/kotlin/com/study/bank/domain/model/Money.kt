@@ -9,6 +9,8 @@ class Money private constructor(
     val currency: Currency,
 ) : Comparable<Money> {
 
+    val isPositive: Boolean get() = amount.signum() > 0
+
     operator fun plus(other: Money): Money {
         requireSameCurrency(other)
         return of(amount.add(other.amount), currency)
@@ -29,8 +31,6 @@ class Money private constructor(
         requireSameCurrency(other)
         return amount.compareTo(other.amount)
     }
-
-    fun isPositive(): Boolean = amount.signum() > 0
 
     private fun requireSameCurrency(other: Money) {
         require(currency == other.currency) {

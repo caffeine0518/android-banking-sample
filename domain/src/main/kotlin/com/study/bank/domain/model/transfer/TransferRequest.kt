@@ -16,7 +16,7 @@ data class TransferRequest(
     val idempotencyKey: String,
 ) {
     init {
-        require(amount.isPositive()) { "Transfer amount must be positive, got $amount" }
+        require(amount.isPositive) { "Transfer amount must be positive, got $amount" }
         require(idempotencyKey.isNotBlank()) { "Idempotency key cannot be blank" }
         require(senderName.isNotBlank()) { "Sender name cannot be blank" }
         require(recipientName.isNotBlank()) { "Recipient name cannot be blank" }

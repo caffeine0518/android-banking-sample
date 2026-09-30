@@ -164,17 +164,17 @@ class MoneyTest {
 
         @Test
         fun `isPositive is true for positive amount`() {
-            assertTrue(Money.of(1, Currency.KRW).isPositive())
+            assertTrue(Money.of(1, Currency.KRW).isPositive)
         }
 
         @Test
         fun `isPositive is false for zero amount`() {
-            assertEquals(false, Money.zero(Currency.KRW).isPositive())
+            assertEquals(false, Money.zero(Currency.KRW).isPositive)
         }
 
         @Test
         fun `isPositive is false for negative amount`() {
-            assertEquals(false, Money.of(BigDecimal("-1"), Currency.KRW).isPositive())
+            assertEquals(false, Money.of(BigDecimal("-1"), Currency.KRW).isPositive)
         }
     }
 

@@ -7,12 +7,10 @@ import com.study.bank.domain.repository.AccountRepository
 import com.study.bank.domain.repository.FxRateRepository
 import java.math.RoundingMode
 import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
-@Singleton
-class TotalAssetsUseCase @Inject constructor(
+class ObserveTotalAssetsUseCase @Inject constructor(
     private val accountRepository: AccountRepository,
     private val fxRateRepository: FxRateRepository,
 ) {

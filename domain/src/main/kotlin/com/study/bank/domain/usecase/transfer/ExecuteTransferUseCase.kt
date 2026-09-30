@@ -4,9 +4,7 @@ import com.study.bank.domain.model.transfer.TransferOutcome
 import com.study.bank.domain.model.transfer.TransferRequest
 import com.study.bank.domain.repository.TransferRepository
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
 class ExecuteTransferUseCase @Inject constructor(
     private val transferRepository: TransferRepository,
 ) {

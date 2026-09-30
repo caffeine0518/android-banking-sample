@@ -7,9 +7,7 @@ import com.study.bank.domain.model.transfer.RecipientLookup
 import com.study.bank.domain.model.transfer.RecipientValidation
 import com.study.bank.domain.repository.RecipientRepository
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
 class ValidateRecipientUseCase @Inject constructor(
     private val recipientRepository: RecipientRepository,
 ) {

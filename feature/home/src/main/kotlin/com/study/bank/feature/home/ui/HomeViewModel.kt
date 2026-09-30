@@ -9,7 +9,7 @@ import com.study.bank.domain.coroutine.DispatcherProvider
 import com.study.bank.domain.coroutine.cancellableCatching
 import com.study.bank.domain.model.Currency
 import com.study.bank.domain.repository.AccountRepository
-import com.study.bank.domain.usecase.account.TotalAssetsUseCase
+import com.study.bank.domain.usecase.account.ObserveTotalAssetsUseCase
 import com.study.bank.feature.home.contract.HomeAction
 import com.study.bank.feature.home.contract.HomeEffect
 import com.study.bank.feature.home.contract.HomeIntent
@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val accountRepository: AccountRepository,
-    private val totalAssetsUseCase: TotalAssetsUseCase,
+    private val observeTotalAssets: ObserveTotalAssetsUseCase,
     private val accountUiMapper: AccountUiMapper,
     private val moneyUiMapper: MoneyUiMapper,
     private val localeTargetCurrency: LocaleTargetCurrency,
@@ -105,7 +105,7 @@ class HomeViewModel @Inject constructor(
 
     private fun collectTotalAssets(target: Currency) {
         viewModelScope.launch {
-            totalAssetsUseCase(target)
+            observeTotalAssets(target)
                 .catch { error -> Log.e(TAG, "Failed to observe total assets", error) }
                 .collect { totals ->
                     store.sendIntent(HomeInternalAction.TotalAssetsUpdated(totals))

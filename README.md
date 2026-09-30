@@ -194,7 +194,7 @@ data class AssetTotals(
 )
 ```
 
-`TotalAssetsUseCase`는 계좌 Flow와 환율 Flow를 `combine`해, 환율 맵에 통화가 있는 계좌만 합산하고 나머지는 `unconverted`로 분리해 방출합니다. 환율 시트가 갱신되거나 계좌가 바뀔 때마다 새 `AssetTotals`가 흐릅니다. 홈 화면은 이를 "총자산 + 환산 불가 N건"으로 그대로 노출합니다.
+`ObserveTotalAssetsUseCase`는 계좌 Flow와 환율 Flow를 `combine`해, 환율 맵에 통화가 있는 계좌만 합산하고 나머지는 `unconverted`로 분리해 방출합니다. 환율 시트가 갱신되거나 계좌가 바뀔 때마다 새 `AssetTotals`가 흐릅니다. 홈 화면은 이를 "총자산 + 환산 불가 N건"으로 그대로 노출합니다.
 
 <p align="center">
   <img src="docs/assets/home-assets.png" width="280" alt="홈 화면 — 총자산 환산값 아래 환산 불가(TWD·VND) 통화를 분리 노출" />

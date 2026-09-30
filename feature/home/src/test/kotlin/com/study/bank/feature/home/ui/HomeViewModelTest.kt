@@ -12,7 +12,7 @@ import com.study.bank.domain.model.account.AccountType
 import com.study.bank.domain.coroutine.DispatcherProvider
 import com.study.bank.domain.repository.AccountRepository
 import com.study.bank.domain.repository.FxRateRepository
-import com.study.bank.domain.usecase.account.TotalAssetsUseCase
+import com.study.bank.domain.usecase.account.ObserveTotalAssetsUseCase
 import com.study.bank.feature.home.contract.HomeEffect
 import com.study.bank.feature.home.contract.HomeIntent
 import com.study.bank.feature.home.testutil.MainDispatcherRule
@@ -139,7 +139,7 @@ class HomeViewModelTest {
         fx: FakeFxRateRepository = fakeFx(Currency.KRW to BigDecimal.ONE),
     ) = HomeViewModel(
         accountRepository = repo,
-        totalAssetsUseCase = TotalAssetsUseCase(repo, fx),
+        observeTotalAssets = ObserveTotalAssetsUseCase(repo, fx),
         accountUiMapper = accountUiMapper,
         moneyUiMapper = moneyUiMapper,
         localeTargetCurrency = LocaleTargetCurrency(),

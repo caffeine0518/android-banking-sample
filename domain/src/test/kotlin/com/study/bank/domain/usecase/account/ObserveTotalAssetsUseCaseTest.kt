@@ -18,18 +18,15 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 
-class TotalAssetsUseCaseTest {
+class ObserveTotalAssetsUseCaseTest {
 
-    // ----- target 통화가 동적으로 결과를 결정 -----
-
-    // UseCase의 target 파라미터가 실제로 결과를 바꾸는지 (KRW 하드코드 회귀 방지).
     @Test
     fun `같은 계좌 집합도 target에 따라 다른 통화의 converted 합계를 반환`() = runTest {
         val accounts = listOf(
             account("acc-1", 1_000_000, Currency.KRW),
-            account("acc-2", "1000.00", Currency.USD),
+            account(id = "acc-2", amount = "1000.00", currency = Currency.USD),
         )
-        val useCase = TotalAssetsUseCase(
+        val useCase = ObserveTotalAssetsUseCase(
             FakeAccountRepository(accounts),
             FakeFxRateRepository(ratesByTarget = mapOf(
                 Currency.KRW to mapOf(
@@ -61,10 +58,10 @@ class TotalAssetsUseCaseTest {
     @Test
     fun `target과 같은 통화 계좌는 환산 없이 그대로 더해진다`() = runTest {
         val accounts = listOf(
-            account("acc-1", "100.00", Currency.USD),
-            account("acc-2", "250.50", Currency.USD),
+            account(id = "acc-1", amount = "100.00", currency = Currency.USD),
+            account(id = "acc-2", amount = "250.50", currency = Currency.USD),
         )
-        val useCase = TotalAssetsUseCase(
+        val useCase = ObserveTotalAssetsUseCase(
             FakeAccountRepository(accounts),
             FakeFxRateRepository(ratesByTarget = mapOf(
                 Currency.USD to mapOf(Currency.USD to BigDecimal.ONE),
@@ -79,7 +76,7 @@ class TotalAssetsUseCaseTest {
 
     @Test
     fun `계좌가 없으면 어떤 target이든 그 통화의 0과 빈 unconverted`() = runTest {
-        val useCase = TotalAssetsUseCase(
+        val useCase = ObserveTotalAssetsUseCase(
             FakeAccountRepository(emptyList()),
             FakeFxRateRepository(ratesByTarget = mapOf(
                 Currency.KRW to mapOf(Currency.KRW to BigDecimal.ONE),
@@ -88,25 +85,22 @@ class TotalAssetsUseCaseTest {
             )),
         )
 
-        listOf(Currency.KRW, Currency.USD, Currency.EUR).forEach { target ->
+        for (target in listOf(Currency.KRW, Currency.USD, Currency.EUR)) {
             val totals = useCase(target).first()
             assertEquals(Money.zero(target), totals.converted)
             assertTrue(totals.unconverted.isEmpty())
         }
     }
 
-    // ----- 환산 불가 자산은 unconverted로 분리 -----
-
-    // 환율 누락이 silent drop이 아니라 unconverted 리스트로 노출되는지 (이전엔 합산에서만 빠짐).
     @Test
     fun `환율 없는 통화 계좌는 unconverted에 원본 통화 그대로 담긴다`() = runTest {
         val accounts = listOf(
-            account("acc-1", "100.00", Currency.USD),
-            account("acc-2", "200.00", Currency.EUR), // EUR rate missing
-            account("acc-3", "50.00", Currency.USD),
+            account(id = "acc-1", amount = "100.00", currency = Currency.USD),
+            account(id = "acc-2", amount = "200.00", currency = Currency.EUR), // EUR rate missing
+            account(id = "acc-3", amount = "50.00", currency = Currency.USD),
             account("acc-4", 30000, Currency.JPY), // JPY rate missing
         )
-        val useCase = TotalAssetsUseCase(
+        val useCase = ObserveTotalAssetsUseCase(
             FakeAccountRepository(accounts),
             FakeFxRateRepository(ratesByTarget = mapOf(
                 Currency.USD to mapOf(Currency.USD to BigDecimal.ONE),
@@ -117,7 +111,6 @@ class TotalAssetsUseCaseTest {
 
         // converted: USD 계좌만 합산 (100 + 50 = 150)
         assertEquals(Money.of(BigDecimal("150.00"), Currency.USD), totals.converted)
-        // unconverted: EUR/JPY 계좌가 원본 통화 그대로 두 항목
         assertEquals(2, totals.unconverted.size)
         assertTrue(totals.unconverted.any { it.currency == Currency.EUR })
         assertTrue(totals.unconverted.any { it.currency == Currency.JPY })
