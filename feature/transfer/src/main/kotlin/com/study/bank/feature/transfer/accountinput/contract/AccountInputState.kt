@@ -15,6 +15,5 @@ data class AccountInputState(
     val isResolving: Boolean = false,
     val error: AccountInputError? = null,
 ) {
-    /** "확인" 노출/활성 기준: 계좌번호가 있고 조회 중이 아닐 때. */
     val isConfirmEnabled: Boolean get() = accountNumber.isNotBlank() && !isResolving
 }

@@ -72,8 +72,9 @@ internal fun AccountInputScreen(
             )
         },
         bottomBar = {
-            // 입력이 시작되면 확인 버튼 노출(스크린샷 1·3과 동일). 키보드 위로 띄운다.
-            if (state.accountNumber.isNotBlank()) {
+            // 스크린샷 1·3과 같이 키보드 위에 표시한다.
+            val isInputStarted = state.accountNumber.isNotBlank()
+            if (isInputStarted) {
                 ConfirmBar(
                     enabled = state.isConfirmEnabled,
                     loading = state.isResolving,
@@ -121,7 +122,7 @@ internal fun AccountInputScreen(
 
             state.error?.let { error ->
                 Text(
-                    text = stringResource(error.messageRes()),
+                    text = stringResource(error.messageRes),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
@@ -237,7 +238,7 @@ private fun ConfirmBar(enabled: Boolean, loading: Boolean, onConfirm: () -> Unit
     }
 }
 
-private fun AccountInputError.messageRes(): Int = when (this) {
+private val AccountInputError.messageRes: Int get() = when (this) {
     AccountInputError.NOT_FOUND -> R.string.transfer_account_input_error_not_found
     AccountInputError.INACTIVE -> R.string.transfer_account_input_error_inactive
     AccountInputError.SELF_TRANSFER -> R.string.transfer_account_input_error_self

@@ -96,10 +96,9 @@ internal fun ResultScreen(
                     lastLine = stringResource(R.string.transfer_result_success_sent),
                     reason = null,
                     testTag = BankTestTags.RESULT_SUCCESS,
-                    chip = {
-                        MemoChip(onClick = { onIntent(ResultIntent.LeaveMemoClicked) })
-                    },
-                )
+                ) {
+                    MemoChip(onClick = { onIntent(ResultIntent.LeaveMemoClicked) })
+                }
                 is ResultPhase.Failure -> OutcomeContent(
                     icon = Icons.Filled.Warning,
                     iconTint = MaterialTheme.colorScheme.error,

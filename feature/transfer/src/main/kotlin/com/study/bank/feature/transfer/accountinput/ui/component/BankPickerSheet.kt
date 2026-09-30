@@ -45,14 +45,14 @@ internal fun BankPickerSheet(
             modifier = Modifier.padding(vertical = 12.dp),
         )
         // 8개뿐이라 LazyVerticalGrid 대신 3개씩 끊어 단순 Row로 깐다(시트 높이 측정 이슈 회피).
-        banks.chunked(COLUMNS).forEach { rowBanks ->
+        for (rowBanks in banks.chunked(COLUMNS)) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 6.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                rowBanks.forEach { bank ->
+                for (bank in rowBanks) {
                     BankCell(
                         bank = bank,
                         isSelected = bank == selected,

@@ -13,7 +13,6 @@ sealed interface ConfirmIntent : ConfirmAction {
     /** "출금 계좌" 행(출금계좌 변경). 변경 화면 미구현이라 placeholder. */
     data object SourceAccountClicked : ConfirmIntent
 
-    /** "보내기" 버튼 → 송금 확정. */
     data object SendClicked : ConfirmIntent
 }
 

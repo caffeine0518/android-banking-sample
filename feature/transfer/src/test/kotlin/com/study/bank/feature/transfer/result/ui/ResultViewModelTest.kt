@@ -143,7 +143,7 @@ class ResultViewModelTest {
 
         assertEquals(ResultPhase.Success, vm.state.value.phase)
         assertEquals("김토스", vm.state.value.header?.recipientName)
-        // 라우트 신원이 그대로 송금 요청으로 나간다(회귀: 예전엔 식별자 미해석으로 실행조차 안 됐다).
+        // 라우트의 수취인 신원이 그대로 송금 요청에 포함된다.
         val request = transfer.requests.single()
         assertEquals("110-555-667788", request.toAccountNumber.value)
         assertEquals(BankCode.SHINHAN, request.toBankCode)

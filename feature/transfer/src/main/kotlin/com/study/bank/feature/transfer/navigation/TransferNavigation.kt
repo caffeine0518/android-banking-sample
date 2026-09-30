@@ -25,11 +25,11 @@ data class TransferRecipientArg(
     val bankDisplayName: String get() = BankCode.byCode(bankCode)?.displayName ?: bankCode
 }
 
-/** 송금 1번째 화면: 수취인 선택. [sourceAccountId]=출금계좌. */
+/** 송금 1번째 화면: 수취인 선택. */
 @Serializable
 data class TransferRecipientRoute(val sourceAccountId: String) : NavKey
 
-/** 송금 1-b 화면: 계좌번호 직접 입력(외부 수취계좌). [sourceAccountId]=출금계좌. */
+/** 송금 1-b 화면: 계좌번호 직접 입력(외부 수취계좌). */
 @Serializable
 data class TransferAccountInputRoute(val sourceAccountId: String) : NavKey
 

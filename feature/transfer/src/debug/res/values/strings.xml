@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="transfer_debug_fill_happy_path_account">🐞 해피패스 계좌 채우기</string>
+</resources>

@@ -92,6 +92,7 @@ private fun RowScope.KeypadCell(
             .height(60.dp)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
-        content = { content() },
-    )
+    ) {
+        content()
+    }
 }

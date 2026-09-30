@@ -5,8 +5,10 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.study.bank.domain.model.BankCode
+import com.study.bank.feature.transfer.R
 
 /**
  * 디버그 빌드 전용 해피패스 프리셋.
@@ -24,7 +26,7 @@ internal fun AccountInputDebugBar(
 ) {
     AssistChip(
         onClick = { onApplyPreset(HAPPY_PATH_ACCOUNT_NUMBER, HAPPY_PATH_BANK) },
-        label = { Text("🐞 해피패스 계좌 채우기") },
+        label = { Text(stringResource(R.string.transfer_debug_fill_happy_path_account)) },
         modifier = modifier.padding(horizontal = 20.dp, vertical = 8.dp),
     )
 }

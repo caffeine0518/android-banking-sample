@@ -125,7 +125,7 @@ class AmountViewModelTest {
 
         vm.onIntent(AmountIntent.FillBalanceClicked)
 
-        // $3,245.80 → 324,580센트. (회귀: 예전엔 toLong()이 3245센트로 절삭해 80센트가 사라졌다)
+        // $3,245.80 → 324,580센트.
         assertEquals(324_580L, vm.state.value.amount)
     }
 

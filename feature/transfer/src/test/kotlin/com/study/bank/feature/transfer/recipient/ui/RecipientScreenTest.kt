@@ -38,7 +38,7 @@ class RecipientScreenTest {
 
     @Test
     fun `제목과 계좌번호 입력 버튼, 내 계좌가 표시된다`() {
-        setScreen(RecipientState(myAccounts = listOf(account("acc-2", "세이프박스"))))
+        setScreen(RecipientState(myAccounts = listOf(account(id = "acc-2", nickname = "세이프박스"))))
 
         composeRule.onNodeWithText(string(R.string.transfer_recipient_title)).assertIsDisplayed()
         composeRule.onNodeWithText(string(R.string.transfer_account_number_hint)).assertIsDisplayed()
@@ -56,7 +56,7 @@ class RecipientScreenTest {
 
     @Test
     fun `내 계좌를 누르면 해당 accountId로 MyAccountClicked 인텐트가 방출된다`() {
-        setScreen(RecipientState(myAccounts = listOf(account("acc-2", "세이프박스"))))
+        setScreen(RecipientState(myAccounts = listOf(account(id = "acc-2", nickname = "세이프박스"))))
 
         // Row의 clickable은 자식 텍스트를 머지하지 않으므로 텍스트 노드를 직접 탭 → clickable 조상이 처리.
         composeRule.onNodeWithText("세이프박스").performClick()
