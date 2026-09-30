@@ -21,9 +21,10 @@ fun AccountDetailRoute(
     route: AccountRoute,
     onSendClick: (accountId: String) -> Unit,
     onBack: () -> Unit,
-    viewModel: AccountDetailViewModel = hiltViewModel<AccountDetailViewModel, AccountDetailViewModel.Factory>(
-        creationCallback = { factory -> factory.create(route) },
-    ),
+    viewModel: AccountDetailViewModel =
+        hiltViewModel<AccountDetailViewModel, AccountDetailViewModel.Factory> { factory ->
+            factory.create(route)
+        },
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val lifecycle = LocalLifecycleOwner.current.lifecycle

@@ -93,10 +93,9 @@ internal fun AccountDetailScreen(
             )
         },
         bottomBar = {
-            SendButton(
-                enabled = state.account != null,
-                onClick = { onIntent(AccountDetailIntent.SendClicked) },
-            )
+            SendButton(enabled = state.account != null) {
+                onIntent(AccountDetailIntent.SendClicked)
+            }
         },
     ) { innerPadding ->
         Column(
@@ -104,7 +103,6 @@ internal fun AccountDetailScreen(
                 .fillMaxSize()
                 .padding(innerPadding),
         ) {
-            // 계좌 (상단)
             state.account?.let { AccountDetailHeader(it) }
             if (state.isLoading || transactionItems.loadState.refresh is LoadState.Loading) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())

@@ -131,8 +131,6 @@ class AccountDetailViewModelTest {
         }
     }
 
-    // ----- 픽스처 -----
-
     private fun buildViewModel(
         accountRepo: FakeAccountRepository,
         txRepo: FakeTransactionRepository,
@@ -194,7 +192,7 @@ class AccountDetailViewModelTest {
         var lastStreamAccountId: AccountId? = null
             private set
 
-        // 이 화면은 더 이상 단건 목록 경로를 쓰지 않는다(페이징으로 일원화). 계약 충족용 stub.
+        // 이 화면은 거래내역을 transactionStream 으로만 조회한다. 인터페이스 구현용 stub.
         override fun observeTransactions(accountId: AccountId): Flow<List<Transaction>> = emptyFlow()
         override suspend fun refresh(accountId: AccountId) {
             refreshCount++

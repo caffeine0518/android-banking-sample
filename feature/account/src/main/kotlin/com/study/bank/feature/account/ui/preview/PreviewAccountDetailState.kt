@@ -26,7 +26,6 @@ internal val PreviewAccountDetailState = AccountDetailState(
     ),
 )
 
-/** 프리뷰용 거래내역 표본 3건. */
 internal val previewTransactionItems = listOf(
     TransactionUi(
         id = "tx-1",
@@ -56,7 +55,6 @@ internal val previewTransactionItems = listOf(
 // 초기 프레임(빈/로딩)에 머문다 — 모든 프리뷰가 똑같이 보이는 원인. MutableStateFlow는 완료되지
 // 않는 hot flow라 즉시 present 되어 정적 프리뷰에서도 상태별로 렌더된다.
 
-/** 거래내역 페이징 프리뷰. */
 internal val previewTransactions: Flow<PagingData<TransactionUi>> =
     MutableStateFlow(PagingData.from(previewTransactionItems))
 

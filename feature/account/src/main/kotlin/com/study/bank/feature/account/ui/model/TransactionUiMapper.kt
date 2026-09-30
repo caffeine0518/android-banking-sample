@@ -18,7 +18,7 @@ class TransactionUiMapper @Inject constructor(
         type = mapType(transaction.type),
         counterpartyName = transaction.counterparty?.name,
         amount = moneyUiMapper.map(transaction.amount),
-        occurredAtLabel = DATE_FORMAT.format(transaction.occurredAt),
+        occurredAtLabel = KST_DATE_FORMAT.format(transaction.occurredAt),
     )
 
     private fun mapType(type: TransactionType): TransactionTypeUi = when (type) {
@@ -29,8 +29,7 @@ class TransactionUiMapper @Inject constructor(
     }
 
     private companion object {
-        // 거래 발생 시각(Instant)을 KST 기준 날짜로 표시.
-        val DATE_FORMAT: DateTimeFormatter =
+        val KST_DATE_FORMAT: DateTimeFormatter =
             DateTimeFormatter.ofPattern("yyyy.MM.dd").withZone(ZoneId.of("Asia/Seoul"))
     }
 }

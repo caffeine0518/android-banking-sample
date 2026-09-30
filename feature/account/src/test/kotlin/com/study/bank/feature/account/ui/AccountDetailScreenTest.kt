@@ -39,14 +39,14 @@ class AccountDetailScreenTest {
 
     private val intents = mutableListOf<AccountDetailIntent>()
 
-    private fun string(id: Int) = RuntimeEnvironment.getApplication().getString(id)
-
     // 적재 완료(NotLoading) 상태로 PagingData를 만든다 — 안 주면 refresh가 Loading으로 남아 '빈 안내' 조건이 안 켜진다.
     private val idleLoadStates = LoadStates(
         refresh = LoadState.NotLoading(endOfPaginationReached = true),
         prepend = LoadState.NotLoading(endOfPaginationReached = true),
         append = LoadState.NotLoading(endOfPaginationReached = true),
     )
+
+    private fun string(id: Int) = RuntimeEnvironment.getApplication().getString(id)
 
     private fun txFlow(items: List<TransactionUi>): Flow<PagingData<TransactionUi>> =
         flowOf(PagingData.from(items, sourceLoadStates = idleLoadStates))
@@ -66,13 +66,11 @@ class AccountDetailScreenTest {
         }
     }
 
-    // ----- 렌더링 -----
-
     @Test
     fun `계좌 닉네임과 거래 상대가 화면에 표시된다`() {
         setScreen(
             state = AccountDetailState(account = account()),
-            transactions = txFlow(listOf(transaction("tx-1", "세이프박스"))),
+            transactions = txFlow(listOf(transaction(id = "tx-1", counterparty = "세이프박스"))),
         )
 
         composeRule.onNodeWithText("월급통장").assertIsDisplayed()
@@ -88,8 +86,6 @@ class AccountDetailScreenTest {
 
         composeRule.onNodeWithText(string(R.string.account_transactions_empty)).assertIsDisplayed()
     }
-
-    // ----- 동작 → 인텐트 -----
 
     @Test
     fun `보내기 버튼을 누르면 SendClicked 인텐트가 방출된다`() {
@@ -118,8 +114,6 @@ class AccountDetailScreenTest {
 
         assertEquals(listOf(AccountDetailIntent.BackClicked), intents)
     }
-
-    // ----- 픽스처 -----
 
     private fun account() = AccountUi(
         id = "acc-1",
