@@ -20,6 +20,7 @@ import kotlinx.coroutines.test.runTest
 
 class ObserveTotalAssetsUseCaseTest {
 
+    // UseCase의 target 파라미터가 실제로 결과를 바꾸는지 (KRW 하드코드 회귀 방지).
     @Test
     fun `같은 계좌 집합도 target에 따라 다른 통화의 converted 합계를 반환`() = runTest {
         val accounts = listOf(
@@ -92,6 +93,7 @@ class ObserveTotalAssetsUseCaseTest {
         }
     }
 
+    // 환율 누락이 silent drop이 아니라 unconverted 리스트로 노출되는지 (이전엔 합산에서만 빠짐).
     @Test
     fun `환율 없는 통화 계좌는 unconverted에 원본 통화 그대로 담긴다`() = runTest {
         val accounts = listOf(
