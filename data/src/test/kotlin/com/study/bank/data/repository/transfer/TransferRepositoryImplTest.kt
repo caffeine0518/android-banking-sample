@@ -39,7 +39,7 @@ class TransferRepositoryImplTest {
         val api = FakeKftcApiService { successResponse(after = "2797320", bankTranId = "M202300001U000007") }
         val accounts = FakeAccountRepository()
         val transactions = FakeTransactionRepository()
-        val repo = TransferRepositoryImpl(api, accounts, transactions, fixedClock)
+        val repo = TransferRepositoryImpl(api, accounts, transactions, fixedClock, BankTranIdIssuer())
 
         val outcome = repo.execute(request())
 
@@ -60,7 +60,7 @@ class TransferRepositoryImplTest {
         val api = FakeKftcApiService { failureResponse(bankRspCode = "311") }
         val accounts = FakeAccountRepository()
         val transactions = FakeTransactionRepository()
-        val repo = TransferRepositoryImpl(api, accounts, transactions, fixedClock)
+        val repo = TransferRepositoryImpl(api, accounts, transactions, fixedClock, BankTranIdIssuer())
 
         val outcome = repo.execute(request())
 
@@ -74,7 +74,7 @@ class TransferRepositoryImplTest {
         val api = FakeKftcApiService { failureResponse(bankRspCode = "320") }
         val accounts = FakeAccountRepository()
         val transactions = FakeTransactionRepository()
-        val repo = TransferRepositoryImpl(api, accounts, transactions, fixedClock)
+        val repo = TransferRepositoryImpl(api, accounts, transactions, fixedClock, BankTranIdIssuer())
 
         val outcome = repo.execute(request())
 
@@ -86,7 +86,7 @@ class TransferRepositoryImplTest {
     @Test
     fun `알 수 없는 업무 거절은 Unknown으로 매핑된다`() = runTest {
         val api = FakeKftcApiService { failureResponse(bankRspCode = "999") }
-        val repo = TransferRepositoryImpl(api, FakeAccountRepository(), FakeTransactionRepository(), fixedClock)
+        val repo = TransferRepositoryImpl(api, FakeAccountRepository(), FakeTransactionRepository(), fixedClock, BankTranIdIssuer())
 
         assertTrue(repo.execute(request()) is TransferOutcome.Failure.Unknown)
     }
@@ -94,7 +94,7 @@ class TransferRepositoryImplTest {
     @Test
     fun `네트워크 예외는 Network로 매핑된다`() = runTest {
         val api = FakeKftcApiService { throw IOException("no network") }
-        val repo = TransferRepositoryImpl(api, FakeAccountRepository(), FakeTransactionRepository(), fixedClock)
+        val repo = TransferRepositoryImpl(api, FakeAccountRepository(), FakeTransactionRepository(), fixedClock, BankTranIdIssuer())
 
         assertTrue(repo.execute(request()) is TransferOutcome.Failure.Network)
     }
@@ -102,7 +102,7 @@ class TransferRepositoryImplTest {
     @Test
     fun `그 외 예외는 Unknown으로 매핑된다`() = runTest {
         val api = FakeKftcApiService { throw RuntimeException("boom") }
-        val repo = TransferRepositoryImpl(api, FakeAccountRepository(), FakeTransactionRepository(), fixedClock)
+        val repo = TransferRepositoryImpl(api, FakeAccountRepository(), FakeTransactionRepository(), fixedClock, BankTranIdIssuer())
 
         assertTrue(repo.execute(request()) is TransferOutcome.Failure.Unknown)
     }
@@ -110,7 +110,7 @@ class TransferRepositoryImplTest {
     @Test
     fun `요청은 출금계좌·수취계좌·금액을 KFTC 필드로 전송한다`() = runTest {
         val api = FakeKftcApiService { successResponse() }
-        val repo = TransferRepositoryImpl(api, FakeAccountRepository(), FakeTransactionRepository(), fixedClock)
+        val repo = TransferRepositoryImpl(api, FakeAccountRepository(), FakeTransactionRepository(), fixedClock, BankTranIdIssuer())
 
         repo.execute(request())
 
@@ -127,7 +127,7 @@ class TransferRepositoryImplTest {
     @Test
     fun `요청의 거래일시는 주입된 Clock 의 현재 시각을 KST 로 적는다`() = runTest {
         val api = FakeKftcApiService { successResponse() }
-        val repo = TransferRepositoryImpl(api, FakeAccountRepository(), FakeTransactionRepository(), fixedClock)
+        val repo = TransferRepositoryImpl(api, FakeAccountRepository(), FakeTransactionRepository(), fixedClock, BankTranIdIssuer())
 
         repo.execute(request())
 

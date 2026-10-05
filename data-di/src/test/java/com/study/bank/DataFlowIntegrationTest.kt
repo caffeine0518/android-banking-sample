@@ -25,6 +25,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -286,16 +287,16 @@ class DataFlowIntegrationTest {
     }
 
     @Test
-    fun `bank_tran_id 와 대체 번호가 모두 앞 송금과 충돌한 송금도 체결된다`() = runBlocking {
+    fun `bank_tran_id 가 앞 송금과 충돌한 같은 금액의 송금도 별도 거래로 체결된다`() = runBlocking {
         accountRepository.refresh()
-        transferToSafebox(amount = 50_000L, idempotencyKey = COLLIDING_KEY_A).requireSuccess()
-        transferToSafebox(amount = 20_000L, idempotencyKey = COLLIDING_KEY_A_FALLBACK).requireSuccess()
+        val first = transferToSafebox(amount = 50_000L, idempotencyKey = COLLIDING_KEY_A).requireSuccess()
 
-        transferToSafebox(amount = 30_000L, idempotencyKey = COLLIDING_KEY_B).requireSuccess()
+        val second = transferToSafebox(amount = 50_000L, idempotencyKey = COLLIDING_KEY_B).requireSuccess()
 
+        assertNotEquals(first.result.transactionId, second.result.transactionId)
         val salary = requireNotNull(accountRepository.observeAccount(SALARY).first())
-        val seedMinusAllTransfers = BigDecimal(2_847_320 - 50_000 - 20_000 - 30_000)
-        assertEquals(0, salary.balance.amount.compareTo(seedMinusAllTransfers))
+        val seedMinusBothTransfers = BigDecimal(2_847_320 - 50_000 - 50_000)
+        assertEquals(0, salary.balance.amount.compareTo(seedMinusBothTransfers))
     }
 
     private suspend fun transferToSafebox(amount: Long, idempotencyKey: String): TransferOutcome =
@@ -321,13 +322,9 @@ class DataFlowIntegrationTest {
         val FX_USD = AccountId(KftcSeedAccountIds.FX_USD)
         val SAFEBOX_NUMBER = AccountNumber("1000-55-1114443")
 
-        // String.hashCode 가 같은 두 키 → 같은 bank_tran_id 로 변환된다.
+        // String.hashCode 가 같은 두 키. 해시로 bank_tran_id 를 만들면 같은 번호가 된다.
         const val COLLIDING_KEY_A = "itest-collision-Aa"
         const val COLLIDING_KEY_B = "itest-collision-BB"
-
-        // COLLIDING_KEY_B 의 대체 번호(키 + "#1")와 같은 bank_tran_id 로 변환되는 키. 해시가 같은 두 키는 같은
-        // 접미사를 붙여도 해시가 같다 → 이 키로 먼저 송금하면 B 의 대체 번호도 이미 체결된 번호가 된다.
-        const val COLLIDING_KEY_A_FALLBACK = "$COLLIDING_KEY_A#1"
 
         // 서버 페이지 크기 단일 소유처. 레거시 refresh는 첫 페이지 한 장을 적재한다.
         const val PAGE_SIZE = KFTC_TRANSACTION_PAGE_SIZE
