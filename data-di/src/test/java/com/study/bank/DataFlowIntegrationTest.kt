@@ -260,11 +260,56 @@ class DataFlowIntegrationTest {
         assertEquals(1, transactionRepository.observeTransactions(SAFEBOX).first().size)
     }
 
+    @Test
+    fun `bank_tran_id 가 앞 송금과 충돌한 송금도 체결된다`() = runBlocking {
+        accountRepository.refresh()
+        transferToSafebox(amount = 50_000L, idempotencyKey = COLLIDING_KEY_A).requireSuccess()
+
+        transferToSafebox(amount = 30_000L, idempotencyKey = COLLIDING_KEY_B).requireSuccess()
+
+        val salary = requireNotNull(accountRepository.observeAccount(SALARY).first())
+        assertEquals(0, salary.balance.amount.compareTo(BigDecimal("2767320"))) // 2,847,320 - 50,000 - 30,000
+    }
+
+    @Test
+    fun `bank_tran_id 가 충돌한 송금을 재시도하면 같은 거래로 응답하고 다시 차감하지 않는다`() = runBlocking {
+        accountRepository.refresh()
+        transferToSafebox(amount = 50_000L, idempotencyKey = COLLIDING_KEY_A).requireSuccess()
+        val collided = transferToSafebox(amount = 30_000L, idempotencyKey = COLLIDING_KEY_B).requireSuccess()
+
+        val retried = transferToSafebox(amount = 30_000L, idempotencyKey = COLLIDING_KEY_B).requireSuccess()
+
+        assertEquals(collided.result.transactionId, retried.result.transactionId)
+        val salary = requireNotNull(accountRepository.observeAccount(SALARY).first())
+        assertEquals(0, salary.balance.amount.compareTo(BigDecimal("2767320")))
+    }
+
+    private suspend fun transferToSafebox(amount: Long, idempotencyKey: String): TransferOutcome =
+        ExecuteTransferUseCase(transferRepository)(
+            TransferRequest(
+                fromAccountId = SALARY,
+                senderName = "홍길동",
+                toAccountNumber = SAFEBOX_NUMBER,
+                toBankCode = BankCode.TOSS,
+                recipientName = "홍길동",
+                amount = Money.of(amount, Currency.KRW),
+                memo = null,
+                idempotencyKey = idempotencyKey,
+            ),
+        )
+
+    private fun TransferOutcome.requireSuccess(): TransferOutcome.Success =
+        this as? TransferOutcome.Success ?: throw AssertionError("송금 성공해야 함: $this")
+
     private companion object {
         val SALARY = AccountId(KftcSeedAccountIds.PAYROLL_KRW)
         val SAFEBOX = AccountId(KftcSeedAccountIds.SAFEBOX_KRW)
         val FX_USD = AccountId(KftcSeedAccountIds.FX_USD)
         val SAFEBOX_NUMBER = AccountNumber("1000-55-1114443")
+
+        // String.hashCode 가 같은 두 키 → 같은 bank_tran_id 로 변환된다.
+        const val COLLIDING_KEY_A = "itest-collision-Aa"
+        const val COLLIDING_KEY_B = "itest-collision-BB"
 
         // 서버 페이지 크기 단일 소유처. 레거시 refresh는 첫 페이지 한 장을 적재한다.
         const val PAGE_SIZE = KFTC_TRANSACTION_PAGE_SIZE
