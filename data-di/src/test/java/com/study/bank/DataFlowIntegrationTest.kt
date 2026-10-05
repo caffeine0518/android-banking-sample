@@ -25,6 +25,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -296,6 +297,19 @@ class DataFlowIntegrationTest {
         val salary = requireNotNull(accountRepository.observeAccount(SALARY).first())
         val seedMinusAllTransfers = BigDecimal(2_847_320 - 50_000 - 20_000 - 30_000)
         assertEquals(0, salary.balance.amount.compareTo(seedMinusAllTransfers))
+    }
+
+    @Test
+    fun `bank_tran_id 가 앞 송금과 충돌한 같은 금액의 송금도 별도 거래로 체결된다`() = runBlocking {
+        accountRepository.refresh()
+        val first = transferToSafebox(amount = 50_000L, idempotencyKey = COLLIDING_KEY_A).requireSuccess()
+
+        val second = transferToSafebox(amount = 50_000L, idempotencyKey = COLLIDING_KEY_B).requireSuccess()
+
+        assertNotEquals(first.result.transactionId, second.result.transactionId)
+        val salary = requireNotNull(accountRepository.observeAccount(SALARY).first())
+        val seedMinusBothTransfers = BigDecimal(2_847_320 - 50_000 - 50_000)
+        assertEquals(0, salary.balance.amount.compareTo(seedMinusBothTransfers))
     }
 
     private suspend fun transferToSafebox(amount: Long, idempotencyKey: String): TransferOutcome =
