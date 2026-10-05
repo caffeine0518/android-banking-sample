@@ -53,13 +53,13 @@ class ResultViewModelTest {
     @Test
     fun `송금 성공이면 header가 채워지고 phase는 Success가 된다`() = runTest {
         val accounts = FakeAccountRepository().apply {
-            emit(account(SOURCE_ID, holder = "강남규"), account(RECIPIENT_ID, holder = "안성재"))
+            emit(account(SOURCE_ID, holder = "박송금"), account(RECIPIENT_ID, holder = "이수취"))
         }
         val vm = buildViewModel(accounts, FakeTransferRepository(success()), amount = 1)
 
         val state = vm.state.value
         assertEquals(ResultPhase.Success, state.phase)
-        assertEquals("안성재", state.header?.recipientName)
+        assertEquals("이수취", state.header?.recipientName)
         assertEquals(BigDecimal.ONE, state.header?.amount?.amount)
     }
 
@@ -125,7 +125,7 @@ class ResultViewModelTest {
     @Test
     fun `외부 수취인은 출금계좌 저장소에 없어도 라우트 신원으로 송금된다`() = runTest {
         // 출금계좌만 저장소에 있고, 외부(타행) 수취인은 라우트 신원으로만 전달된다(재조회 없음).
-        val accounts = FakeAccountRepository().apply { emit(account(SOURCE_ID, holder = "강남규")) }
+        val accounts = FakeAccountRepository().apply { emit(account(SOURCE_ID, holder = "박송금")) }
         val transfer = SequencedTransferRepository(success())
         val vm = buildViewModel(
             accounts,
@@ -268,8 +268,8 @@ class ResultViewModelTest {
             sourceAccountId = SOURCE_ID,
             recipient = TransferRecipientArg(
                 bankCode = "088",
-                accountNumber = "110-503-685417",
-                holderName = "안성재",
+                accountNumber = "110-123-456789",
+                holderName = "이수취",
             ),
             amount = amount,
         ),

@@ -44,15 +44,15 @@ class ConfirmViewModelTest {
         val vm = buildViewModel(repo, amount = 2)
 
         // 수취인은 라우트로 확정돼 들어온다(아래 buildViewModel 참고). 출금계좌만 로딩하면 확정 정보가 채워진다.
-        repo.emit(account(SOURCE_ID, holder = "강남규", nickname = "U드림 저축예금", balance = 284_797))
+        repo.emit(account(SOURCE_ID, holder = "박송금", nickname = "U드림 저축예금", balance = 284_797))
 
         val detail = vm.state.value.detail!!
-        assertEquals("안성재", detail.recipientHolderName)
+        assertEquals("이수취", detail.recipientHolderName)
         assertEquals(BigDecimal.valueOf(2), detail.amount.amount)
-        assertEquals("강남규", detail.displayName)
+        assertEquals("박송금", detail.displayName)
         assertEquals("U드림 저축예금", detail.sourceNickname)
         assertEquals("신한은행", detail.recipientBankDisplayName)
-        assertEquals("110-503-685417", detail.recipientNumberMasked)
+        assertEquals("110-123-456789", detail.recipientNumberMasked)
     }
 
     @Test
@@ -87,8 +87,8 @@ class ConfirmViewModelTest {
                     sourceAccountId = SOURCE_ID,
                     recipient = TransferRecipientArg(
                         bankCode = "088",
-                        accountNumber = "110-503-685417",
-                        holderName = "안성재",
+                        accountNumber = "110-123-456789",
+                        holderName = "이수취",
                     ),
                     amount = 2L,
                 ),
@@ -114,8 +114,8 @@ class ConfirmViewModelTest {
                     sourceAccountId = SOURCE_ID,
                     recipient = TransferRecipientArg(
                         bankCode = "088",
-                        accountNumber = "110-503-685417",
-                        holderName = "안성재",
+                        accountNumber = "110-123-456789",
+                        holderName = "이수취",
                     ),
                     amount = 2L,
                 ),
@@ -156,8 +156,8 @@ class ConfirmViewModelTest {
             sourceAccountId = SOURCE_ID,
             recipient = TransferRecipientArg(
                 bankCode = "088",
-                accountNumber = "110-503-685417",
-                holderName = "안성재",
+                accountNumber = "110-123-456789",
+                holderName = "이수취",
             ),
             amount = amount,
         ),

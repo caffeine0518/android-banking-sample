@@ -17,7 +17,7 @@ internal val PreviewAmountState = AmountState(
     recipient = AmountRecipientUi(
         holderName = "김토스",
         bankDisplayName = "신한은행",
-        accountNumber = "110-503-685417",
+        accountNumber = "110-123-456789",
     ),
     amount = 0L,
 )
