@@ -5,7 +5,9 @@ import com.study.bank.data.remote.kftc.api.BANK_RSP_CURRENCY_MISMATCH
 import com.study.bank.data.remote.kftc.api.BANK_RSP_INSUFFICIENT_FUNDS
 import com.study.bank.data.remote.kftc.api.KftcApiService
 import com.study.bank.data.remote.kftc.api.RSP_SUCCESS
+import com.study.bank.data.remote.kftc.api.isBankTranIdConflict
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
+import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferResponse
 import com.study.bank.data.repository.TRAN_DTIME
 import com.study.bank.data.repository.bankTranIdFor
 import com.study.bank.domain.coroutine.cancellableCatching
@@ -39,7 +41,7 @@ class TransferRepositoryImpl @Inject constructor(
 
     override suspend fun execute(request: TransferRequest): TransferOutcome {
         val response = try {
-            api.withdraw(request.toWithdrawRequest())
+            withdraw(request)
         } catch (e: IOException) {
             return TransferOutcome.Failure.Network(e)
         } catch (e: Exception) {
@@ -71,8 +73,21 @@ class TransferRepositoryImpl @Inject constructor(
         )
     }
 
-    private fun TransferRequest.toWithdrawRequest() = WithdrawTransferRequest(
-        bankTranId = bankTranIdFor(idempotencyKey),
+    /**
+     * 409 는 이 번호가 다른 송금에 이미 체결돼 이 송금은 체결되지 않았다는 뜻이다. 키에서 결정적으로 만든
+     * 다음 번호로 다시 보낸다 — 같은 송금의 재시도는 항상 같은 번호를 같은 순서로 시도하므로 멱등성이 유지된다.
+     *
+     * ponytail: 대체 번호는 1개다. 그 번호까지 충돌하면 실패로 끝난다. 번호를 백엔드가 순번으로 발급하면 이 처리는 필요 없다.
+     */
+    private suspend fun withdraw(request: TransferRequest): WithdrawTransferResponse = try {
+        api.withdraw(request.toWithdrawRequest(bankTranIdFor(request.idempotencyKey)))
+    } catch (e: Exception) {
+        if (!e.isBankTranIdConflict()) throw e
+        api.withdraw(request.toWithdrawRequest(bankTranIdFor(request.idempotencyKey + COLLISION_FALLBACK_SUFFIX)))
+    }
+
+    private fun TransferRequest.toWithdrawRequest(bankTranId: String) = WithdrawTransferRequest(
+        bankTranId = bankTranId,
         fintechUseNum = fromAccountId.value,
         tranAmt = amount.amount.toPlainString(),
         tranDtime = TRAN_DTIME,
@@ -94,5 +109,6 @@ class TransferRepositoryImpl @Inject constructor(
 
     private companion object {
         const val TAG = "TransferRepository"
+        const val COLLISION_FALLBACK_SUFFIX = "#1"
     }
 }
