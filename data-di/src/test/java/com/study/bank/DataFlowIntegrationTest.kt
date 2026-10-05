@@ -268,7 +268,8 @@ class DataFlowIntegrationTest {
         transferToSafebox(amount = 30_000L, idempotencyKey = COLLIDING_KEY_B).requireSuccess()
 
         val salary = requireNotNull(accountRepository.observeAccount(SALARY).first())
-        assertEquals(0, salary.balance.amount.compareTo(BigDecimal("2767320"))) // 2,847,320 - 50,000 - 30,000
+        val seedMinusBothTransfers = BigDecimal(2_847_320 - 50_000 - 30_000)
+        assertEquals(0, salary.balance.amount.compareTo(seedMinusBothTransfers))
     }
 
     @Test
