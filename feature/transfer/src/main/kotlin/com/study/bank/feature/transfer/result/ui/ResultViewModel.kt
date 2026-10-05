@@ -1,7 +1,6 @@
 package com.study.bank.feature.transfer.result.ui
 
 import android.util.Log
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.study.bank.core.ui.mvi.MviStore
@@ -11,7 +10,6 @@ import com.study.bank.domain.model.BankCode
 import com.study.bank.domain.model.Money
 import com.study.bank.domain.model.account.AccountId
 import com.study.bank.domain.model.account.AccountNumber
-import com.study.bank.domain.model.transfer.IdempotencyKeyGenerator
 import com.study.bank.domain.model.transfer.TransferOutcome
 import com.study.bank.domain.model.transfer.TransferRequest
 import com.study.bank.domain.repository.AccountRepository
@@ -36,11 +34,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel(assistedFactory = ResultViewModel.Factory::class)
 class ResultViewModel @AssistedInject constructor(
     @Assisted route: TransferResultRoute,
-    // 내비 인자는 라우트로 받지만, 멱등성 키는 프로세스 death를 넘겨 살아남아야 하므로 SavedStateHandle에 둔다.
-    savedStateHandle: SavedStateHandle,
     private val accountRepository: AccountRepository,
     private val executeTransfer: ExecuteTransferUseCase,
-    idempotencyKeyGenerator: IdempotencyKeyGenerator,
     private val resultUiMapper: ResultUiMapper,
     private val dispatcherProvider: DispatcherProvider,
 ) : ViewModel() {
@@ -58,11 +53,9 @@ class ResultViewModel @AssistedInject constructor(
     /**
      * 멱등성 키는 "이 송금 한 건"에 묶여 재시도 내내 동일해야 한다. 재시도마다 새로 만들면
      * 타임아웃 뒤 재시도가 서버엔 새 거래(=새 bank_tran_id)로 보여 이중출금을 못 막는다.
+     * 키는 확인 화면이 발급해 라우트로 전달하므로, 결과 화면이 중복 생성되거나 복원돼도 같은 키를 쓴다.
      */
-    private val idempotencyKey: String =
-        savedStateHandle.get<String>(IDEMPOTENCY_KEY) ?: idempotencyKeyGenerator.newKey().also {
-            savedStateHandle[IDEMPOTENCY_KEY] = it
-        }
+    private val idempotencyKey = route.idempotencyKey
 
     private val store = MviStore<ResultState, ResultAction, ResultEffect>(
         initialState = ResultState(),
@@ -151,6 +144,5 @@ class ResultViewModel @AssistedInject constructor(
 
     private companion object {
         const val TAG = "ResultViewModel"
-        const val IDEMPOTENCY_KEY = "transfer_idempotency_key"
     }
 }

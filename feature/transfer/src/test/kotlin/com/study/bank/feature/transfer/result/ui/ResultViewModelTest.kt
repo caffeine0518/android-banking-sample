@@ -1,7 +1,6 @@
 package com.study.bank.feature.transfer.result.ui
 
 import app.cash.turbine.test
-import androidx.lifecycle.SavedStateHandle
 import com.study.bank.core.ui.mapper.MoneyUiMapper
 import com.study.bank.domain.coroutine.DispatcherProvider
 import com.study.bank.domain.model.BankCode
@@ -29,7 +28,6 @@ import com.study.bank.feature.transfer.result.ui.model.ResultUiMapper
 import com.study.bank.feature.transfer.testutil.MainDispatcherRule
 import java.math.BigDecimal
 import java.time.Instant
-import java.util.UUID
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -139,6 +137,7 @@ class ResultViewModelTest {
                     holderName = "김토스",
                 ),
                 amount = 1L,
+                idempotencyKey = IDEMPOTENCY_KEY,
             ),
         )
 
@@ -189,33 +188,12 @@ class ResultViewModelTest {
     }
 
     @Test
-    fun `복원 후 자동 재실행돼도 멱등성 키가 보존된다`() = runTest {
-        val accounts = FakeAccountRepository().apply {
-            emit(account(SOURCE_ID), account(RECIPIENT_ID))
-        }
-        // 멱등성 키의 유일한 저장소 — 프로세스 death 복원 시 Navigation이 엔트리별로 되살려 준다.
-        val savedStateHandle = SavedStateHandle()
-        val first = SequencedTransferRepository(TransferOutcome.Failure.Network(RuntimeException("timeout")))
-        buildViewModel(accounts, first, amount = 1, savedStateHandle = savedStateHandle)
-
-        // 같은 SavedStateHandle로 VM 재생성 = 시스템 OOM kill 후 Navigation이 결과 화면을
-        // 복원해 init이 송금을 자동 재실행하는 상황. 키는 그대로여야 한다.
-        val second = SequencedTransferRepository(success())
-        buildViewModel(accounts, second, amount = 1, savedStateHandle = savedStateHandle)
-
-        assertEquals(
-            first.requests.single().idempotencyKey,
-            second.requests.single().idempotencyKey,
-        )
-    }
-
-    @Test
     fun `확인 화면의 송금 한 건으로 결과 화면이 두 번 생성돼도 같은 멱등성 키로 송금한다`() = runTest {
         val accounts = FakeAccountRepository().apply {
             emit(account(SOURCE_ID), account(RECIPIENT_ID))
         }
-        // 확인 화면이 같은 송금으로 결과 화면을 두 번 연 상황(내비게이션 중복 실행). 화면 인스턴스는 별개라
-        // SavedStateHandle 도 각각 새로 생성된다. 서버가 한 건으로 판정하려면 키가 같아야 한다.
+        // 확인 화면이 같은 송금으로 결과 화면을 두 번 연 상황(내비게이션 중복 실행), 또는 프로세스 death 뒤
+        // Navigation 이 결과 화면을 복원해 송금을 자동 재실행하는 상황. 서버가 한 건으로 판정하려면 키가 같아야 한다.
         val first = SequencedTransferRepository(success())
         buildViewModel(accounts, first, amount = 1)
         val second = SequencedTransferRepository(success())
@@ -290,15 +268,12 @@ class ResultViewModelTest {
                 holderName = "안성재",
             ),
             amount = amount,
+            idempotencyKey = IDEMPOTENCY_KEY,
         ),
-        // 내비 인자는 라우트로 받으므로 SavedStateHandle은 멱등성 키 저장용으로만 쓰인다.
-        savedStateHandle: SavedStateHandle = SavedStateHandle(),
     ) = ResultViewModel(
         route = route,
-        savedStateHandle = savedStateHandle,
         accountRepository = accounts,
         executeTransfer = ExecuteTransferUseCase(transfer),
-        idempotencyKeyGenerator = { UUID.randomUUID().toString() },
         resultUiMapper = resultUiMapper,
         dispatcherProvider = TestDispatcherProvider(mainDispatcherRule.testDispatcher),
     )
@@ -393,5 +368,6 @@ class ResultViewModelTest {
     private companion object {
         const val SOURCE_ID = "source-1"
         const val RECIPIENT_ID = "recipient-1"
+        const val IDEMPOTENCY_KEY = "idem-1"
     }
 }
