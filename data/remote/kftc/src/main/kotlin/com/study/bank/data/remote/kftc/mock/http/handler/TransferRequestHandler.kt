@@ -43,6 +43,10 @@ internal class TransferRequestHandler(
             mapper.toResponse(this).ok()
         }
 
+        is WithdrawResult.IdempotencyConflict -> {
+            errors.toResponse(MockError.DuplicateBankTranId(bankTranId))
+        }
+
         is WithdrawResult.UnknownSender -> {
             errors.toResponse(MockError.UnknownFintechUseNum(fintechUseNum))
         }
