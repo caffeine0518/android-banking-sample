@@ -3,12 +3,13 @@ package com.study.bank.data.repository.account
 import android.util.Log
 import com.study.bank.data.local.dao.AccountDao
 import com.study.bank.data.remote.kftc.api.KftcApiService
-import com.study.bank.data.repository.TRAN_DTIME
+import com.study.bank.data.repository.tranDtime
 import com.study.bank.data.repository.bankTranIdFor
 import com.study.bank.domain.coroutine.cancellableCatching
 import com.study.bank.domain.model.account.Account
 import com.study.bank.domain.model.account.AccountId
 import com.study.bank.domain.repository.AccountRepository
+import java.time.Clock
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.async
@@ -24,6 +25,7 @@ class AccountRepositoryImpl @Inject constructor(
     private val dao: AccountDao,
     private val dtoMapper: AccountMapper,
     private val entityMapper: AccountEntityMapper,
+    private val clock: Clock,
 ) : AccountRepository {
 
     override fun observeAccounts(): Flow<List<Account>> =
@@ -53,7 +55,7 @@ class AccountRepositoryImpl @Inject constructor(
                         val balance = api.getAccountBalance(
                             bankTranId = bankTranIdFor(item.fintechUseNum),
                             fintechUseNum = item.fintechUseNum,
-                            tranDtime = TRAN_DTIME,
+                            tranDtime = tranDtime(clock),
                         )
                         dtoMapper.map(item, balance)
                     }.onFailure { error ->

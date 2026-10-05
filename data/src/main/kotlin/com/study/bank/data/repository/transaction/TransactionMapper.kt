@@ -3,6 +3,8 @@ package com.study.bank.data.repository.transaction
 import com.study.bank.data.remote.kftc.api.INOUT_DEPOSIT
 import com.study.bank.data.remote.kftc.api.TRAN_TYPE_TRANSFER
 import com.study.bank.data.remote.kftc.dto.transaction.TransactionItemDto
+import com.study.bank.data.repository.KFTC_DATETIME_FORMAT
+import com.study.bank.data.repository.KST
 import com.study.bank.domain.model.Currency
 import com.study.bank.domain.model.Money
 import com.study.bank.domain.model.account.AccountId
@@ -12,8 +14,6 @@ import com.study.bank.domain.model.transaction.TransactionId
 import com.study.bank.domain.model.transaction.TransactionStatus
 import com.study.bank.domain.model.transaction.TransactionType
 import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -55,10 +55,5 @@ class TransactionMapper @Inject constructor() {
     }
 
     private fun parseOccurredAt(tranDate: String, tranTime: String) =
-        LocalDateTime.parse(tranDate + tranTime, OCCURRED_AT_FORMAT).atZone(KST).toInstant()
-
-    private companion object {
-        val KST: ZoneId = ZoneId.of("Asia/Seoul")
-        val OCCURRED_AT_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
-    }
+        LocalDateTime.parse(tranDate + tranTime, KFTC_DATETIME_FORMAT).atZone(KST).toInstant()
 }

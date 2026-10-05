@@ -19,8 +19,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneOffset
 
 class AccountRepositoryImplTest {
+
+    private val fixedClock = Clock.fixed(Instant.parse("2026-06-18T01:30:00Z"), ZoneOffset.UTC)
 
     // ----- refresh: 원격 fetch → DB 덮어쓰기 -----
 
@@ -136,6 +141,16 @@ class AccountRepositoryImplTest {
         }
     }
 
+    @Test
+    fun `잔액 조회 요청의 거래일시는 주입된 Clock 의 현재 시각을 KST 로 적는다`() = runTest {
+        val api = FakeKftcApiService(initialSeeds = listOf(SEED_TOSS_KRW))
+
+        buildRepo(api, FakeAccountDao()).refresh()
+
+        // fixedClock 2026-06-18T01:30:00Z 를 KST 로 환산한 값
+        assertEquals("20260618103000", api.lastBalanceTranDtime)
+    }
+
     // ----- 헬퍼 -----
 
     private fun buildRepo(api: KftcApiService, dao: AccountDao) = AccountRepositoryImpl(
@@ -143,6 +158,7 @@ class AccountRepositoryImplTest {
         dao = dao,
         dtoMapper = AccountMapper(),
         entityMapper = AccountEntityMapper(),
+        clock = fixedClock,
     )
 
     private data class Seed(
@@ -210,6 +226,8 @@ class AccountRepositoryImplTest {
             private set
         var balanceCallCount: Int = 0
             private set
+        var lastBalanceTranDtime: String? = null
+            private set
 
         fun setSeeds(new: List<Seed>) {
             seeds = new
@@ -238,6 +256,7 @@ class AccountRepositoryImplTest {
             tranDtime: String,
         ): AccountBalanceResponse {
             balanceCallCount++
+            lastBalanceTranDtime = tranDtime
             val seed = seeds.first { it.fintechUseNum == fintechUseNum }
             return AccountBalanceResponse(
                 apiTranId = "B-$balanceCallCount",
