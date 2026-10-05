@@ -48,7 +48,7 @@ class ConfirmViewModel @AssistedInject constructor(
 
     /**
      * 멱등성 키는 "이 송금 한 건"에 묶여야 한다. 송금 의도가 확정되는 이 화면에서 한 번 발급해 결과 화면에 전달한다.
-     * 결과 화면에서 발급하면 결과 화면이 중복 생성될 때 키가 둘이 돼 서버가 별개의 송금 두 건으로 처리한다.
+     * 결과 화면이 중복 생성되거나 복원돼도 같은 키로 송금하므로 서버는 이 송금을 한 건으로 처리한다.
      */
     private val idempotencyKey: String =
         savedStateHandle.get<String>(IDEMPOTENCY_KEY) ?: idempotencyKeyGenerator.newKey().also {
