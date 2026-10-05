@@ -82,8 +82,6 @@ internal class WithdrawExecutor @Inject constructor(
         accountHolderName = source.accountHolderName,
         tranAmt = amount.toLedgerString(BigDecimal(source.balanceAmt).scale()),
         afterBalanceAmt = afterBalanceAmt,
-        recvAccountNum = command.recvAccountNum,
-        recvBankCode = command.recvBankCode,
     )
 
     /**

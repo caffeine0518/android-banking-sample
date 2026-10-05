@@ -1,8 +1,7 @@
 package com.study.bank.data.remote.kftc.mock.service.model
 
 import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import com.study.bank.data.remote.kftc.mock.storage.entity.SettledWithdrawal
 
 /**
  * [KftcWithdrawalService.withdraw] 결과.
@@ -14,14 +13,10 @@ import androidx.room.PrimaryKey
 internal sealed interface WithdrawResult {
 
     /**
-     * 체결된 출금이체. 그대로 `mock_settled_withdrawals` 한 행이 된다 — 같은 [bankTranId]로 재요청이 오면
-     * 원장을 다시 변경하지 않고 이 행을 조회해 같은 응답을 반환한다(이중출금 차단).
-     *
-     * [recvAccountNum]·[recvBankCode]는 응답에 포함하지 않는다 — 재요청이 같은 거래인지 비교하는 데만 쓴다.
+     * 체결된 출금이체. [SettledWithdrawal]에 포함돼 저장된다 — 같은 [bankTranId]로 재요청이 오면
+     * 원장을 다시 변경하지 않고 저장된 응답을 반환한다(이중출금 차단).
      */
-    @Entity(tableName = "mock_settled_withdrawals")
     data class Success(
-        @PrimaryKey
         @ColumnInfo(name = "bank_tran_id")
         val bankTranId: String,
         @ColumnInfo(name = "fintech_use_num")
@@ -36,10 +31,6 @@ internal sealed interface WithdrawResult {
         val tranAmt: String,
         @ColumnInfo(name = "after_balance_amt")
         val afterBalanceAmt: String,
-        @ColumnInfo(name = "recv_account_num")
-        val recvAccountNum: String,
-        @ColumnInfo(name = "recv_bank_code")
-        val recvBankCode: String,
     ) : WithdrawResult
 
     /** 이미 체결된 [bankTranId]로 출금계좌·금액·수취계좌가 다른 요청이 왔다. 원장은 변경하지 않는다. */

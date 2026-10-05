@@ -5,13 +5,13 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.study.bank.data.remote.kftc.mock.service.model.WithdrawResult
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockAccountDao
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockTransactionDao
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockTransactionScopeDao
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockWithdrawalDao
 import com.study.bank.data.remote.kftc.mock.storage.entity.MockDirectionConverter
 import com.study.bank.data.remote.kftc.mock.storage.entity.SeedAccount
+import com.study.bank.data.remote.kftc.mock.storage.entity.SettledWithdrawal
 import com.study.bank.data.remote.kftc.mock.storage.entity.TransactionRecord
 
 /**
@@ -24,7 +24,7 @@ import com.study.bank.data.remote.kftc.mock.storage.entity.TransactionRecord
  * 네이티브 로딩이 실패하고(UnsatisfiedLinkError), Android 빌더는 어차피 Context를 요구해 이득이 없다.
  */
 @Database(
-    entities = [SeedAccount::class, TransactionRecord::class, WithdrawResult.Success::class],
+    entities = [SeedAccount::class, TransactionRecord::class, SettledWithdrawal::class],
     version = 1,
     exportSchema = false,
 )
