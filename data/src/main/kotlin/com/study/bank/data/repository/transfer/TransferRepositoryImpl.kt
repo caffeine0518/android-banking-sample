@@ -8,7 +8,7 @@ import com.study.bank.data.remote.kftc.api.RSP_SUCCESS
 import com.study.bank.data.remote.kftc.api.isBankTranIdConflict
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferResponse
-import com.study.bank.data.repository.TRAN_DTIME
+import com.study.bank.data.repository.tranDtime
 import com.study.bank.data.repository.bankTranIdFor
 import com.study.bank.domain.coroutine.cancellableCatching
 import com.study.bank.domain.model.Money
@@ -94,7 +94,7 @@ class TransferRepositoryImpl @Inject constructor(
         bankTranId = bankTranId,
         fintechUseNum = fromAccountId.value,
         tranAmt = amount.amount.toPlainString(),
-        tranDtime = TRAN_DTIME,
+        tranDtime = tranDtime(clock),
         reqClientName = senderName,
         recvClientName = recipientName,
         recvClientBankCodeStd = toBankCode.code,

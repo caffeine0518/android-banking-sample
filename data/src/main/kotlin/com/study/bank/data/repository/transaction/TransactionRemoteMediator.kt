@@ -8,7 +8,7 @@ import com.study.bank.data.local.dao.TransactionDao
 import com.study.bank.data.local.entity.TransactionEntity
 import com.study.bank.data.remote.kftc.api.KftcApiService
 import com.study.bank.data.remote.kftc.dto.transaction.TransactionListResponse
-import com.study.bank.data.repository.TRAN_DTIME
+import com.study.bank.data.repository.tranDtime
 import com.study.bank.domain.coroutine.cancellableCatching
 import com.study.bank.domain.model.Currency
 import com.study.bank.domain.model.account.AccountId
@@ -91,7 +91,7 @@ internal class TransactionRemoteMediator(
         fintechUseNum = accountId.value,
         fromDate = fromDate,
         toDate = toDate,
-        tranDtime = TRAN_DTIME,
+        tranDtime = tranDtime(clock),
         beforInquiryTraceInfo = cursor,
     )
 

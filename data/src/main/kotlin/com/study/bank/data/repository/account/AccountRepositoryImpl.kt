@@ -3,7 +3,7 @@ package com.study.bank.data.repository.account
 import android.util.Log
 import com.study.bank.data.local.dao.AccountDao
 import com.study.bank.data.remote.kftc.api.KftcApiService
-import com.study.bank.data.repository.TRAN_DTIME
+import com.study.bank.data.repository.tranDtime
 import com.study.bank.data.repository.bankTranIdFor
 import com.study.bank.domain.coroutine.cancellableCatching
 import com.study.bank.domain.model.account.Account
@@ -55,7 +55,7 @@ class AccountRepositoryImpl @Inject constructor(
                         val balance = api.getAccountBalance(
                             bankTranId = bankTranIdFor(item.fintechUseNum),
                             fintechUseNum = item.fintechUseNum,
-                            tranDtime = TRAN_DTIME,
+                            tranDtime = tranDtime(clock),
                         )
                         dtoMapper.map(item, balance)
                     }.onFailure { error ->

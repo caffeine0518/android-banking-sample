@@ -1,7 +1,14 @@
 package com.study.bank.data.repository
 
-/** 데모 고정값. */
-internal const val TRAN_DTIME = "20260603120000"
+import java.time.Clock
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+
+private val TRAN_DTIME_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
+private val KST = ZoneId.of("Asia/Seoul")
+
+/** KFTC 요청의 tran_dtime. 기기 시간대와 무관하게 KST 로 적는다. */
+internal fun tranDtime(clock: Clock): String = TRAN_DTIME_FORMAT.format(clock.instant().atZone(KST))
 
 /**
  * 송금은 서버가 이 값으로 멱등 판정을 하므로 충돌이 곧 결함이다 — 정상 송금이 중복으로 처리된다.

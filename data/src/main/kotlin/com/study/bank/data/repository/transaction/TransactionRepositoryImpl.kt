@@ -8,7 +8,7 @@ import androidx.paging.map
 import com.study.bank.data.local.dao.TransactionDao
 import com.study.bank.data.remote.kftc.api.KFTC_TRANSACTION_PAGE_SIZE
 import com.study.bank.data.remote.kftc.api.KftcApiService
-import com.study.bank.data.repository.TRAN_DTIME
+import com.study.bank.data.repository.tranDtime
 import com.study.bank.data.repository.bankTranIdFor
 import com.study.bank.domain.model.Currency
 import com.study.bank.domain.model.account.AccountId
@@ -74,7 +74,7 @@ class TransactionRepositoryImpl @Inject constructor(
             fintechUseNum = accountId.value,
             fromDate = FROM_DATE,
             toDate = TO_DATE,
-            tranDtime = TRAN_DTIME,
+            tranDtime = tranDtime(clock),
         )
         val currency = Currency.requireByCode(response.currencyCode)
         return response.resList.map { item ->
