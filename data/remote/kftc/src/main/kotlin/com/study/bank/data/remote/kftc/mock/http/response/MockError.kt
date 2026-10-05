@@ -49,6 +49,12 @@ internal sealed interface MockError {
         override val message = "유효하지 않은 tran_amt: $raw"
     }
 
+    /** 같은 bank_tran_id 가 다른 내용의 거래에 재사용됐다 — 클라이언트의 키 발급 결함이므로 4xx 로 알린다. */
+    data class DuplicateBankTranId(val bankTranId: String) : MockError {
+        override val httpCode = HTTP_CONFLICT
+        override val message = "다른 거래에 이미 사용된 bank_tran_id: $bankTranId"
+    }
+
     data object MissingInquiryBody : MockError {
         override val httpCode = HTTP_BAD_REQUEST
         override val message = "계좌실명조회 요청 본문 누락/파싱 실패"

@@ -5,6 +5,7 @@ import com.study.bank.data.remote.kftc.mock.service.model.WithdrawPlan
 import com.study.bank.data.remote.kftc.mock.service.model.WithdrawResult
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockTransactionScopeDao
 import com.study.bank.data.remote.kftc.mock.storage.dao.MockWithdrawalDao
+import com.study.bank.data.remote.kftc.mock.storage.entity.SettledWithdrawal
 import javax.inject.Inject
 
 /**
@@ -22,9 +23,17 @@ internal class KftcWithdrawalServiceImpl @Inject constructor(
 
     override fun withdraw(command: WithdrawCommand): WithdrawResult = transactionScope.inTransaction {
         val settled = withdrawalDao.findSettled(command.bankTranId)
-        settled ?: when (val plan = planner.plan(command)) {
-            is WithdrawPlan.Reject -> plan.result
-            is WithdrawPlan.Approved -> executor.execute(plan, command).also(withdrawalDao::insertSettled)
+        when {
+            settled == null -> settle(command)
+            settled.fingerprint == command.fingerprint() -> settled.response
+            else -> WithdrawResult.IdempotencyConflict(command.bankTranId)
+        }
+    }
+
+    private fun settle(command: WithdrawCommand): WithdrawResult = when (val plan = planner.plan(command)) {
+        is WithdrawPlan.Reject -> plan.result
+        is WithdrawPlan.Approved -> executor.execute(plan, command).also { success ->
+            withdrawalDao.insertSettled(SettledWithdrawal(success, command.fingerprint()))
         }
     }
 }

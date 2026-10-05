@@ -180,6 +180,32 @@ class KftcWithdrawalServiceTest {
     }
 
     @Test
+    fun `같은 bank_tran_id라도 금액이 다르면 체결된 응답을 반환하지 않는다`() {
+        val bank = newBank()
+
+        // 키 충돌로 서로 다른 송금이 같은 번호를 받은 상황. 앞 건의 성공 응답이 반환되면 송금하지 않은 건이 성공으로 표시된다.
+        bank.withdrawalService.withdraw(externalCommand(from = SALARY, amount = "50000", bankTranId = REPLAYED_ID))
+        val collided = bank.withdrawalService.withdraw(externalCommand(from = SALARY, amount = "30000", bankTranId = REPLAYED_ID))
+
+        assertTrue("충돌한 요청이 성공으로 처리됐다: $collided", collided !is WithdrawResult.Success)
+        assertEquals("2797320", bank.accountDao.find(SALARY)!!.balanceAmt)
+        assertEquals(1, bank.transactionDao.sessionLedger(SALARY).size)
+    }
+
+    @Test
+    fun `같은 bank_tran_id라도 수취계좌가 다르면 체결된 응답을 반환하지 않는다`() {
+        val bank = newBank()
+
+        bank.withdrawalService.withdraw(externalCommand(from = SALARY, amount = "50000", bankTranId = REPLAYED_ID))
+        val collided = bank.withdrawalService.withdraw(
+            externalCommand(from = SALARY, amount = "50000", bankTranId = REPLAYED_ID).copy(recvAccountNum = "8888-88-8888888"),
+        )
+
+        assertTrue("충돌한 요청이 성공으로 처리됐다: $collided", collided !is WithdrawResult.Success)
+        assertEquals("2797320", bank.accountDao.find(SALARY)!!.balanceAmt)
+    }
+
+    @Test
     fun `거절된 요청은 같은 bank_tran_id로 다시 시도할 수 있다`() {
         val bank = newBank()
 

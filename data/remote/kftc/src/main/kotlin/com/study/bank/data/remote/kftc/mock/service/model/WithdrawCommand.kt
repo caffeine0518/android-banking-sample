@@ -16,4 +16,11 @@ internal data class WithdrawCommand(
     val reqName: String,
     val wdPrintContent: String?,
     val dpsPrintContent: String?,
-)
+) {
+    fun fingerprint() = WithdrawFingerprint(
+        fintechUseNum = fintechUseNum,
+        recvBankCode = recvBankCode,
+        recvAccountNum = recvAccountNum,
+        tranAmt = tranAmt,
+    )
+}

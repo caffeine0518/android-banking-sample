@@ -260,11 +260,74 @@ class DataFlowIntegrationTest {
         assertEquals(1, transactionRepository.observeTransactions(SAFEBOX).first().size)
     }
 
+    @Test
+    fun `bank_tran_id 가 앞 송금과 충돌한 송금도 체결된다`() = runBlocking {
+        accountRepository.refresh()
+        transferToSafebox(amount = 50_000L, idempotencyKey = COLLIDING_KEY_A).requireSuccess()
+
+        transferToSafebox(amount = 30_000L, idempotencyKey = COLLIDING_KEY_B).requireSuccess()
+
+        val salary = requireNotNull(accountRepository.observeAccount(SALARY).first())
+        val seedMinusBothTransfers = BigDecimal(2_847_320 - 50_000 - 30_000)
+        assertEquals(0, salary.balance.amount.compareTo(seedMinusBothTransfers))
+    }
+
+    @Test
+    fun `bank_tran_id 가 충돌한 송금을 재시도하면 같은 거래로 응답하고 다시 차감하지 않는다`() = runBlocking {
+        accountRepository.refresh()
+        transferToSafebox(amount = 50_000L, idempotencyKey = COLLIDING_KEY_A).requireSuccess()
+        val collided = transferToSafebox(amount = 30_000L, idempotencyKey = COLLIDING_KEY_B).requireSuccess()
+
+        val retried = transferToSafebox(amount = 30_000L, idempotencyKey = COLLIDING_KEY_B).requireSuccess()
+
+        assertEquals(collided.result.transactionId, retried.result.transactionId)
+        val salary = requireNotNull(accountRepository.observeAccount(SALARY).first())
+        assertEquals(0, salary.balance.amount.compareTo(BigDecimal("2767320")))
+    }
+
+    @Test
+    fun `bank_tran_id 와 대체 번호가 모두 앞 송금과 충돌한 송금도 체결된다`() = runBlocking {
+        accountRepository.refresh()
+        transferToSafebox(amount = 50_000L, idempotencyKey = COLLIDING_KEY_A).requireSuccess()
+        transferToSafebox(amount = 20_000L, idempotencyKey = COLLIDING_KEY_A_FALLBACK).requireSuccess()
+
+        transferToSafebox(amount = 30_000L, idempotencyKey = COLLIDING_KEY_B).requireSuccess()
+
+        val salary = requireNotNull(accountRepository.observeAccount(SALARY).first())
+        val seedMinusAllTransfers = BigDecimal(2_847_320 - 50_000 - 20_000 - 30_000)
+        assertEquals(0, salary.balance.amount.compareTo(seedMinusAllTransfers))
+    }
+
+    private suspend fun transferToSafebox(amount: Long, idempotencyKey: String): TransferOutcome =
+        ExecuteTransferUseCase(transferRepository)(
+            TransferRequest(
+                fromAccountId = SALARY,
+                senderName = "홍길동",
+                toAccountNumber = SAFEBOX_NUMBER,
+                toBankCode = BankCode.TOSS,
+                recipientName = "홍길동",
+                amount = Money.of(amount, Currency.KRW),
+                memo = null,
+                idempotencyKey = idempotencyKey,
+            ),
+        )
+
+    private fun TransferOutcome.requireSuccess(): TransferOutcome.Success =
+        this as? TransferOutcome.Success ?: throw AssertionError("송금 성공해야 함: $this")
+
     private companion object {
         val SALARY = AccountId(KftcSeedAccountIds.PAYROLL_KRW)
         val SAFEBOX = AccountId(KftcSeedAccountIds.SAFEBOX_KRW)
         val FX_USD = AccountId(KftcSeedAccountIds.FX_USD)
         val SAFEBOX_NUMBER = AccountNumber("1000-55-1114443")
+
+        // String.hashCode 가 같은 두 키 → 같은 bank_tran_id 로 변환된다.
+        const val COLLIDING_KEY_A = "itest-collision-Aa"
+        const val COLLIDING_KEY_B = "itest-collision-BB"
+
+        // COLLIDING_KEY_B 의 대체 번호(키 + "#1")와 같은 bank_tran_id 로 변환되는 키. 해시가 같은 두 키는 같은
+        // 접미사를 붙여도 해시가 같다 → 이 키로 먼저 송금하면 B 의 대체 번호도 이미 체결된 번호가 된다.
+        const val COLLIDING_KEY_A_FALLBACK = "$COLLIDING_KEY_A#1"
 
         // 서버 페이지 크기 단일 소유처. 레거시 refresh는 첫 페이지 한 장을 적재한다.
         const val PAGE_SIZE = KFTC_TRANSACTION_PAGE_SIZE

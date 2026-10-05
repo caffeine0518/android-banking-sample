@@ -3,7 +3,7 @@ package com.study.bank.data.remote.kftc.mock.storage.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.study.bank.data.remote.kftc.mock.service.model.WithdrawResult
+import com.study.bank.data.remote.kftc.mock.storage.entity.SettledWithdrawal
 
 /**
  * `mock_settled_withdrawals` — 체결된 출금이체를 거래고유번호(bank_tran_id)로 기록한다.
@@ -14,12 +14,12 @@ import com.study.bank.data.remote.kftc.mock.service.model.WithdrawResult
 @Dao
 internal interface MockWithdrawalDao {
 
-    /** 이 거래고유번호로 이미 체결된 건이 있으면 그때 돌려준 응답, 없으면 null. */
+    /** 이 거래고유번호로 이미 체결된 건이 있으면 그 기록, 없으면 null. */
     @Query("SELECT * FROM mock_settled_withdrawals WHERE bank_tran_id = :bankTranId")
-    fun findSettled(bankTranId: String): WithdrawResult.Success?
+    fun findSettled(bankTranId: String): SettledWithdrawal?
 
     @Insert
-    fun insertSettled(settled: WithdrawResult.Success)
+    fun insertSettled(settled: SettledWithdrawal)
 
     @Query("DELETE FROM mock_settled_withdrawals")
     fun clear()

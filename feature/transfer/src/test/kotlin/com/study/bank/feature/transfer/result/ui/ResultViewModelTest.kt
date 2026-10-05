@@ -29,6 +29,7 @@ import com.study.bank.feature.transfer.result.ui.model.ResultUiMapper
 import com.study.bank.feature.transfer.testutil.MainDispatcherRule
 import java.math.BigDecimal
 import java.time.Instant
+import java.util.UUID
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -279,6 +280,7 @@ class ResultViewModelTest {
         savedStateHandle = savedStateHandle,
         accountRepository = accounts,
         executeTransfer = ExecuteTransferUseCase(transfer),
+        idempotencyKeyGenerator = { UUID.randomUUID().toString() },
         resultUiMapper = resultUiMapper,
         dispatcherProvider = TestDispatcherProvider(mainDispatcherRule.testDispatcher),
     )
