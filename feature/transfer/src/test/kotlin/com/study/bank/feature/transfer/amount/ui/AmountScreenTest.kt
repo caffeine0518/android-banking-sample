@@ -52,7 +52,7 @@ class AmountScreenTest {
         composeRule.onNodeWithText("U드림 저축예금").assertIsDisplayed()
         composeRule.onNodeWithText(string(R.string.transfer_amount_to_label)).assertIsDisplayed()
         // 수취인은 예금주명으로 표시된다(본인·외부 동일).
-        composeRule.onNodeWithText("안성재").assertIsDisplayed()
+        composeRule.onNodeWithText("이수취").assertIsDisplayed()
         composeRule.onNodeWithText(string(R.string.transfer_amount_hint)).assertIsDisplayed()
     }
 
@@ -110,9 +110,9 @@ class AmountScreenTest {
             balance = MoneyUi(BigDecimal.valueOf(284_797), CurrencyUi.KRW),
         ),
         recipient = AmountRecipientUi(
-            holderName = "안성재",
+            holderName = "이수취",
             bankDisplayName = "신한은행",
-            accountNumber = "110-503-685417",
+            accountNumber = "110-123-456789",
         ),
         amount = amount,
     )

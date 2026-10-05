@@ -48,10 +48,10 @@ class ConfirmScreenTest {
     fun `제목·금액·정보행·보내기 버튼이 표시된다`() {
         setScreen(ConfirmState(detail = detail()))
 
-        composeRule.onNodeWithText("안성재", substring = true).assertIsDisplayed()
+        composeRule.onNodeWithText("이수취", substring = true).assertIsDisplayed()
         composeRule.onNodeWithText(string(R.string.transfer_confirm_title_question)).assertIsDisplayed()
         composeRule.onNodeWithText(string(R.string.transfer_confirm_label_display_name)).assertIsDisplayed()
-        composeRule.onNodeWithText("강남규").assertIsDisplayed()
+        composeRule.onNodeWithText("박송금").assertIsDisplayed()
         composeRule.onNodeWithText(string(R.string.transfer_confirm_label_deposit)).assertIsDisplayed()
         composeRule.onNodeWithText(string(R.string.transfer_confirm_send)).assertIsDisplayed()
     }
@@ -69,7 +69,7 @@ class ConfirmScreenTest {
     fun `받는 분에게 표시 행을 누르면 DisplayNameClicked 인텐트가 방출된다`() {
         setScreen(ConfirmState(detail = detail()))
 
-        composeRule.onNodeWithText("강남규").performClick()
+        composeRule.onNodeWithText("박송금").performClick()
 
         assertEquals(listOf(ConfirmIntent.DisplayNameClicked), intents)
     }
@@ -98,12 +98,12 @@ class ConfirmScreenTest {
     }
 
     private fun detail() = ConfirmDetailUi(
-        recipientHolderName = "안성재",
+        recipientHolderName = "이수취",
         amount = MoneyUi(BigDecimal.valueOf(2), CurrencyUi.KRW),
-        displayName = "강남규",
+        displayName = "박송금",
         sourceNickname = "U드림 저축예금 (인터넷전용)",
         sourceType = AccountTypeUi.SAVINGS,
         recipientBankDisplayName = "신한은행",
-        recipientNumberMasked = "110-503-685417",
+        recipientNumberMasked = "110-123-456789",
     )
 }

@@ -57,7 +57,7 @@ class ResultScreenTest {
     fun `성공 상태는 제목·메모칩·공유하기·확인을 보인다`() {
         setScreen(ResultState(header = header(), phase = ResultPhase.Success))
 
-        composeRule.onNodeWithText("안성재", substring = true).assertIsDisplayed()
+        composeRule.onNodeWithText("이수취", substring = true).assertIsDisplayed()
         // 로딩이 끝나면 백 버튼이 다시 노출된다.
         composeRule.onNodeWithContentDescription(string(R.string.transfer_action_back))
             .assertIsDisplayed()
@@ -106,7 +106,7 @@ class ResultScreenTest {
     }
 
     private fun header() = ResultHeaderUi(
-        recipientName = "안성재",
+        recipientName = "이수취",
         amount = MoneyUi(BigDecimal.ONE, CurrencyUi.KRW),
     )
 }

@@ -11,10 +11,10 @@ internal val PreviewConfirmState = ConfirmState(
     detail = ConfirmDetailUi(
         recipientHolderName = "집주인",
         amount = MoneyUi(BigDecimal.valueOf(2), CurrencyUi.KRW),
-        displayName = "강남규",
+        displayName = "박송금",
         sourceNickname = "U드림 저축예금 (인터넷전용)",
         sourceType = AccountTypeUi.SAVINGS,
         recipientBankDisplayName = "신한은행",
-        recipientNumberMasked = "110-503-685417",
+        recipientNumberMasked = "110-123-456789",
     ),
 )
