@@ -11,6 +11,7 @@ import com.study.bank.domain.model.BankCode
 import com.study.bank.domain.model.Money
 import com.study.bank.domain.model.account.AccountId
 import com.study.bank.domain.model.account.AccountNumber
+import com.study.bank.domain.model.transfer.IdempotencyKeyGenerator
 import com.study.bank.domain.model.transfer.TransferOutcome
 import com.study.bank.domain.model.transfer.TransferRequest
 import com.study.bank.domain.repository.AccountRepository
@@ -28,7 +29,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.util.UUID
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -40,6 +40,7 @@ class ResultViewModel @AssistedInject constructor(
     savedStateHandle: SavedStateHandle,
     private val accountRepository: AccountRepository,
     private val executeTransfer: ExecuteTransferUseCase,
+    idempotencyKeyGenerator: IdempotencyKeyGenerator,
     private val resultUiMapper: ResultUiMapper,
     private val dispatcherProvider: DispatcherProvider,
 ) : ViewModel() {
@@ -59,7 +60,7 @@ class ResultViewModel @AssistedInject constructor(
      * 타임아웃 뒤 재시도가 서버엔 새 거래(=새 bank_tran_id)로 보여 이중출금을 못 막는다.
      */
     private val idempotencyKey: String =
-        savedStateHandle.get<String>(IDEMPOTENCY_KEY) ?: UUID.randomUUID().toString().also {
+        savedStateHandle.get<String>(IDEMPOTENCY_KEY) ?: idempotencyKeyGenerator.newKey().also {
             savedStateHandle[IDEMPOTENCY_KEY] = it
         }
 
