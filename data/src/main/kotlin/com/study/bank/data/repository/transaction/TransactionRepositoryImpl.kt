@@ -14,6 +14,7 @@ import com.study.bank.domain.model.Currency
 import com.study.bank.domain.model.account.AccountId
 import com.study.bank.domain.model.transaction.Transaction
 import com.study.bank.domain.repository.TransactionRepository
+import java.time.Clock
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
@@ -31,6 +32,7 @@ class TransactionRepositoryImpl @Inject constructor(
     private val dao: TransactionDao,
     private val dtoMapper: TransactionMapper,
     private val entityMapper: TransactionEntityMapper,
+    private val clock: Clock,
 ) : TransactionRepository {
 
     override fun observeTransactions(accountId: AccountId): Flow<List<Transaction>> =
@@ -61,7 +63,7 @@ class TransactionRepositoryImpl @Inject constructor(
                 bankTranId = bankTranIdFor(accountId.value),
                 fromDate = FROM_DATE,
                 toDate = TO_DATE,
-                tranDtime = TRAN_DTIME,
+                clock = clock,
             ),
             pagingSourceFactory = { dao.pagingSource(accountId.value) },
         ).flow.map { pagingData -> pagingData.map(entityMapper::toDomain) }

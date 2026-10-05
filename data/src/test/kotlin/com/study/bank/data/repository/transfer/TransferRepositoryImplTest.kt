@@ -124,6 +124,17 @@ class TransferRepositoryImplTest {
         assertEquals("김세이프", sent?.recvClientName)
     }
 
+    @Test
+    fun `요청의 거래일시는 주입된 Clock 의 현재 시각을 KST 로 적는다`() = runTest {
+        val api = FakeKftcApiService { successResponse() }
+        val repo = TransferRepositoryImpl(api, FakeAccountRepository(), FakeTransactionRepository(), fixedClock)
+
+        repo.execute(request())
+
+        // fixedClock 2026-06-18T01:30:00Z 를 KST 로 환산한 값
+        assertEquals("20260618103000", api.lastWithdraw?.tranDtime)
+    }
+
     private fun request() = TransferRequest(
         fromAccountId = AccountId("120220112345678901234001"),
         senderName = "홍길동",

@@ -9,6 +9,7 @@ import com.study.bank.domain.coroutine.cancellableCatching
 import com.study.bank.domain.model.account.Account
 import com.study.bank.domain.model.account.AccountId
 import com.study.bank.domain.repository.AccountRepository
+import java.time.Clock
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.async
@@ -24,6 +25,7 @@ class AccountRepositoryImpl @Inject constructor(
     private val dao: AccountDao,
     private val dtoMapper: AccountMapper,
     private val entityMapper: AccountEntityMapper,
+    private val clock: Clock,
 ) : AccountRepository {
 
     override fun observeAccounts(): Flow<List<Account>> =

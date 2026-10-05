@@ -8,6 +8,7 @@ import com.study.bank.domain.model.BankCode
 import com.study.bank.domain.model.account.AccountNumber
 import com.study.bank.domain.model.transfer.RecipientLookup
 import com.study.bank.domain.repository.RecipientRepository
+import java.time.Clock
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,6 +23,7 @@ import javax.inject.Singleton
 class RecipientRepositoryImpl @Inject constructor(
     private val api: KftcApiService,
     private val mapper: RecipientMapper,
+    private val clock: Clock,
 ) : RecipientRepository {
 
     override suspend fun lookup(accountNumber: AccountNumber, bankCode: BankCode): RecipientLookup =

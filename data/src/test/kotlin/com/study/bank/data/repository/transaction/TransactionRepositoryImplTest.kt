@@ -19,6 +19,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.math.BigDecimal
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneOffset
 
 /**
  * [TransactionRepositoryImpl] SSOT 동작 검증.
@@ -29,6 +32,7 @@ class TransactionRepositoryImplTest {
 
     private val salary = AccountId("120220112345678901234001")
     private val usd = AccountId("120220112345678901234002")
+    private val fixedClock = Clock.fixed(Instant.parse("2026-06-18T01:30:00Z"), ZoneOffset.UTC)
 
     @Test
     fun `refresh는 원격 거래내역을 매핑해 SSOT에 저장하고 observe로 흘린다`() = runTest {
@@ -149,11 +153,22 @@ class TransactionRepositoryImplTest {
         assertTrue("최신 거래가 먼저 와야 한다", txns[0].occurredAt.isAfter(txns[1].occurredAt))
     }
 
+    @Test
+    fun `refresh 요청의 거래일시는 주입된 Clock 의 현재 시각을 KST 로 적는다`() = runTest {
+        val api = FakeKftcApiService(mapOf(salary.value to txnResponse(salary.value, "KRW", "0", emptyList())))
+
+        buildRepo(api, FakeTransactionDao()).refresh(salary)
+
+        // fixedClock 2026-06-18T01:30:00Z 를 KST 로 환산한 값
+        assertEquals("20260618103000", api.lastTranDtime)
+    }
+
     private fun buildRepo(api: KftcApiService, dao: TransactionDao) = TransactionRepositoryImpl(
         api = api,
         dao = dao,
         dtoMapper = TransactionMapper(),
         entityMapper = TransactionEntityMapper(),
+        clock = fixedClock,
     )
 
     // --- 픽스처 ---
@@ -225,6 +240,9 @@ class TransactionRepositoryImplTest {
     private class FakeKftcApiService(
         private val responses: Map<String, TransactionListResponse>,
     ) : KftcApiService by NoopKftcApiService {
+        var lastTranDtime: String? = null
+            private set
+
         override suspend fun getTransactionList(
             bankTranId: String,
             fintechUseNum: String,
@@ -235,7 +253,10 @@ class TransactionRepositoryImplTest {
             inquiryBase: String,
             sortOrder: String,
             beforInquiryTraceInfo: String?,
-        ): TransactionListResponse = responses[fintechUseNum] ?: error("no stub for $fintechUseNum")
+        ): TransactionListResponse {
+            lastTranDtime = tranDtime
+            return responses[fintechUseNum] ?: error("no stub for $fintechUseNum")
+        }
     }
 
     private class SequencedKftcApiService(

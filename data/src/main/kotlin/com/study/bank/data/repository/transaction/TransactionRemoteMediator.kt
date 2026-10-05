@@ -8,9 +8,11 @@ import com.study.bank.data.local.dao.TransactionDao
 import com.study.bank.data.local.entity.TransactionEntity
 import com.study.bank.data.remote.kftc.api.KftcApiService
 import com.study.bank.data.remote.kftc.dto.transaction.TransactionListResponse
+import com.study.bank.data.repository.TRAN_DTIME
 import com.study.bank.domain.coroutine.cancellableCatching
 import com.study.bank.domain.model.Currency
 import com.study.bank.domain.model.account.AccountId
+import java.time.Clock
 
 /**
  * 거래내역 페이징의 네트워크→DB 적재기(network+DB 패턴). [transactionDao]에 쓰면 Room PagingSource가
@@ -30,7 +32,7 @@ internal class TransactionRemoteMediator(
     private val bankTranId: String,
     private val fromDate: String,
     private val toDate: String,
-    private val tranDtime: String,
+    private val clock: Clock,
 ) : RemoteMediator<Int, TransactionEntity>() {
 
     // KFTC 연속조회 커서(befor_inquiry_trace_info). null이면 더 받을 페이지가 없다. 인스턴스가 한 Pager
@@ -89,7 +91,7 @@ internal class TransactionRemoteMediator(
         fintechUseNum = accountId.value,
         fromDate = fromDate,
         toDate = toDate,
-        tranDtime = tranDtime,
+        tranDtime = TRAN_DTIME,
         beforInquiryTraceInfo = cursor,
     )
 

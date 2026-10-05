@@ -11,11 +11,16 @@ import com.study.bank.domain.model.transfer.RecipientLookup
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneOffset
 
 /**
  * [RecipientRepositoryImpl] 검증. 실명조회는 원격 전용이라 Room/DAO 없이 KftcApiService만 모사한다.
  */
 class RecipientRepositoryImplTest {
+
+    private val fixedClock = Clock.fixed(Instant.parse("2026-06-18T01:30:00Z"), ZoneOffset.UTC)
 
     @Test
     fun `활성 수취인은 Active로 조회된다`() = runTest {
@@ -54,7 +59,17 @@ class RecipientRepositoryImplTest {
         assertEquals("110-555-667788", api.lastRequest?.accountNum)
     }
 
-    private fun buildRepo(api: KftcApiService) = RecipientRepositoryImpl(api, RecipientMapper())
+    @Test
+    fun `요청의 거래일시는 주입된 Clock 의 현재 시각을 KST 로 적는다`() = runTest {
+        val api = FakeKftcApiService(response())
+
+        buildRepo(api).lookup(AccountNumber("110-555-667788"), BankCode.SHINHAN)
+
+        // fixedClock 2026-06-18T01:30:00Z 를 KST 로 환산한 값
+        assertEquals("20260618103000", api.lastRequest?.tranDtime)
+    }
+
+    private fun buildRepo(api: KftcApiService) = RecipientRepositoryImpl(api, RecipientMapper(), fixedClock)
 
     private fun response(
         rsp: String = "A0000",

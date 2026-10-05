@@ -21,6 +21,9 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneOffset
 
 /** Room 없이 인메모리 fake DAO로 [TransactionRemoteMediator]의 네트워크→DB 적재를 검증한다. */
 @OptIn(ExperimentalPagingApi::class)
@@ -28,6 +31,7 @@ class TransactionRemoteMediatorTest {
 
     private val accountId = AccountId("120220112345678901234001")
     private val transactionDao = FakeTransactionDao()
+    private val fixedClock = Clock.fixed(Instant.parse("2026-06-18T01:30:00Z"), ZoneOffset.UTC)
 
     @Test
     fun `REFRESH는 첫 페이지를 적재하고 다음 페이지가 있으면 미완료를 알린다`() = runTest {
@@ -91,6 +95,16 @@ class TransactionRemoteMediatorTest {
         assertEquals(0, api.callCount)
     }
 
+    @Test
+    fun `페이지 요청의 거래일시는 주입된 Clock 의 현재 시각을 KST 로 적는다`() = runTest {
+        val api = FakePagedApi(twoPageScript())
+
+        mediator(api).load(LoadType.REFRESH, emptyState())
+
+        // fixedClock 2026-06-18T01:30:00Z 를 KST 로 환산한 값
+        assertEquals("20260618103000", api.lastTranDtime)
+    }
+
     // --- 헬퍼 ---
 
     private fun mediator(api: KftcApiService) = TransactionRemoteMediator(
@@ -102,7 +116,7 @@ class TransactionRemoteMediatorTest {
         bankTranId = "M202300001U000001",
         fromDate = "20260101",
         toDate = "20261231",
-        tranDtime = "20260603120000",
+        clock = fixedClock,
     )
 
     private fun emptyState() = PagingState<Int, TransactionEntity>(
@@ -165,6 +179,8 @@ class TransactionRemoteMediatorTest {
             private set
         var lastRequestedCursor: String? = null
             private set
+        var lastTranDtime: String? = null
+            private set
 
         override suspend fun getTransactionList(
             bankTranId: String,
@@ -179,6 +195,7 @@ class TransactionRemoteMediatorTest {
         ): TransactionListResponse {
             callCount++
             lastRequestedCursor = beforInquiryTraceInfo
+            lastTranDtime = tranDtime
             return pageByCursor[beforInquiryTraceInfo] ?: error("no page for cursor=$beforInquiryTraceInfo")
         }
     }
