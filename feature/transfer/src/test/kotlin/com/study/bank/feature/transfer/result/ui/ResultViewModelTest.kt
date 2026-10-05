@@ -210,6 +210,24 @@ class ResultViewModelTest {
     }
 
     @Test
+    fun `확인 화면의 송금 한 건으로 결과 화면이 두 번 생성돼도 같은 멱등성 키로 송금한다`() = runTest {
+        val accounts = FakeAccountRepository().apply {
+            emit(account(SOURCE_ID), account(RECIPIENT_ID))
+        }
+        // 확인 화면이 같은 송금으로 결과 화면을 두 번 연 상황(내비게이션 중복 실행). 화면 인스턴스는 별개라
+        // SavedStateHandle 도 각각 새로 생성된다. 서버가 한 건으로 판정하려면 키가 같아야 한다.
+        val first = SequencedTransferRepository(success())
+        buildViewModel(accounts, first, amount = 1)
+        val second = SequencedTransferRepository(success())
+        buildViewModel(accounts, second, amount = 1)
+
+        assertEquals(
+            first.requests.single().idempotencyKey,
+            second.requests.single().idempotencyKey,
+        )
+    }
+
+    @Test
     fun `재실행 중에는 RetryClicked 연타가 무시된다`() = runTest {
         val accounts = FakeAccountRepository().apply {
             emit(account(SOURCE_ID), account(RECIPIENT_ID))
