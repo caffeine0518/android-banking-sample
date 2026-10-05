@@ -30,11 +30,7 @@ fun ResultRoute(
         viewModel.effect.flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
     }
 
-    // 송금을 보낸 뒤(로딩/성공)에는 시스템 뒤로가기로 확인·금액 화면에 되돌아가 재송금하지 못하게 막는다.
-    // 실패일 때만 뒤로가기를 허용해 이전 화면으로 돌아가게 둔다.
-    BackHandler(enabled = state.phase !is ResultPhase.Failure) {
-        // no-op: 로딩/성공 중 뒤로가기 차단(완료는 "확인" 또는 상단 백으로만).
-    }
+    ResultBackHandler(phase = state.phase)
 
     LaunchedEffect(effects) {
         effects.collect { effect ->
@@ -48,4 +44,15 @@ fun ResultRoute(
     }
 
     ResultScreen(state = state, onIntent = viewModel::onIntent)
+}
+
+/**
+ * 송금을 보낸 뒤(로딩/성공)에는 시스템 뒤로가기로 확인·금액 화면에 되돌아가 재송금하지 못하게 막는다.
+ * 실패일 때만 뒤로가기를 허용해 이전 화면으로 돌아가게 둔다.
+ */
+@Composable
+internal fun ResultBackHandler(phase: ResultPhase) {
+    BackHandler(enabled = phase !is ResultPhase.Failure) {
+        // no-op: 로딩/성공 중 뒤로가기 차단(완료는 "확인" 또는 상단 백으로만).
+    }
 }
