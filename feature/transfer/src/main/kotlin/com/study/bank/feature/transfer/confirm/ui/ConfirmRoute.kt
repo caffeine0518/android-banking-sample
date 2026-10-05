@@ -38,10 +38,10 @@ fun ConfirmRoute(
                 is ConfirmEffect.Submit ->
                     currentOnSent(
                         TransferResultRoute(
-                            effect.sourceAccountId,
-                            effect.recipient,
-                            effect.amount,
-                            effect.idempotencyKey,
+                            sourceAccountId = effect.sourceAccountId,
+                            recipient = effect.recipient,
+                            amount = effect.amount,
+                            idempotencyKey = effect.idempotencyKey,
                         ),
                     )
                 // 편집/변경 화면 미구현 — 현재는 무시(placeholder).
