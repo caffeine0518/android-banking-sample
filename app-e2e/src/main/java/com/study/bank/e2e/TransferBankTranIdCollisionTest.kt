@@ -29,11 +29,10 @@ import org.junit.Rule
 import org.junit.Test
 
 /**
- * 두 송금의 거래고유번호(bank_tran_id)가 실제로 충돌할 때 화면과 잔액을 검증하는 E2E.
+ * 해시가 같은 멱등성 키로 송금해도 거래고유번호(bank_tran_id)가 충돌하지 않는지 화면과 잔액으로 검증하는 E2E.
  *
- * 송금마다 해시가 같은 멱등성 키를 발급해, 두 번째 송금이 첫 번째 송금과 같은 번호로 나가게 한다. 서버는 그 번호를
- * 이미 체결된 다른 거래로 판정해 409 로 거절하고, 앱은 대체 번호로 다시 보내야 한다. 같은 번호로 다시 보내면
- * 계속 409 라 성공 화면이 보이지 않는다.
+ * 송금마다 해시가 같은 멱등성 키를 발급한다. 번호를 키의 해시로 만들면 두 번째 송금이 첫 번째 송금과 같은 번호로
+ * 나가 서버가 거절한다. 번호는 키마다 순번으로 발급되므로 두 송금 모두 성공해야 한다.
  */
 @HiltAndroidTest
 @UninstallModules(IdempotencyKeyModule::class)
@@ -84,7 +83,7 @@ class TransferBankTranIdCollisionTest {
     }
 
     private companion object {
-        // String.hashCode 가 같은 두 키 → 같은 bank_tran_id 로 변환된다.
+        // String.hashCode 가 같은 두 키. 해시로 bank_tran_id 를 만들면 같은 번호가 된다.
         const val COLLIDING_KEY_A = "e2e-collision-Aa"
         const val COLLIDING_KEY_B = "e2e-collision-BB"
 
