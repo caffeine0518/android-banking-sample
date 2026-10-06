@@ -48,12 +48,16 @@ data class TransferConfirmRoute(
     val amount: Long,
 ) : NavKey
 
-/** 송금 4번째 화면: 송금 결과(로딩→성공/실패). 진입과 동시에 실제 송금을 실행한다. */
+/**
+ * 송금 4번째 화면: 송금 결과(로딩→성공/실패). 진입과 동시에 실제 송금을 실행한다.
+ * [idempotencyKey]는 확인 화면이 송금 한 건마다 발급한다. 결과 화면이 중복 생성되거나 복원돼도 같은 키로 송금한다.
+ */
 @Serializable
 data class TransferResultRoute(
     val sourceAccountId: String,
     val recipient: TransferRecipientArg,
     val amount: Long,
+    val idempotencyKey: String,
 ) : NavKey
 
 fun EntryProviderScope<NavKey>.transferRecipientEntry(

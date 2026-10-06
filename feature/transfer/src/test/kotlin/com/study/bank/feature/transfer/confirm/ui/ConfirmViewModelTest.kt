@@ -1,6 +1,7 @@
 package com.study.bank.feature.transfer.confirm.ui
 
 import app.cash.turbine.test
+import androidx.lifecycle.SavedStateHandle
 import com.study.bank.core.ui.mapper.MoneyUiMapper
 import com.study.bank.domain.coroutine.DispatcherProvider
 import com.study.bank.domain.model.BankCode
@@ -18,6 +19,7 @@ import com.study.bank.feature.transfer.navigation.TransferConfirmRoute
 import com.study.bank.feature.transfer.navigation.TransferRecipientArg
 import com.study.bank.feature.transfer.testutil.MainDispatcherRule
 import java.math.BigDecimal
+import java.util.UUID
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -91,6 +93,7 @@ class ConfirmViewModelTest {
                         holderName = "이수취",
                     ),
                     amount = 2L,
+                    idempotencyKey = IDEMPOTENCY_KEY,
                 ),
                 awaitItem(),
             )
@@ -118,6 +121,7 @@ class ConfirmViewModelTest {
                         holderName = "이수취",
                     ),
                     amount = 2L,
+                    idempotencyKey = IDEMPOTENCY_KEY,
                 ),
                 awaitItem(),
             )
@@ -125,6 +129,28 @@ class ConfirmViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
         assertTrue(vm.state.value.submitting)
+    }
+
+    @Test
+    fun `복원돼도 Submit effect의 멱등성 키가 보존된다`() = runTest {
+        val repo = FakeAccountRepository()
+        // 같은 SavedStateHandle로 VM 재생성 = 프로세스 death 후 Navigation이 확인 화면을 복원하는 상황.
+        val savedStateHandle = SavedStateHandle()
+        val newKey = { UUID.randomUUID().toString() }
+        val first = buildViewModel(repo, amount = 2, savedStateHandle = savedStateHandle, newKey = newKey)
+        val restored = buildViewModel(repo, amount = 2, savedStateHandle = savedStateHandle, newKey = newKey)
+        repo.emit(account(SOURCE_ID), account(RECIPIENT_ID))
+
+        val firstKey = first.effect.test {
+            first.onIntent(ConfirmIntent.SendClicked)
+            (awaitItem() as ConfirmEffect.Submit).idempotencyKey
+        }
+        val restoredKey = restored.effect.test {
+            restored.onIntent(ConfirmIntent.SendClicked)
+            (awaitItem() as ConfirmEffect.Submit).idempotencyKey
+        }
+
+        assertEquals(firstKey, restoredKey)
     }
 
     @Test
@@ -151,7 +177,12 @@ class ConfirmViewModelTest {
         }
     }
 
-    private fun buildViewModel(repo: FakeAccountRepository, amount: Long) = ConfirmViewModel(
+    private fun buildViewModel(
+        repo: FakeAccountRepository,
+        amount: Long,
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        newKey: () -> String = { IDEMPOTENCY_KEY },
+    ) = ConfirmViewModel(
         route = TransferConfirmRoute(
             sourceAccountId = SOURCE_ID,
             recipient = TransferRecipientArg(
@@ -161,7 +192,9 @@ class ConfirmViewModelTest {
             ),
             amount = amount,
         ),
+        savedStateHandle = savedStateHandle,
         accountRepository = repo,
+        idempotencyKeyGenerator = newKey,
         confirmUiMapper = confirmUiMapper,
         dispatcherProvider = TestDispatcherProvider(mainDispatcherRule.testDispatcher),
     )
@@ -207,5 +240,6 @@ class ConfirmViewModelTest {
     private companion object {
         const val SOURCE_ID = "source-1"
         const val RECIPIENT_ID = "recipient-1"
+        const val IDEMPOTENCY_KEY = "idem-1"
     }
 }
