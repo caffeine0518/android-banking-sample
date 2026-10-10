@@ -44,9 +44,6 @@ fun ConfirmRoute(
                             idempotencyKey = effect.idempotencyKey,
                         ),
                     )
-                // 편집/변경 화면 미구현 — 현재는 무시(placeholder).
-                ConfirmEffect.EditDisplayName -> Unit
-                ConfirmEffect.ChangeSource -> Unit
             }
         }
     }

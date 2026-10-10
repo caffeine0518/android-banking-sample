@@ -66,15 +66,6 @@ class ConfirmScreenTest {
     }
 
     @Test
-    fun `받는 분에게 표시 행을 누르면 DisplayNameClicked 인텐트가 방출된다`() {
-        setScreen(ConfirmState(detail = detail()))
-
-        composeRule.onNodeWithText("박송금").performClick()
-
-        assertEquals(listOf(ConfirmIntent.DisplayNameClicked), intents)
-    }
-
-    @Test
     fun `백 버튼을 누르면 BackClicked 인텐트가 방출된다`() {
         setScreen(ConfirmState(detail = detail()))
 

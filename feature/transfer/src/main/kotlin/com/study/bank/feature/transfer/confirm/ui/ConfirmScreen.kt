@@ -83,7 +83,7 @@ internal fun ConfirmScreen(
             }
             Spacer(Modifier.weight(1f))
             if (detail != null) {
-                InfoSection(detail = detail, onIntent = onIntent)
+                InfoSection(detail = detail)
             }
             Spacer(Modifier.height(8.dp))
         }
@@ -125,12 +125,11 @@ private fun ColumnScope.TitleBlock(detail: ConfirmDetailUi) {
 }
 
 @Composable
-private fun InfoSection(detail: ConfirmDetailUi, onIntent: (ConfirmIntent) -> Unit) {
+private fun InfoSection(detail: ConfirmDetailUi) {
     Column(modifier = Modifier.fillMaxWidth()) {
         ConfirmInfoRow(
             label = stringResource(R.string.transfer_confirm_label_display_name),
             value = detail.displayName,
-            onClick = { onIntent(ConfirmIntent.DisplayNameClicked) },
         )
         ConfirmInfoRow(
             label = stringResource(R.string.transfer_confirm_label_source),
@@ -138,7 +137,6 @@ private fun InfoSection(detail: ConfirmDetailUi, onIntent: (ConfirmIntent) -> Un
                 R.string.transfer_confirm_source_format,
                 detail.sourceNickname ?: detail.sourceType.label(),
             ),
-            onClick = { onIntent(ConfirmIntent.SourceAccountClicked) },
         )
         ConfirmInfoRow(
             label = stringResource(R.string.transfer_confirm_label_deposit),

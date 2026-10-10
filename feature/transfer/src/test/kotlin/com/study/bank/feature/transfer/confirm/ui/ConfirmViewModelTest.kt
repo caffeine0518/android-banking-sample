@@ -164,19 +164,6 @@ class ConfirmViewModelTest {
         }
     }
 
-    @Test
-    fun `표시이름·출금계좌 행은 각각 편집·변경 effect를 보낸다`() = runTest {
-        val vm = buildViewModel(FakeAccountRepository(), amount = 2)
-
-        vm.effect.test {
-            vm.onIntent(ConfirmIntent.DisplayNameClicked)
-            assertEquals(ConfirmEffect.EditDisplayName, awaitItem())
-            vm.onIntent(ConfirmIntent.SourceAccountClicked)
-            assertEquals(ConfirmEffect.ChangeSource, awaitItem())
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
-
     private fun buildViewModel(
         repo: FakeAccountRepository,
         amount: Long,
