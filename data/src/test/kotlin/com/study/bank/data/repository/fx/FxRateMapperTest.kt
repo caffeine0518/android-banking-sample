@@ -1,5 +1,6 @@
 package com.study.bank.data.repository.fx
 
+import com.study.bank.data.remote.fx.api.KeximRates
 import com.study.bank.data.remote.fx.dto.KeximRateItem
 import com.study.bank.domain.model.Currency
 import java.math.BigDecimal
@@ -29,7 +30,7 @@ class FxRateMapperTest {
             success("JPY(100)", "950.00"),
         )
 
-        val result = mapper.map(items, Currency.KRW)
+        val result = mapper.map(KeximRates.Published(items), Currency.KRW)
 
         assertNotNull(result)
         assertTrue(result!!.containsKey(Currency.USD))
@@ -42,26 +43,9 @@ class FxRateMapperTest {
     fun `map은 JPY(100) 단위를 1엔 단위로 정규화`() {
         val items = listOf(success("JPY(100)", "950.00"))
 
-        val result = mapper.map(items, Currency.KRW)
+        val result = mapper.map(KeximRates.Published(items), Currency.KRW)
 
         assertEquals(0, BigDecimal("9.5").compareTo(result!![Currency.JPY]))
-    }
-
-    // 인증실패/휴일 응답이 환율 0으로 환산에 섞이는 사고 방지.
-    @Test
-    fun `map은 result가 1이 아닌 응답을 제외`() {
-        val items = listOf(
-            success("USD", "1,350.00"),
-            KeximRateItem(result = 3, curUnit = "EUR", dealBasR = "1,450.00"),
-            KeximRateItem(result = 2, curUnit = "JPY(100)", dealBasR = "950.00"),
-        )
-
-        val result = mapper.map(items, Currency.KRW)
-
-        assertNotNull(result)
-        assertTrue(result!!.containsKey(Currency.USD))
-        assertNull(result[Currency.EUR])
-        assertNull(result[Currency.JPY])
     }
 
     @Test
@@ -72,7 +56,7 @@ class FxRateMapperTest {
             success("GBP", "1,700.00"),
         )
 
-        val result = mapper.map(items, Currency.KRW)
+        val result = mapper.map(KeximRates.Published(items), Currency.KRW)
 
         assertNotNull(result)
         assertTrue(result!!.containsKey(Currency.USD))
@@ -83,7 +67,7 @@ class FxRateMapperTest {
     fun `map은 천단위 콤마 포함 문자열을 파싱`() {
         val items = listOf(success("USD", "1,234,567.89"))
 
-        val result = mapper.map(items, Currency.KRW)
+        val result = mapper.map(KeximRates.Published(items), Currency.KRW)
 
         assertEquals(0, BigDecimal("1234567.89").compareTo(result!![Currency.USD]))
     }
@@ -93,14 +77,8 @@ class FxRateMapperTest {
     @Test
     fun `map은 파싱 가능한 응답이 없으면 null 반환`() {
         listOf(Currency.KRW, Currency.USD, Currency.EUR).forEach { target ->
-            assertNull("empty + target=$target", mapper.map(emptyList(), target))
+            assertNull("empty + target=$target", mapper.map(KeximRates.Published(emptyList()), target))
         }
-
-        val allFailures = listOf(
-            KeximRateItem(result = 3, curUnit = "USD", dealBasR = "1,350.00"),
-            KeximRateItem(result = 2),
-        )
-        assertNull(mapper.map(allFailures, Currency.KRW))
     }
 
     // target 통화 데이터가 KEXIM에 없으면 silent 폴백 대신 null로 "환산 불가" 신호.
@@ -109,7 +87,7 @@ class FxRateMapperTest {
         // EUR만 있고 USD 없는 응답 + target USD
         val items = listOf(success("EUR", "1,450.00"))
 
-        assertNull(mapper.map(items, Currency.USD))
+        assertNull(mapper.map(KeximRates.Published(items), Currency.USD))
     }
 
     // ----- target 동적성 (rebaser와의 통합) -----
@@ -122,8 +100,8 @@ class FxRateMapperTest {
             success("EUR", "1,450.00"),
         )
 
-        val toKrw = mapper.map(items, Currency.KRW)
-        val toUsd = mapper.map(items, Currency.USD)
+        val toKrw = mapper.map(KeximRates.Published(items), Currency.KRW)
+        val toUsd = mapper.map(KeximRates.Published(items), Currency.USD)
 
         // KRW 기준: 1 USD = 1350 KRW
         assertEquals(0, BigDecimal("1350").compareTo(toKrw!![Currency.USD]))
