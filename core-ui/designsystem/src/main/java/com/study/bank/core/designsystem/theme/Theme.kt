@@ -25,7 +25,6 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun BankTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // 다이내믹 컬러는 Android 12 이상에서만 지원한다
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
