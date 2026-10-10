@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <lint>
     <!--
-      annotation-experimental 번들 lint 검사가 K2 IDE 분석에서 @Serializable 클래스의 생성 코드를
-      InternalSerializationApi opt-in 위반으로 오판한다(컴파일러·CLI lint는 보고하지 않는다).
-      Kotlin opt-in 은 컴파일러가 이미 강제하므로 이 메시지만 제외한다.
-      https://github.com/Kotlin/kotlinx.serialization/issues/2844 , KTIJ-31549
+      K2 모드 IDE에서만 발생하는 오탐을 제외한다.
+
+      annotation-experimental의 UnsafeOptInUsageError 검사가 @Serializable 클래스의 생성 코드를
+      InternalSerializationApi opt-in 위반으로 잘못 판정한다. 빌드와 CLI lint에서는 보고되지 않는다.
+      Kotlin opt-in은 컴파일러가 따로 검사하므로, 이 메시지만 제외해도 놓치는 위반은 없다.
+
+      참고: https://github.com/Kotlin/kotlinx.serialization/issues/2844 (KTIJ-31549)
     -->
     <issue id="UnsafeOptInUsageError">
         <ignore regexp="kotlinx\.serialization\.InternalSerializationApi" />
