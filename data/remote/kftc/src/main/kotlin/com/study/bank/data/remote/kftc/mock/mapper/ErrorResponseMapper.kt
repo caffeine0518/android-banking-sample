@@ -8,12 +8,7 @@ import com.study.bank.data.remote.kftc.mock.model.ErrorEnvelope
 import com.study.bank.data.remote.kftc.network.KftcJson
 import okhttp3.mockwebserver.MockResponse
 
-/**
- * [MockError] → 에러 응답.
- *
- * 다른 매퍼와 달리 DTO가 아니라 [MockResponse]를 반환한다 — HTTP 상태코드가 [MockError]의 일부라
- * 여기서 함께 붙이는 편이 호출부에서 다시 꺼내 쓰는 것보다 짧다.
- */
+/** HTTP 상태 코드가 [MockError]에 포함돼 있어 DTO가 아니라 [MockResponse]를 반환한다. */
 internal class ErrorResponseMapper(private val tranIds: KftcTranIds) {
 
     fun toResponse(error: MockError): MockResponse {
@@ -23,8 +18,8 @@ internal class ErrorResponseMapper(private val tranIds: KftcTranIds) {
             rspCode = RSP_ERROR,
             rspMessage = error.message,
         )
-        // 생성된 serializer를 직접 넘긴다 — reified 경로를 타면 IDE가 InternalSerializationApi
-        // opt-in을 요구한다(컴파일러는 경고하지 않지만 에디터에 계속 남는다).
+        // 생성된 serializer를 직접 전달한다. reified 버전을 쓰면 IDE가 InternalSerializationApi opt-in 경고를
+        // 표시한다(컴파일러는 경고하지 않는다).
         return jsonResponse(
             error.httpCode,
             KftcJson.encodeToString(ErrorEnvelope.serializer(), envelope),

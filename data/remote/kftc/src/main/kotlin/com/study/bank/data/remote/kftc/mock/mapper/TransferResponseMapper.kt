@@ -7,16 +7,15 @@ import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferResponse
 import com.study.bank.data.remote.kftc.mock.http.response.KftcTranIds
 import com.study.bank.data.remote.kftc.mock.service.model.WithdrawResult
 
-/** 출금 결과 → KFTC `/v2.0/transfer/…` 응답 DTO. 성공과 업무 거절이 같은 DTO를 쓴다. */
 internal class TransferResponseMapper(private val tranIds: KftcTranIds) {
 
-    /** bank_tran_id는 새로 발급하지 않고 요청값을 그대로 돌려준다 — 재요청이 같은 거래여야 한다. */
     fun toResponse(result: WithdrawResult.Success): WithdrawTransferResponse =
         WithdrawTransferResponse(
             apiTranId = tranIds.newApiTranId(),
             apiTranDtm = tranIds.nowDtm(),
             rspCode = RSP_SUCCESS,
             rspMessage = "",
+            // 재요청도 같은 거래로 식별되도록 새로 발급하지 않는다.
             bankTranId = result.bankTranId,
             bankTranDate = tranIds.nowDate(),
             bankCodeTran = result.bankCodeStd,
@@ -28,7 +27,6 @@ internal class TransferResponseMapper(private val tranIds: KftcTranIds) {
             afterBalanceAmt = result.afterBalanceAmt,
         )
 
-    /** 업무 거절. 계좌 상세는 비우고 식별용 [bankRspCode]만 채운다. */
     fun toRejectedResponse(bankRspCode: String, message: String): WithdrawTransferResponse =
         WithdrawTransferResponse(
             apiTranId = tranIds.newApiTranId(),

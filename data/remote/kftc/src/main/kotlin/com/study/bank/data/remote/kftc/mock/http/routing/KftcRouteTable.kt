@@ -4,12 +4,6 @@ import com.study.bank.data.remote.kftc.mock.http.handler.AccountRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.handler.InquiryRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.handler.TransferRequestHandler
 
-/**
- * mock 서버가 노출하는 KFTC 오픈뱅킹 v2.0 엔드포인트 전체.
- *
- * 경로·메서드·처리 주체가 한 줄에 모여 있어 [com.study.bank.data.remote.kftc.api.KftcApiService]의
- * Retrofit 선언과 나란히 대조할 수 있다. 쿼리/본문을 꺼내는 것까지만 여기서 하고, 그 뒤 판단은 핸들러 몫.
- */
 internal fun kftcRoutes(
     account: AccountRequestHandler,
     transfer: TransferRequestHandler,

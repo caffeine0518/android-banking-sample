@@ -10,7 +10,6 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 
-/** KFTC `/v2.0/inquiry/…` 계좌실명조회 핸들러. */
 internal class InquiryRequestHandler(
     private val recipients: List<SeedRecipient>,
     private val mapper: InquiryResponseMapper,
@@ -29,9 +28,6 @@ internal class InquiryRequestHandler(
     private fun parse(body: String): RealNameInquiryRequest? =
         runCatching { json.decodeFromString<RealNameInquiryRequest>(body) }.getOrNull()
 
-    /**
-     * 계좌번호 비교용 정규화. 실제 KFTC는 account_num을 하이픈 없는 숫자로 주고받고(하이픈은 표시용)
-     * 시드는 하이픈 표기를 쓰므로, 양쪽에서 숫자만 남겨 비교한다.
-     */
+    /** KFTC는 하이픈 없는 숫자로 전송하지만 시드는 하이픈을 포함하므로 숫자만 비교한다. */
     private fun String.digitsOnly(): String = filter(Char::isDigit)
 }

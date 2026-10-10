@@ -11,11 +11,6 @@ import com.study.bank.data.remote.kftc.mock.storage.dao.MockTransactionDao
 import com.study.bank.data.remote.kftc.mock.storage.entity.SeedAccount
 import okhttp3.mockwebserver.MockResponse
 
-/**
- * KFTC `/v2.0/account/…` 조회 핸들러.
- *
- * 조회 전용이라 쓰기 규칙([KftcWithdrawalService])을 거치지 않고 DAO를 직접 읽는다.
- */
 internal class AccountRequestHandler(
     private val accountDao: MockAccountDao,
     private val transactionDao: MockTransactionDao,
@@ -61,7 +56,6 @@ internal class AccountRequestHandler(
     private companion object {
         const val PAGE_SIZE = KFTC_TRANSACTION_PAGE_SIZE
 
-        // 클라는 받은 커서를 그대로 되돌려보내기만 한다(불투명 토큰).
         private const val CURSOR_PREFIX = "INQ"
 
         fun encodeCursor(seq: Long): String = "$CURSOR_PREFIX$seq"

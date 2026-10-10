@@ -10,12 +10,6 @@ private val DTM_FORMATTER: DateTimeFormatter =
 private val DATE_FORMATTER: DateTimeFormatter =
     DateTimeFormatter.ofPattern("yyyyMMdd")
 
-/**
- * 응답 추적 필드 발급기.
- *
- * api_tran_id 시퀀스가 엔드포인트 전역으로 1씩 증가해야 하므로 mock 서버 하나당 인스턴스 하나를
- * 매퍼들이 공유한다. 응답 DTO에 없는 필드는 매퍼가 호출하지 않아 번호도 소모되지 않는다.
- */
 internal class KftcTranIds {
     private val apiTranSeq = AtomicLong(0)
     private val bankTranSeq = AtomicLong(0)

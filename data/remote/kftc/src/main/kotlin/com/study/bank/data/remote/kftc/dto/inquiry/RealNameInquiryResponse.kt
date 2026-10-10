@@ -3,13 +3,7 @@ package com.study.bank.data.remote.kftc.dto.inquiry
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/**
- * KFTC 계좌실명조회 응답.
- *
- * 조회 성공은 rsp_code "A0000" + 예금주명/식별자/상태. 조회 실패(수취 계좌 없음)는 KFTC대로 HTTP 200 +
- * rsp_code "A0001" + bank_rsp_code로 내려오며 이때 상세 필드는 비어 있어 nullable로 둔다.
- * `account_status`는 mock 확장 — 휴면/해지 계좌를 RecipientLookup.Inactive로 구분하기 위함.
- */
+/** 수취 계좌가 없으면 HTTP 200 + rsp_code A0001로 상세 필드 없이 반환되므로 상세 필드는 널러블이다. */
 @Serializable
 data class RealNameInquiryResponse(
     @SerialName("api_tran_id") val apiTranId: String,
@@ -23,5 +17,6 @@ data class RealNameInquiryResponse(
     @SerialName("account_num") val accountNum: String? = null,
     @SerialName("account_holder_name") val accountHolderName: String? = null,
     @SerialName("account_id") val accountId: String? = null,
+    // 휴면·해지 계좌를 구분하는 mock 확장 필드.
     @SerialName("account_status") val accountStatus: String? = null,
 )
