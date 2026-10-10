@@ -45,7 +45,6 @@ class AmountViewModelTest {
 
         val state = vm.state.value
         assertEquals("U드림 저축예금", state.source?.nickname)
-        // 수취인은 라우트로 확정돼 들어온다(예금주명·은행 표시). 별명/종류가 아니다.
         assertEquals("이수취", state.recipient?.holderName)
         assertEquals("신한은행", state.recipient?.bankDisplayName)
     }

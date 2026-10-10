@@ -22,7 +22,6 @@ import com.study.bank.feature.transfer.R
 
 private const val BACKSPACE_GLYPH = "⌫"
 
-/** 토스식 숫자 키패드: 1~9 / 00 / 0 / 지우기. */
 @Composable
 internal fun AmountKeypad(
     onDigit: (String) -> Unit,

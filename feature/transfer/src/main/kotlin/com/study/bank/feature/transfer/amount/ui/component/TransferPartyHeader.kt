@@ -22,10 +22,7 @@ import com.study.bank.feature.transfer.amount.ui.model.AmountRecipientUi
 import com.study.bank.feature.transfer.amount.ui.model.AmountSourceUi
 import com.study.bank.feature.transfer.recipient.ui.model.label
 
-/**
- * 출금계좌(FROM)와 수취계좌(TO)를 위·아래로 보여주는 헤더.
- * 조사("에서"/"로") 대신 언어 중립적인 FROM/TO 캡션으로 방향을 표시한다.
- */
+/** 조사("에서"/"로") 대신 언어 중립적인 FROM/TO 캡션으로 방향을 표시한다. */
 @Composable
 internal fun TransferPartyHeader(
     source: AmountSourceUi?,
@@ -71,7 +68,6 @@ private fun RecipientParty(recipient: AmountRecipientUi) {
     )
 }
 
-/** FROM/TO 캡션. 작고 흐린 대문자 라벨로 본문 위에 배치한다. */
 @Composable
 private fun PartyLabel(text: String) {
     Text(

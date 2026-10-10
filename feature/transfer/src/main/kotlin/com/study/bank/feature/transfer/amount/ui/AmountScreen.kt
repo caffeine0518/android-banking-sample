@@ -90,7 +90,6 @@ private fun AmountValue(state: AmountState, onFillBalance: () -> Unit) {
     val source = state.source
     val entered = state.isAmountEntered && source != null
     val amountText = if (entered) {
-        // state.amount는 통화 최소단위(minor unit) 정수 → exponent만큼 소수점을 밀어 표시 금액 복원.
         val currency = source.balance.currency
         val displayAmount = BigDecimal.valueOf(state.amount).movePointLeft(currency.exponent)
         MoneyUi(displayAmount, currency).format()
@@ -139,7 +138,6 @@ private fun BottomBar(
     onDigit: (String) -> Unit,
     onBackspace: () -> Unit,
 ) {
-    // 키패드 배경은 내비게이션 바 뒤까지 채우되, 콘텐츠는 navigationBarsPadding으로 시스템 바 위로 띄운다.
     Surface(color = MaterialTheme.colorScheme.background) {
         Column(modifier = Modifier.navigationBarsPadding()) {
             if (showNext) {

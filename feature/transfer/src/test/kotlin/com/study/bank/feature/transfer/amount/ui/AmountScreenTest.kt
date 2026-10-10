@@ -24,7 +24,7 @@ import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-// 키패드 bottomBar가 길어 기본(작은) 뷰포트에선 콘텐츠 영역이 0높이로 눌린다. 실제 폰 크기를 준다.
+// 키패드가 길어 기본 뷰포트에서는 콘텐츠 높이가 0이 된다.
 @Config(qualifiers = "w411dp-h891dp")
 class AmountScreenTest {
 
@@ -51,7 +51,6 @@ class AmountScreenTest {
         composeRule.onNodeWithText(string(R.string.transfer_amount_from_label)).assertIsDisplayed()
         composeRule.onNodeWithText("U드림 저축예금").assertIsDisplayed()
         composeRule.onNodeWithText(string(R.string.transfer_amount_to_label)).assertIsDisplayed()
-        // 수취인은 예금주명으로 표시된다(본인·외부 동일).
         composeRule.onNodeWithText("이수취").assertIsDisplayed()
         composeRule.onNodeWithText(string(R.string.transfer_amount_hint)).assertIsDisplayed()
     }
