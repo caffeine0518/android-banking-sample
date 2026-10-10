@@ -173,8 +173,6 @@ class KftcApiServiceTest {
             path.contains("sort_order=D"))
     }
 
-    // --- 거래내역 조회 / 출금이체 E2E ---
-
     @Test
     fun `시드 거래내역이 없는 계좌는 빈 res_list와 next_page_yn=N을 반환한다`() = runTest {
         // 신한 계좌는 시드 거래내역이 없다.
@@ -328,8 +326,6 @@ class KftcApiServiceTest {
         // 기본값이어도 KFTC 필수 필드다(encodeDefaults).
         assertTrue("transfer_purpose 필드: $body", body.contains("transfer_purpose"))
     }
-
-    // --- 계좌실명조회 E2E ---
 
     @Test
     fun `inquireRealName 활성 수취인은 예금주명과 ACTIVE를 반환한다`() = runTest {
