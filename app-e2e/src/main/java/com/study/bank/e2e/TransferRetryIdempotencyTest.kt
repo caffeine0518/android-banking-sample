@@ -74,7 +74,6 @@ class TransferRetryIdempotencyTest {
         composeRule.onNodeWithText(BALANCE_AFTER_ONE_SEND, substring = true).assertIsDisplayed()
     }
 
-    /** 홈 → [sourceId] 상세 → 보내기 → 수취인 [recipientId] → 금액 화면. */
     private fun openAmountScreen(sourceId: String, recipientId: String) {
         composeRule.awaitTag(accountItem(sourceId))
         composeRule.onNodeWithTag(accountItem(sourceId)).performClick()
