@@ -12,12 +12,6 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
 
-/**
- * 금융결제원 오픈뱅킹 v2.0 엔드포인트 일부의 Retrofit 인터페이스.
- *
- * KFTC 스펙에서 계좌 목록과 잔액은 별도 API다. Repository가 목록을 조회한 뒤 계좌마다
- * `balance/fin_num`을 병렬로 호출하는 것을 전제로 한다.
- */
 interface KftcApiService {
 
     @GET("v2.0/account/list_finuse")

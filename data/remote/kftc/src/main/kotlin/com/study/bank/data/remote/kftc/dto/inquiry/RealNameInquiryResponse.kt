@@ -4,11 +4,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * KFTC 계좌실명조회 응답.
- *
- * 성공하면 rsp_code "A0000"과 예금주명·계좌 식별자·상태를 반환한다. 수취 계좌가 없으면 KFTC 스펙대로
- * HTTP 200 + rsp_code "A0001" + bank_rsp_code를 반환하고 상세 필드가 비어 있으므로 널러블로 둔다.
- * `account_status`는 mock 확장 필드로, 휴면·해지 계좌를 RecipientLookup.Inactive로 구분한다.
+ * 수취 계좌가 없으면 HTTP 200 + rsp_code A0001로 상세 필드 없이 반환되므로 상세 필드는 널러블이다.
+ * `account_status`는 휴면·해지 계좌를 구분하는 mock 확장 필드다.
  */
 @Serializable
 data class RealNameInquiryResponse(

@@ -3,11 +3,6 @@ package com.study.bank.data.remote.kftc.dto.transaction
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/**
- * KFTC 오픈뱅킹 v2.0 거래내역조회(`transaction_list/fin_num`) 응답.
- *
- * 공통 응답 필드, 조회 계좌의 현재 잔액, 거래 목록으로 구성된다. `res_list`는 sort_order=D(최신순)로 정렬된다.
- */
 @Serializable
 data class TransactionListResponse(
     @SerialName("api_tran_id") val apiTranId: String,

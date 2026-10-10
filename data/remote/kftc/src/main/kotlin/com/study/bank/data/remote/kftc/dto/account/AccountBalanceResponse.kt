@@ -3,11 +3,7 @@ package com.study.bank.data.remote.kftc.dto.account
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/**
- * KFTC 오픈뱅킹 v2.0 `GET /v2.0/account/balance/fin_num` 응답.
- *
- * `currency_code`는 실제 KFTC 잔액조회의 외환 확장 필드다. 다통화 도메인을 시연하기 위해 mock 응답에는 항상 포함한다.
- */
+/** `currency_code`는 KFTC 잔액조회의 외환 확장 필드로, mock은 항상 포함한다. */
 @Serializable
 data class AccountBalanceResponse(
     @SerialName("api_tran_id") val apiTranId: String,
