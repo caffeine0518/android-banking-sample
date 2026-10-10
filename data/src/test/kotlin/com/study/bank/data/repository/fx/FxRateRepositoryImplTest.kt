@@ -24,9 +24,6 @@ class FxRateRepositoryImplTest {
         ZoneId.of("Asia/Seoul"),
     )
 
-    // ----- target 통화에 따른 동적 환율 뷰 -----
-
-    // repository가 target을 무시하고 KRW-base 응답 그대로 흘리는 회귀 방지.
     @Test
     fun `같은 KEXIM 응답을 다른 target으로 요청하면 각각 다른 뷰가 emit된다`() = runTest {
         val items = listOf(
@@ -41,20 +38,15 @@ class FxRateRepositoryImplTest {
         val usdView = repo.observeRates(Currency.USD).first()
         val eurView = repo.observeRates(Currency.EUR).first()
 
-        // 각 뷰는 자기 target의 identity를 가진다
         assertEquals(0, BigDecimal.ONE.compareTo(krwView[Currency.KRW]))
         assertEquals(0, BigDecimal.ONE.compareTo(usdView[Currency.USD]))
         assertEquals(0, BigDecimal.ONE.compareTo(eurView[Currency.EUR]))
 
-        // 그리고 cross-currency 환율은 target에 따라 다르다
         assertEquals(0, BigDecimal("1350").compareTo(krwView[Currency.USD]))
         // USD view의 KRW: 1 / 1350 = 0.00074074 (SCALE=8, HALF_UP)
         assertEquals(0, BigDecimal("0.00074074").compareTo(usdView[Currency.KRW]))
     }
 
-    // ----- walkback (target과 무관한 영업일 회피 로직) -----
-
-    // KEXIM이 휴일/주말에 빈 배열로 응답하는 실제 동작을 회피.
     @Test
     fun `최근 응답이 비면 다음 날짜로 walkback`() = runTest {
         val api = FakeKeximApiService(mapOf(
@@ -66,9 +58,8 @@ class FxRateRepositoryImplTest {
 
         val result = repo.observeRates(Currency.KRW).first()
 
-        // primary: walkback이 yesterday()-2 데이터에 도달했는지 결과로 증명
         assertEquals(0, BigDecimal("1400").compareTo(result[Currency.USD]))
-        // secondary: 도중에 batch/skip 같은 알고리즘 변경 감지
+        // 날짜를 건너뛰지 않고 하루씩 거슬러 조회한다.
         assertEquals(3, api.callCount)
     }
 
@@ -94,7 +85,6 @@ class FxRateRepositoryImplTest {
         assertEquals(1, api.callCount)
     }
 
-    // KEXIM 장기 장애 시 앱이 환율 없이도 동작 (UI가 빈 맵으로 NPE 안 나게).
     @Test
     fun `walkback 한도까지 모두 실패하면 어떤 target이든 identity row만 반환`() = runTest {
         val api = FakeKeximApiService(ratesByDate = emptyMap())

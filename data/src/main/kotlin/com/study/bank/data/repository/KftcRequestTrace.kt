@@ -4,7 +4,6 @@ import java.time.Clock
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-/** KFTC 일시 필드(tran_dtime, tran_date+tran_time)의 형식. */
 internal val KFTC_DATETIME_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
 internal val KST: ZoneId = ZoneId.of("Asia/Seoul")
 

@@ -20,8 +20,6 @@ class FxRateMapperTest {
         mapper = FxRateMapper(CurrencyRebaser())
     }
 
-    // ----- KEXIM 입력 파싱 -----
-
     @Test
     fun `map은 KEXIM 응답 한 통화당 한 행으로 변환`() {
         val items = listOf(
@@ -38,7 +36,6 @@ class FxRateMapperTest {
         assertTrue(result.containsKey(Currency.JPY))
     }
 
-    // KEXIM이 JPY를 100엔 단위로 주는 변칙을 매퍼가 흡수해야 함.
     @Test
     fun `map은 JPY(100) 단위를 1엔 단위로 정규화`() {
         val items = listOf(success("JPY(100)", "950.00"))
@@ -72,8 +69,6 @@ class FxRateMapperTest {
         assertEquals(0, BigDecimal("1234567.89").compareTo(result!![Currency.USD]))
     }
 
-    // ----- "데이터 없음" 시그널 -----
-
     @Test
     fun `map은 파싱 가능한 응답이 없으면 null 반환`() {
         listOf(Currency.KRW, Currency.USD, Currency.EUR).forEach { target ->
@@ -81,18 +76,13 @@ class FxRateMapperTest {
         }
     }
 
-    // target 통화 데이터가 KEXIM에 없으면 silent 폴백 대신 null로 "환산 불가" 신호.
     @Test
     fun `map은 target 통화 데이터가 없으면 null 반환`() {
-        // EUR만 있고 USD 없는 응답 + target USD
         val items = listOf(success("EUR", "1,450.00"))
 
         assertNull(mapper.map(KeximRates.Published(items), Currency.USD))
     }
 
-    // ----- target 동적성 (rebaser와의 통합) -----
-
-    // target 파라미터가 KEXIM 파싱 결과를 통과해 rebaser까지 흐르는지 (와이어링 회귀 방지).
     @Test
     fun `map은 target에 따라 다른 통화 기준 환율을 emit`() {
         val items = listOf(

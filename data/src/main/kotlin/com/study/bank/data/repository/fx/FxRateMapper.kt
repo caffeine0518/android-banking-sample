@@ -12,10 +12,6 @@ class FxRateMapper @Inject constructor(
     private val rebaser: CurrencyRebaser,
 ) {
 
-    /**
-     * KEXIM 응답을 target 기준 환율 맵으로 변환. 파싱 가능한 통화가 없거나 target을 KEXIM 데이터에서
-     * 유도할 수 없으면 null — 호출자가 "환산 불가" 상태를 명시적으로 처리해야 함.
-     */
     fun map(rates: KeximRates.Published, target: Currency): Map<Currency, BigDecimal>? {
         val parsed = parseKeximRates(rates)
         if (parsed.isEmpty()) return null
