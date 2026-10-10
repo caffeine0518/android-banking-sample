@@ -11,13 +11,7 @@ import okhttp3.mockwebserver.RecordedRequest
 import okhttp3.tls.HandshakeCertificates
 import okhttp3.tls.HeldCertificate
 
-/**
- * [KftcMockServer]를 MockWebServer로 구현한다.
- *
- * 라우팅과 응답은 주입받은 [dispatcher]가 처리하고, 이 클래스는 수명 주기와 TLS만 담당한다.
- * 매니페스트에 cleartext 허용을 두지 않으려고 자체 서명 loopback 인증서로 HTTPS를 제공한다.
- * 생성 시 바로 [start]하므로 주입받은 시점에는 이미 실행 중이다.
- */
+/** 매니페스트에 cleartext 허용을 두지 않으려고 자체 서명 인증서로 HTTPS를 제공한다. 생성 시 바로 시작된다. */
 @Singleton
 internal class KftcMockServerImpl @Inject constructor(
     private val dispatcher: KftcMockDispatcher,
@@ -69,10 +63,7 @@ internal class KftcMockServerImpl @Inject constructor(
         started = false
     }
 
-    /**
-     * 테스트 전용: 수신한 요청 중 가장 오래된 1건을 반환한다.
-     * 인터페이스 멤버는 internal로 선언할 수 없어 구현체에만 둔다. 호출 측은 이 타입을 직접 생성한다.
-     */
+    /** 테스트 전용. */
     internal fun takeRequest(timeoutMs: Long = 1_000): RecordedRequest? =
         server.takeRequest(timeoutMs, TimeUnit.MILLISECONDS)
 
@@ -86,7 +77,6 @@ internal class KftcMockServerImpl @Inject constructor(
 
     private companion object {
         const val LOOPBACK_HOST = "127.0.0.1"
-        // 이름을 해석하지 않으므로 메인 스레드에서도 안전하다.
         val LOOPBACK_ADDRESS: InetAddress = InetAddress.getByAddress(byteArrayOf(127, 0, 0, 1))
     }
 }

@@ -16,7 +16,6 @@ import com.study.bank.data.remote.kftc.mock.storage.entity.SeedAccount
 import com.study.bank.data.remote.kftc.mock.storage.entity.TransactionDirection
 import com.study.bank.data.remote.kftc.mock.storage.entity.TransactionRecord
 
-/** 저장 모델 → KFTC `/v2.0/account/…` 응답 DTO. */
 internal class AccountResponseMapper(private val tranIds: KftcTranIds) {
 
     fun toListResponse(accounts: List<SeedAccount>): AccountListResponse = AccountListResponse(
@@ -45,7 +44,6 @@ internal class AccountResponseMapper(private val tranIds: KftcTranIds) {
         currencyCode = account.currencyCode,
     )
 
-    /** 방향 enum은 응답 문자열("입금"/"출금")로 변환하고, tran_type은 "이체"로 고정한다. */
     fun toTransactionListResponse(
         account: SeedAccount,
         records: List<TransactionRecord>,
@@ -92,7 +90,7 @@ internal class AccountResponseMapper(private val tranIds: KftcTranIds) {
     )
 
     private companion object {
-        // 사용자 일련번호. 실서비스에서는 OAuth 토큰에서 얻지만 mock은 고정값을 쓴다.
+        // 실서비스에서는 OAuth 토큰에서 얻는다.
         const val USER_SEQ_NO = "1100000001"
     }
 }

@@ -8,12 +8,7 @@ import com.study.bank.data.remote.kftc.mock.model.ErrorEnvelope
 import com.study.bank.data.remote.kftc.network.KftcJson
 import okhttp3.mockwebserver.MockResponse
 
-/**
- * [MockError]를 오류 응답으로 변환한다.
- *
- * 다른 매퍼와 달리 DTO가 아니라 [MockResponse]를 반환한다. HTTP 상태 코드가 [MockError]에 포함돼 있어
- * 여기서 함께 설정하는 편이 호출부에서 다시 꺼내 쓰는 것보다 짧다.
- */
+/** HTTP 상태 코드가 [MockError]에 포함돼 있어 DTO가 아니라 [MockResponse]를 반환한다. */
 internal class ErrorResponseMapper(private val tranIds: KftcTranIds) {
 
     fun toResponse(error: MockError): MockResponse {

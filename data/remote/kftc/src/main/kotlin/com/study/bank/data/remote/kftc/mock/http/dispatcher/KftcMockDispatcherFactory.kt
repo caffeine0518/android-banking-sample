@@ -16,12 +16,7 @@ import com.study.bank.data.remote.kftc.mock.storage.dao.MockTransactionDao
 import com.study.bank.data.remote.kftc.mock.storage.entity.SeedAccount
 import kotlinx.serialization.json.Json
 
-/**
- * 프로덕션(Hilt)과 디스패처 단위 테스트가 함께 쓰는 디스패처 생성 함수.
- *
- * [KftcTranIds]는 여기서 한 번만 생성해 모든 매퍼가 공유한다. api_tran_id가 엔드포인트와 관계없이
- * 1씩 증가해야 하기 때문이다.
- */
+/** api_tran_id가 엔드포인트와 관계없이 1씩 증가하도록 [KftcTranIds]를 모든 매퍼가 공유한다. */
 internal fun kftcMockDispatcher(
     accountDao: MockAccountDao,
     transactionDao: MockTransactionDao,
