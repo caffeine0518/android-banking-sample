@@ -143,7 +143,6 @@ class DataFlowIntegrationTest {
         )
         assertTrue("송금 성공해야 함: $outcome", outcome is TransferOutcome.Success)
 
-        // 출금계좌 차감 + 수취계좌 입금(복식부기) 둘 다 반영돼야 한다 — 회귀: 예전엔 수취계좌가 그대로였음.
         val salaryAfter = requireNotNull(accountRepository.observeAccount(SALARY).first())
             .balance.amount
         val safeboxAfter = requireNotNull(accountRepository.observeAccount(SAFEBOX).first())
@@ -176,12 +175,10 @@ class DataFlowIntegrationTest {
         transactionRepository.refresh(SALARY)
         transactionRepository.refresh(SAFEBOX)
 
-        // 출금계좌 내역의 상대방 = 수취 명의 (예전엔 마스킹 계좌번호가 찍혔다).
         val outgoing = transactionRepository.observeTransactions(SALARY).first().first()
         assertEquals(TransactionType.TRANSFER_OUT, outgoing.type)
         assertEquals(recipient.holderName, outgoing.counterparty?.name)
 
-        // 수취계좌 내역의 상대방 = 출금 명의 (예전엔 비어 있었다).
         val incoming = transactionRepository.observeTransactions(SAFEBOX).first().first()
         assertEquals(TransactionType.TRANSFER_IN, incoming.type)
         assertEquals(source.holderName, incoming.counterparty?.name)
@@ -313,7 +310,6 @@ class DataFlowIntegrationTest {
         const val COLLIDING_KEY_A = "itest-collision-Aa"
         const val COLLIDING_KEY_B = "itest-collision-BB"
 
-        // 서버 페이지 크기 단일 소유처. 레거시 refresh는 첫 페이지 한 장을 적재한다.
         const val PAGE_SIZE = KFTC_TRANSACTION_PAGE_SIZE
     }
 }
