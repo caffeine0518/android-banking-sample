@@ -169,14 +169,6 @@ private fun BottomBar(enabled: Boolean, onSend: () -> Unit) {
             ) {
                 Text(stringResource(R.string.transfer_confirm_send))
             }
-            Spacer(Modifier.height(10.dp))
-            Text(
-                text = stringResource(R.string.transfer_confirm_fee_free),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
-            )
         }
     }
 }

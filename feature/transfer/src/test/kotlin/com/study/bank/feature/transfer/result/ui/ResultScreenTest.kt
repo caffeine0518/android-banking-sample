@@ -54,7 +54,7 @@ class ResultScreenTest {
     }
 
     @Test
-    fun `성공 상태는 제목·메모칩·공유하기·확인을 보인다`() {
+    fun `성공 상태는 제목·확인을 보인다`() {
         setScreen(ResultState(header = header(), phase = ResultPhase.Success))
 
         composeRule.onNodeWithText("이수취", substring = true).assertIsDisplayed()
@@ -62,8 +62,6 @@ class ResultScreenTest {
         composeRule.onNodeWithContentDescription(string(R.string.transfer_action_back))
             .assertIsDisplayed()
         composeRule.onNodeWithText(string(R.string.transfer_result_success_sent)).assertIsDisplayed()
-        composeRule.onNodeWithText(string(R.string.transfer_result_leave_memo)).assertIsDisplayed()
-        composeRule.onNodeWithText(string(R.string.transfer_result_share)).assertIsDisplayed()
         composeRule.onNodeWithText(string(R.string.transfer_result_confirm)).assertIsDisplayed()
     }
 
@@ -79,7 +77,6 @@ class ResultScreenTest {
         composeRule.onNodeWithText(string(R.string.transfer_result_failure_title)).assertIsDisplayed()
         composeRule.onNodeWithText(string(R.string.transfer_result_error_insufficient)).assertIsDisplayed()
         composeRule.onNodeWithText(string(R.string.transfer_result_retry)).assertIsDisplayed()
-        composeRule.onNodeWithText(string(R.string.transfer_result_share)).assertDoesNotExist()
     }
 
     @Test
