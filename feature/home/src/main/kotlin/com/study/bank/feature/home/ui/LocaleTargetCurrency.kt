@@ -5,7 +5,6 @@ import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** 사용자 시스템 로케일에서 표시 통화 해석. 실패 시 [Currency.DEFAULT]로 폴백. */
 @Singleton
 class LocaleTargetCurrency @Inject constructor() {
 
