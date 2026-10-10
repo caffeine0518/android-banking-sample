@@ -31,8 +31,7 @@ class TransactionEntityMapper @Inject constructor() {
     )
 
     /**
-     * @throws IllegalStateException Entity는 우리가 저장한 값이므로 통화/enum 복원 실패는 스키마-코드 정합성이
-     * 어긋난 상황. fail-fast.
+     * @throws IllegalStateException 저장된 통화·enum을 복원하지 못하면 발생한다(스키마와 코드 불일치).
      */
     fun toDomain(entity: TransactionEntity): Transaction {
         val currency = checkNotNull(Currency.byCode(entity.currency)) {

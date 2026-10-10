@@ -23,8 +23,6 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * 출금이체 실행 = KFTC withdraw 호출 후 SSOT(Room) 재동기화.
- *
  * 업무 거절(잔액부족 등)은 KFTC가 HTTP 200 + rsp_code A0001 + bank_rsp_code로 알리고, 전송/입력 오류는
  * 예외(IOException=네트워크, 그 외=Unknown)로 매핑한다.
  */
@@ -55,7 +53,7 @@ class TransferRepositoryImpl @Inject constructor(
                 IllegalStateException("성공 응답에 after_balance_amt가 없다"),
             )
 
-        // KFTC mock 상태가 변했으니 SSOT(Room)를 재동기화. 실패해도 이체 성공은 유지(best-effort).
+        // 재동기화에 실패해도 이체 성공은 유지한다.
         cancellableCatching {
             accountRepository.refresh()
             transactionRepository.refresh(request.fromAccountId)

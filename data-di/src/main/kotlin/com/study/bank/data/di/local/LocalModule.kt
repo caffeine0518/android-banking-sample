@@ -17,8 +17,7 @@ import javax.inject.Singleton
 internal object LocalModule {
 
     /**
-     * KFTC가 mock이라 프로세스 재시작 시 시드가 초기화되므로 영속 캐시는 mock과 영구히 달라진다.
-     * 인메모리 DB로 lifecycle을 맞춰 불일치를 차단하면서 SSOT + DAO Flow 패턴은 그대로 확보.
+     * KFTC mock은 프로세스가 재시작되면 시드로 초기화되므로, 캐시도 인메모리로 두어 mock과 수명을 맞춘다.
      */
     @Provides
     @Singleton

@@ -15,8 +15,7 @@ import com.study.bank.domain.model.account.AccountId
 import java.time.Clock
 
 /**
- * 거래내역 페이징의 네트워크→DB 적재기(network+DB 패턴). [transactionDao]에 쓰면 Room PagingSource가
- * 무효화돼 Pager가 자동 재로드한다. DB가 인메모리라 RemoteKeys 테이블 같은 커서 영속화는 이득이 없다.
+ * DB가 인메모리라 커서를 RemoteKeys 테이블에 영속화하지 않는다.
  *
  * 주의: [com.study.bank.domain.repository.TransactionRepository.refresh]도 같은 transactions 테이블을
  * 통째 교체하는데 [nextCursor]는 그대로 남는다. 한 계좌에 두 경로가 동시에 살아 있으면 다음 APPEND가 먼
@@ -35,9 +34,8 @@ internal class TransactionRemoteMediator(
     private val clock: Clock,
 ) : RemoteMediator<Int, TransactionEntity>() {
 
-    // KFTC 연속조회 커서(befor_inquiry_trace_info). null이면 더 받을 페이지가 없다. 인스턴스가 한 Pager
-    // 스트림의 수명을 함께하므로 REFRESH→APPEND 사이에 유지된다. load는 직렬화되지만 디스패처 스레드가
-    // 달라질 수 있어 @Volatile.
+    // KFTC 연속조회 커서(befor_inquiry_trace_info). null이면 다음 페이지가 없다.
+    // load는 직렬화되지만 호출마다 스레드가 다를 수 있어 @Volatile.
     @Volatile
     private var nextCursor: String? = null
 

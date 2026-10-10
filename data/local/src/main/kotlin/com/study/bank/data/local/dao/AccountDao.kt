@@ -29,10 +29,7 @@ interface AccountDao {
     @Query("DELETE FROM accounts")
     suspend fun clear()
 
-    /**
-     * 원격 fetch 결과로 테이블을 통째 갈아끼움. 닫힌 계좌가 응답에서 사라졌을 때 stale entry가
-     * 남지 않도록 트랜잭션으로 clear → insert.
-     */
+    /** 응답에서 사라진 계좌가 남지 않도록 트랜잭션으로 clear → insert 한다. */
     @Transaction
     suspend fun replaceAll(entities: List<AccountEntity>) {
         clear()
