@@ -117,7 +117,7 @@ private fun ColumnScope.TitleBlock(detail: ConfirmDetailUi) {
         style = MaterialTheme.typography.headlineMedium,
         fontWeight = FontWeight.Bold,
         textAlign = TextAlign.Center,
-        // detail 로딩 후에만 그려지는 제목 → 확인 화면 도착 마커.
+        // detail 로딩 후에만 그려지므로 E2E가 이 태그로 확인 화면 도착을 판정한다.
         modifier = Modifier
             .fillMaxWidth()
             .testTag(BankTestTags.SCREEN_CONFIRM),

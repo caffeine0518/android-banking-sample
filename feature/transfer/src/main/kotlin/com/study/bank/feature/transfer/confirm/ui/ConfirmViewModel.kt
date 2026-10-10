@@ -28,7 +28,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel(assistedFactory = ConfirmViewModel.Factory::class)
 class ConfirmViewModel @AssistedInject constructor(
     @Assisted route: TransferConfirmRoute,
-    // 멱등성 키는 프로세스 death를 넘겨 살아남아야 하므로 SavedStateHandle에 둔다.
+    // 멱등성 키를 프로세스 종료 후에도 유지하려고 SavedStateHandle에 둔다.
     savedStateHandle: SavedStateHandle,
     private val accountRepository: AccountRepository,
     idempotencyKeyGenerator: IdempotencyKeyGenerator,
@@ -42,14 +42,10 @@ class ConfirmViewModel @AssistedInject constructor(
     }
 
     private val sourceAccountId = AccountId(route.sourceAccountId)
-    // 수취인·금액은 라우트로 확정돼 화면 동안 고정이다.
     private val recipient = route.recipient
     private val amount = route.amount
 
-    /**
-     * 멱등성 키는 "이 송금 한 건"에 묶여야 한다. 송금 의도가 확정되는 이 화면에서 한 번 발급해 결과 화면에 전달한다.
-     * 결과 화면이 중복 생성되거나 복원돼도 같은 키로 송금하므로 서버는 이 송금을 한 건으로 처리한다.
-     */
+    /** 송금 한 건에 묶이도록 이 화면에서 한 번 발급한다. 결과 화면이 중복 생성되거나 복원돼도 같은 키로 송금한다. */
     private val idempotencyKey: String =
         savedStateHandle.get<String>(IDEMPOTENCY_KEY) ?: idempotencyKeyGenerator.newKey().also {
             savedStateHandle[IDEMPOTENCY_KEY] = it
@@ -64,7 +60,6 @@ class ConfirmViewModel @AssistedInject constructor(
             ConfirmIntent.BackClicked -> sendEffect(ConfirmEffect.NavigateBack)
 
             ConfirmIntent.SendClicked -> {
-                // 단발 가드: 첫 탭에서만 Submit. 연타해도 둘째부터는 submitting=true라 무시된다.
                 if (state.detail != null && !state.submitting) {
                     setState { copy(submitting = true) }
                     sendEffect(
@@ -78,7 +73,6 @@ class ConfirmViewModel @AssistedInject constructor(
                 }
             }
 
-            // 수취인·금액은 라우트로 확정돼 고정이므로, 출금계좌가 로딩되면 확정 정보를 채운다.
             is ConfirmInternalAction.SourceUpdated -> {
                 val source = action.source
                 if (source != null) {

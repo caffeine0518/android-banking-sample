@@ -24,7 +24,6 @@ import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-// 제목(가중치 배치) + bottomBar 버튼이 함께 보이도록 실제 폰 크기를 준다.
 @Config(qualifiers = "w411dp-h891dp")
 class ConfirmScreenTest {
 
