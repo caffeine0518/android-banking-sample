@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
@@ -96,9 +95,7 @@ internal fun ResultScreen(
                     lastLine = stringResource(R.string.transfer_result_success_sent),
                     reason = null,
                     testTag = BankTestTags.RESULT_SUCCESS,
-                ) {
-                    MemoChip(onClick = { onIntent(ResultIntent.LeaveMemoClicked) })
-                }
+                )
                 is ResultPhase.Failure -> OutcomeContent(
                     icon = Icons.Filled.Warning,
                     iconTint = MaterialTheme.colorScheme.error,
@@ -106,7 +103,6 @@ internal fun ResultScreen(
                     lastLine = stringResource(R.string.transfer_result_failure_title),
                     reason = phase.reason.message(),
                     testTag = BankTestTags.RESULT_FAILURE,
-                    chip = null,
                 )
             }
         }
@@ -134,7 +130,6 @@ private fun OutcomeContent(
     lastLine: String,
     reason: String?,
     testTag: String,
-    chip: (@Composable () -> Unit)?,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -157,10 +152,6 @@ private fun OutcomeContent(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
-        }
-        if (chip != null) {
-            Spacer(Modifier.height(24.dp))
-            chip()
         }
     }
 }
@@ -199,22 +190,6 @@ private fun TitleBlock(header: ResultHeaderUi?, lastLine: String) {
 }
 
 @Composable
-private fun MemoChip(onClick: () -> Unit) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHighest,
-    ) {
-        Text(
-            text = stringResource(R.string.transfer_result_leave_memo),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
-        )
-    }
-}
-
-@Composable
 private fun BottomBar(phase: ResultPhase, onIntent: (ResultIntent) -> Unit) {
     if (phase == ResultPhase.Loading) return
     Surface(color = MaterialTheme.colorScheme.background) {
@@ -225,20 +200,14 @@ private fun BottomBar(phase: ResultPhase, onIntent: (ResultIntent) -> Unit) {
                 .padding(horizontal = 20.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            when (phase) {
-                is ResultPhase.Failure -> FilledTonalButton(
+            if (phase is ResultPhase.Failure) {
+                FilledTonalButton(
                     onClick = { onIntent(ResultIntent.RetryClicked) },
                     modifier = Modifier
                         .weight(1f)
                         .testTag(BankTestTags.RESULT_RETRY),
                 ) {
                     Text(stringResource(R.string.transfer_result_retry))
-                }
-                ResultPhase.Loading, ResultPhase.Success -> FilledTonalButton(
-                    onClick = { onIntent(ResultIntent.ShareClicked) },
-                    modifier = Modifier.weight(1f),
-                ) {
-                    Text(stringResource(R.string.transfer_result_share))
                 }
             }
             Button(

@@ -44,14 +44,11 @@
     <string name="transfer_confirm_label_deposit">입금 계좌</string>
     <string name="transfer_confirm_source_format">내 %1$s 계좌</string>
     <string name="transfer_confirm_send">보내기</string>
-    <string name="transfer_confirm_fee_free">평생 수수료 무료</string>
 
     <!-- 송금 결과 화면(4/5): 로딩 → 성공/실패 -->
     <string name="transfer_result_loading">보내는 중이에요</string>
     <string name="transfer_result_success_sent">보냈어요</string>
     <string name="transfer_result_failure_title">보내지 못했어요</string>
-    <string name="transfer_result_leave_memo">메모 남기기</string>
-    <string name="transfer_result_share">공유하기</string>
     <string name="transfer_result_confirm">확인</string>
     <string name="transfer_result_retry">다시 시도</string>
     <string name="transfer_result_error_insufficient">출금 계좌의 잔액이 부족해요</string>

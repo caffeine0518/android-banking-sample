@@ -66,10 +66,6 @@ class ResultViewModel @AssistedInject constructor(
             ResultIntent.BackClicked, ResultIntent.ConfirmClicked ->
                 sendEffect(ResultEffect.Finish(sourceAccountId.value))
 
-            ResultIntent.ShareClicked -> sendEffect(ResultEffect.Share)
-
-            ResultIntent.LeaveMemoClicked -> sendEffect(ResultEffect.LeaveMemo)
-
             ResultIntent.RetryClicked -> {
                 // 단발 가드: 이미 재실행 중이면 무시한다. 로딩 중 버튼을 숨기는 UI 가드는 재합성
                 // 타이밍에 의존해 빠른 연타를 못 막으므로, 상태로 직접 재진입을 차단한다.

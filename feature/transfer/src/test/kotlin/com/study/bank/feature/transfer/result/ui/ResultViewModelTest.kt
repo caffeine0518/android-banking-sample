@@ -240,22 +240,6 @@ class ResultViewModelTest {
         }
     }
 
-    @Test
-    fun `공유하기·메모는 각각 Share·LeaveMemo effect를 보낸다`() = runTest {
-        val accounts = FakeAccountRepository().apply {
-            emit(account(SOURCE_ID), account(RECIPIENT_ID))
-        }
-        val vm = buildViewModel(accounts, FakeTransferRepository(success()), amount = 1)
-
-        vm.effect.test {
-            vm.onIntent(ResultIntent.ShareClicked)
-            assertEquals(ResultEffect.Share, awaitItem())
-            vm.onIntent(ResultIntent.LeaveMemoClicked)
-            assertEquals(ResultEffect.LeaveMemo, awaitItem())
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
-
     private fun buildViewModel(
         accounts: FakeAccountRepository,
         transfer: TransferRepository,
