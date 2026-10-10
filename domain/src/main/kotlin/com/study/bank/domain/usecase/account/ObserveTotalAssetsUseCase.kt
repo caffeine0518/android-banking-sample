@@ -15,10 +15,6 @@ class ObserveTotalAssetsUseCase @Inject constructor(
     private val fxRateRepository: FxRateRepository,
 ) {
 
-    /**
-     * 자산을 [target] 기준 합계와 환산 불가 잔액으로 분리해 emit. 환율 시트가 갱신되거나
-     * 계좌 변동이 있을 때마다 새로운 [AssetTotals] 방출.
-     */
     operator fun invoke(target: Currency): Flow<AssetTotals> =
         accountRepository.observeAccounts().combine(
             fxRateRepository.observeRates(target),
