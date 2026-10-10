@@ -8,12 +8,9 @@ import java.math.RoundingMode
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-/**
- * 무한 스크롤을 검증할 수 있도록 월급통장에만 [HISTORY_COUNT]건을 생성한다.
- * [rows]는 오래된 순으로 반환해 SQLite가 부여하는 seq가 시간순과 일치하게 한다.
- */
 internal object KftcTransactionSeed {
 
+    // 무한 스크롤을 검증할 수 있는 건수.
     const val HISTORY_COUNT = 1_200
 
     // 1440(하루의 분 수)과 서로소라 거래 시각이 겹치지 않는다.
@@ -29,6 +26,7 @@ internal object KftcTransactionSeed {
     fun rows(accounts: List<SeedAccount>): List<TransactionRecord> {
         val payroll = accounts.firstOrNull { it.fintechUseNum == KftcSeedAccountIds.PAYROLL_KRW }
             ?: return emptyList()
+        // 오래된 순으로 삽입해야 SQLite가 부여하는 seq가 시간순과 일치한다.
         return historyFor(payroll).asReversed()
     }
 
@@ -39,10 +37,7 @@ internal object KftcTransactionSeed {
         return entries.mapIndexed { index, entry -> entry.toRecord(account, balances[index]) }
     }
 
-    /**
-     * 시드 잔액이 현재 잔액이므로 최신 거래부터 과거로 거슬러 계산한다. 입금이었으면 빼고 출금이었으면 더한다.
-     * 오래된 순으로 더하면 시작 잔액을 알 수 없어 최신 잔액이 시드 잔액과 달라진다.
-     */
+    /** 시드 잔액이 현재 잔액이므로 최신 거래부터 과거로 거슬러 계산한다. */
     private fun balancesAfter(seedBalance: BigDecimal, entries: List<Entry>): List<BigDecimal> =
         entries.runningFold(seedBalance) { balance, entry ->
             if (entry.deposit) balance - entry.amount else balance + entry.amount

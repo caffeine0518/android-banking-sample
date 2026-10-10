@@ -3,7 +3,6 @@ package com.study.bank.data.remote.kftc.mock.seed
 import com.study.bank.data.remote.kftc.mock.model.SeedRecipient
 import com.study.bank.data.remote.kftc.mock.storage.entity.SeedAccount
 
-/** 본인 계좌는 계좌 시드에서 만들므로([directory]) 여기에는 외부 수취인만 둔다. */
 internal object KftcRecipientSeed {
 
     private val externalRecipients: List<SeedRecipient> = listOf(

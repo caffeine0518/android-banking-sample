@@ -4,10 +4,6 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-/**
- * [balanceAmt]의 소수 자릿수가 통화의 소수 자릿수이므로, 갱신할 때 같은 scale로 포맷해 별도 컬럼 없이 유지한다.
- * [accountNumMasked]는 내 계좌끼리 송금할 때 수취계좌 매칭에 쓴다.
- */
 @Entity(tableName = "mock_accounts")
 internal data class SeedAccount(
     @PrimaryKey
@@ -19,6 +15,7 @@ internal data class SeedAccount(
     val bankName: String,
     @ColumnInfo(name = "account_num")
     val accountNum: String,
+    /** 앱은 마스킹된 번호만 받으므로 내 계좌끼리 송금할 때 수취계좌 매칭에 쓴다. */
     @ColumnInfo(name = "account_num_masked")
     val accountNumMasked: String,
     @ColumnInfo(name = "account_alias")
@@ -27,6 +24,7 @@ internal data class SeedAccount(
     val accountHolderName: String,
     @ColumnInfo(name = "account_type")
     val accountType: String,
+    /** 소수 자릿수가 통화의 소수 자릿수다. 갱신할 때 같은 scale로 포맷해 유지한다. */
     @ColumnInfo(name = "balance_amt")
     val balanceAmt: String,
     @ColumnInfo(name = "currency_code")
