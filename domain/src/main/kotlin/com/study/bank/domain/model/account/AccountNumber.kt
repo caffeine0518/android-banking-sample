@@ -16,7 +16,7 @@ value class AccountNumber(val value: String) {
     }
 
     companion object {
-        // IBAN 최대 34자 + 버퍼. 어떤 결제 시스템도 50자 초과 식별자 안 씀.
+        // IBAN 최대 34자에 여유를 둔다.
         private const val MAX_LENGTH = 50
     }
 }

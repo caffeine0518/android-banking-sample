@@ -1,35 +1,26 @@
 package com.study.bank.domain.model
 
-/**
- * 뱅킹 도메인이 명시적으로 지원하는 통화.
- *
- * [exponent]는 해당 통화 최소 단위의 소수 자릿수(ISO 4217)다.
- * [Money] 금액을 정규화하고 표시하는 방식을 결정한다.
- */
+/** [exponent]는 ISO 4217 기준 최소 단위의 소수 자릿수다. */
 enum class Currency(val code: String, val exponent: Int) {
     KRW("KRW", 0),
     USD("USD", 2),
     JPY("JPY", 0),
     EUR("EUR", 2),
-    // KEXIM API 미커버 통화 — 사용자는 외화통장으로 보유 가능하지만 환산 불가 경로로 흐름.
+    // KEXIM이 환율을 제공하지 않아 총자산 환산에서 제외된다.
     TWD("TWD", 2),
     VND("VND", 0),
     ;
 
     companion object {
-        /**
-         * 통화를 결정할 수 없을 때(로케일 해석 실패, 미지원 코드 등) 모든 피쳐가 따를 기본값.
-         * USD는 국제 결제·환율의 사실상 기준 통화라 안전한 fallback.
-         */
+        /** 통화를 결정할 수 없을 때의 기본값. 국제 결제의 기준 통화라 USD로 둔다. */
         val DEFAULT: Currency = USD
 
         fun byCode(code: String): Currency? = entries.firstOrNull { it.code == code }
 
-        /** [code]가 우리가 저장/응답한 값이라 반드시 지원돼야 할 때. 미지원이면 스키마-코드 불일치이므로 fail-fast. */
+        /** 저장·응답한 코드처럼 반드시 지원돼야 하는 경우에 쓴다. 미지원이면 스키마와 코드가 어긋난 것이므로 즉시 실패한다. */
         fun requireByCode(code: String): Currency =
             requireNotNull(byCode(code)) { "Unsupported currency: $code" }
 
-        /** [code]가 null이거나 미지원이면 [DEFAULT]로 폴백. */
         fun byCodeOrDefault(code: String?): Currency = code?.let(::byCode) ?: DEFAULT
     }
 }

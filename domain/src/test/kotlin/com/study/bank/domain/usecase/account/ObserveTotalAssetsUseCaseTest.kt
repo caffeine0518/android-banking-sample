@@ -20,7 +20,7 @@ import kotlinx.coroutines.test.runTest
 
 class ObserveTotalAssetsUseCaseTest {
 
-    // UseCase의 target 파라미터가 실제로 결과를 바꾸는지 (KRW 하드코드 회귀 방지).
+    // target이 KRW로 고정되는 회귀를 검출한다.
     @Test
     fun `같은 계좌 집합도 target에 따라 다른 통화의 converted 합계를 반환`() = runTest {
         val accounts = listOf(
@@ -55,7 +55,7 @@ class ObserveTotalAssetsUseCaseTest {
         )
     }
 
-    // 환율 1.0 곱셈 후 BigDecimal 반올림이 원본 값을 망가뜨리지 않는지.
+    // 환율 1.0을 곱하고 반올림해도 원래 값이 유지돼야 한다.
     @Test
     fun `target과 같은 통화 계좌는 환산 없이 그대로 더해진다`() = runTest {
         val accounts = listOf(
@@ -93,14 +93,14 @@ class ObserveTotalAssetsUseCaseTest {
         }
     }
 
-    // 환율 누락이 silent drop이 아니라 unconverted 리스트로 노출되는지 (이전엔 합산에서만 빠짐).
+    // 환율이 없는 계좌가 합계에서 조용히 제외되지 않고 unconverted로 노출돼야 한다.
     @Test
-    fun `환율 없는 통화 계좌는 unconverted에 원본 통화 그대로 담긴다`() = runTest {
+    fun `환율 없는 통화 계좌는 unconverted에 원본 통화 그대로 포함된다`() = runTest {
         val accounts = listOf(
             account(id = "acc-1", amount = "100.00", currency = Currency.USD),
-            account(id = "acc-2", amount = "200.00", currency = Currency.EUR), // EUR rate missing
+            account(id = "acc-2", amount = "200.00", currency = Currency.EUR), // EUR 환율 없음
             account(id = "acc-3", amount = "50.00", currency = Currency.USD),
-            account("acc-4", 30000, Currency.JPY), // JPY rate missing
+            account("acc-4", 30000, Currency.JPY), // JPY 환율 없음
         )
         val useCase = ObserveTotalAssetsUseCase(
             FakeAccountRepository(accounts),
