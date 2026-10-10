@@ -87,6 +87,28 @@ class FxRateRepositoryImplTest {
         assertEquals(2, api.callCount)
     }
 
+    @Test
+    fun `인증키 오류(result 3)면 날짜를 바꿔 다시 조회하지 않고 identity만 반환한다`() = runTest {
+        val api = FakeKeximApiService(ratesByDate = emptyMap(), defaultItems = listOf(KeximRateItem(result = 3)))
+        val repo = FxRateRepositoryImpl(api, FxRateMapper(CurrencyRebaser()), fixedClock)
+
+        val result = repo.observeRates(Currency.KRW).first()
+
+        assertEquals(mapOf(Currency.KRW to BigDecimal.ONE), result)
+        assertEquals(1, api.callCount)
+    }
+
+    @Test
+    fun `일일 한도 초과(result 4)면 날짜를 바꿔 다시 조회하지 않고 identity만 반환한다`() = runTest {
+        val api = FakeKeximApiService(ratesByDate = emptyMap(), defaultItems = listOf(KeximRateItem(result = 4)))
+        val repo = FxRateRepositoryImpl(api, FxRateMapper(CurrencyRebaser()), fixedClock)
+
+        val result = repo.observeRates(Currency.KRW).first()
+
+        assertEquals(mapOf(Currency.KRW to BigDecimal.ONE), result)
+        assertEquals(1, api.callCount)
+    }
+
     // KEXIM 장기 장애 시 앱이 환율 없이도 동작 (UI가 빈 맵으로 NPE 안 나게).
     @Test
     fun `walkback 한도까지 모두 실패하면 어떤 target이든 identity row만 반환`() = runTest {
@@ -126,6 +148,7 @@ class FxRateRepositoryImplTest {
     private class FakeKeximApiService(
         private val ratesByDate: Map<LocalDate, List<KeximRateItem>>,
         private val failOnDates: Set<LocalDate> = emptySet(),
+        private val defaultItems: List<KeximRateItem> = emptyList(),
     ) : KeximApiService {
 
         var callCount: Int = 0
@@ -134,7 +157,7 @@ class FxRateRepositoryImplTest {
         override suspend fun getRates(date: LocalDate): List<KeximRateItem> {
             callCount++
             if (date in failOnDates) throw RuntimeException("simulated network failure for $date")
-            return ratesByDate[date] ?: emptyList()
+            return ratesByDate[date] ?: defaultItems
         }
     }
 }
