@@ -265,7 +265,6 @@ private fun SendButton(
     enabled: Boolean,
     onClick: () -> Unit,
 ) {
-    // 배경은 내비게이션 바 뒤까지 그리고(edge-to-edge) 버튼만 navigationBarsPadding으로 올린다.
     Surface(color = MaterialTheme.colorScheme.background) {
         Button(
             onClick = onClick,

@@ -50,9 +50,6 @@ internal val previewTransactionItems = listOf(
     ),
 )
 
-// flowOf는 한 번 emit하고 완료돼 정적 @Preview가 초기 프레임(빈/로딩)에 머문다.
-// 완료되지 않는 MutableStateFlow를 써야 상태별로 렌더된다(androidx PagingPreviewSample과 같은 방식).
-
 internal val previewTransactions: Flow<PagingData<TransactionUi>> =
     MutableStateFlow(PagingData.from(previewTransactionItems))
 
