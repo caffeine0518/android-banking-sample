@@ -15,11 +15,8 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 
 /**
- * [HomeScreen]의 골든 스크린샷 테스트 — 색·간격·레이아웃 회귀를 실제 픽셀로 검출한다.
  * 골든은 src/test/screenshots에 저장된다.
- *
- * - 골든 기록: ./gradlew :feature:home:recordRoborazziDebug
- * - 회귀 검증: ./gradlew :feature:home:verifyRoborazziDebug
+ * 기록 `./gradlew :feature:home:recordRoborazziDebug`, 검증 `./gradlew :feature:home:verifyRoborazziDebug`.
  */
 @RunWith(RobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
