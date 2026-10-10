@@ -8,7 +8,6 @@ import com.study.bank.data.remote.kftc.mock.storage.dao.MockWithdrawalDao
 import com.study.bank.data.remote.kftc.mock.storage.entity.SettledWithdrawal
 import javax.inject.Inject
 
-/** 멱등 조회·계좌 갱신·원장 삽입·멱등 기록을 [transactionScope] 하나로 묶어 원자적으로 실행한다. */
 internal class KftcWithdrawalServiceImpl @Inject constructor(
     private val transactionScope: MockTransactionScopeDao,
     private val planner: WithdrawPlanner,
@@ -16,6 +15,7 @@ internal class KftcWithdrawalServiceImpl @Inject constructor(
     private val withdrawalDao: MockWithdrawalDao,
 ) : KftcWithdrawalService {
 
+    // 멱등 조회·계좌 갱신·원장 삽입·멱등 기록을 한 트랜잭션으로 실행한다.
     override fun withdraw(command: WithdrawCommand): WithdrawResult = transactionScope.inTransaction {
         val settled = withdrawalDao.findSettled(command.bankTranId)
         when {

@@ -19,13 +19,12 @@ internal class WithdrawPlanner @Inject constructor(
         val amount = command.positiveAmountOrNull()
             ?: return reject(WithdrawResult.InvalidAmount(command.tranAmt))
 
-        // null이면 외부 이체.
-        val recipient = accountDao.findByAccountNum(command.recvBankCode, command.recvAccountNum)
+        val internalRecipient = accountDao.findByAccountNum(command.recvBankCode, command.recvAccountNum)
 
         insufficientFunds(source, amount)?.let { return reject(it) }
-        currencyMismatch(source, recipient)?.let { return reject(it) }
+        currencyMismatch(source, internalRecipient)?.let { return reject(it) }
 
-        return WithdrawPlan.Approved(source, amount, recipient)
+        return WithdrawPlan.Approved(source, amount, internalRecipient)
     }
 
     private fun WithdrawCommand.positiveAmountOrNull(): BigDecimal? =
@@ -41,9 +40,9 @@ internal class WithdrawPlanner @Inject constructor(
     }
 
     /** 외부 이체는 상대 통화를 알 수 없어 확인하지 않는다. */
-    private fun currencyMismatch(source: SeedAccount, recipient: SeedAccount?): WithdrawResult? =
-        if (recipient != null && recipient.currencyCode != source.currencyCode) {
-            WithdrawResult.CurrencyMismatch(source.currencyCode, recipient.currencyCode)
+    private fun currencyMismatch(source: SeedAccount, internalRecipient: SeedAccount?): WithdrawResult? =
+        if (internalRecipient != null && internalRecipient.currencyCode != source.currencyCode) {
+            WithdrawResult.CurrencyMismatch(source.currencyCode, internalRecipient.currencyCode)
         } else {
             null
         }

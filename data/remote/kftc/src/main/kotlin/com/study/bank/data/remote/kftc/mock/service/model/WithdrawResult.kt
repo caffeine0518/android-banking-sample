@@ -3,10 +3,6 @@ package com.study.bank.data.remote.kftc.mock.service.model
 import androidx.room.ColumnInfo
 import com.study.bank.data.remote.kftc.mock.storage.entity.SettledWithdrawal
 
-/**
- * [IdempotencyConflict]·[UnknownSender]·[InvalidAmount]는 4xx로, [InsufficientFunds]·[CurrencyMismatch]는
- * HTTP 200 업무 거절로 응답한다.
- */
 internal sealed interface WithdrawResult {
 
     /** 같은 [bankTranId]의 재요청에 그대로 반환하도록 [SettledWithdrawal]에 저장한다. */

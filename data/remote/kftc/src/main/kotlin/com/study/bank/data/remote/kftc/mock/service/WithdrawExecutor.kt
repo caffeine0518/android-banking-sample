@@ -23,17 +23,16 @@ internal class WithdrawExecutor @Inject constructor(
 ) {
 
     fun execute(plan: WithdrawPlan.Approved, command: WithdrawCommand): WithdrawResult.Success {
-        val (source, amount, recipient) = plan
+        val (source, amount, internalRecipient) = plan
         val at = LocalDateTime.now(clock)
 
         val afterSource = withdrawFrom(source, amount, command, at)
-        if (recipient != null) {
-            depositTo(recipient, amount, command, at)
+        if (internalRecipient != null) {
+            depositTo(internalRecipient, amount, command, at)
         }
         return success(source, amount, command, afterSource)
     }
 
-    /** 인자내용이 없으면 상대방 이름을 쓴다(KFTC 기본 동작). */
     private fun withdrawFrom(
         source: SeedAccount,
         amount: BigDecimal,
@@ -43,6 +42,7 @@ internal class WithdrawExecutor @Inject constructor(
         fintechUseNum = source.fintechUseNum,
         direction = TransactionDirection.WITHDRAWAL,
         amount = amount,
+        // 인자내용이 없으면 상대방 이름을 쓴다(KFTC 기본 동작).
         printContent = command.wdPrintContent ?: command.recvName,
         counterpartyName = command.recvName,
         at = at,
@@ -79,7 +79,6 @@ internal class WithdrawExecutor @Inject constructor(
         afterBalanceAmt = afterBalanceAmt,
     )
 
-    /** 같은 계좌로 송금하면(출금 = 수취) 입금 쪽이 차감 전 잔액을 쓰지 않도록 잔액을 매번 다시 조회한다. */
     private fun post(
         fintechUseNum: String,
         direction: TransactionDirection,
@@ -88,6 +87,7 @@ internal class WithdrawExecutor @Inject constructor(
         counterpartyName: String?,
         at: LocalDateTime,
     ): String {
+        // 같은 계좌로 송금하면(출금 = 수취) 입금 쪽이 차감 전 잔액을 쓰지 않도록 매번 다시 조회한다.
         val balance = BigDecimal(checkNotNull(accountDao.find(fintechUseNum)).balanceAmt)
         val scale = balance.scale()
         val newBalance = when (direction) {
