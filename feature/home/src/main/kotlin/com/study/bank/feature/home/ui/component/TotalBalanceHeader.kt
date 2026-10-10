@@ -41,7 +41,7 @@ internal fun TotalBalanceHeader(
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
         )
-        // 환산 불가 자산을 "+ £1,850.40" 형태의 추가 라인으로 — 총자산에 합산되는 자산임을 시각화.
+        // 환산하지 못한 자산도 총자산에 포함됨을 보여 주려고 원본 통화로 한 줄씩 덧붙인다.
         for (money in unconvertedAssets) {
             Spacer(Modifier.height(4.dp))
             Text(

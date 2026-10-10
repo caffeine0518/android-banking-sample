@@ -25,10 +25,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 
-/**
- * [HomeScreen]은 state를 받아 그리고 동작을 onIntent로만 내보내는 stateless composable이라, ViewModel 없이
- * state를 직접 주입해 검증한다. Robolectric으로 JVM에서 구동 — 에뮬레이터 불필요.
- */
 @RunWith(RobolectricTestRunner::class)
 class HomeScreenTest {
 
@@ -37,7 +33,6 @@ class HomeScreenTest {
 
     private val emittedIntents = mutableListOf<HomeIntent>()
 
-    /** UI 카피는 이 모듈이 소유한 string 리소스가 정답이므로, 리터럴 중복 대신 리소스를 참조한다. */
     private fun string(id: Int) = RuntimeEnvironment.getApplication().getString(id)
 
     private fun setHomeScreen(state: HomeState) {
@@ -90,7 +85,6 @@ class HomeScreenTest {
     fun `계좌 항목을 누르면 해당 accountId로 AccountClicked 인텐트가 방출된다`() {
         setHomeScreen(HomeState(accounts = listOf(account(id = "acc-1", nickname = "월급통장"))))
 
-        // Card의 clickable이 자식 텍스트를 머지하므로, 머지 노드 자신의 텍스트로 클릭 대상을 특정한다.
         composeRule.onNode(hasClickAction() and hasText("월급통장")).performClick()
 
         assertEquals(listOf(HomeIntent.AccountClicked("acc-1")), emittedIntents)

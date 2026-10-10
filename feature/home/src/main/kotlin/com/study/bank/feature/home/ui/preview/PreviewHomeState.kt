@@ -61,7 +61,6 @@ internal val PreviewHomeState = HomeState(
     ),
 )
 
-/** LazyColumn 스크롤이 실제로 동작하는지 확인하기 위한 다건 계좌 프리뷰 상태. */
 internal val PreviewHomeStateLongList = PreviewHomeState.copy(
     accounts = List(PREVIEW_LIST_SIZE) { index ->
         AccountUi(

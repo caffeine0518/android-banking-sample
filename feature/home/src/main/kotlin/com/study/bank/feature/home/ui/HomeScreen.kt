@@ -45,7 +45,6 @@ internal fun HomeScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         snackbarHost = {
-            // 에러는 문구가 아니라 "스낵바가 떴다"는 사실로 검증하므로 안정 태그를 부여한다.
             SnackbarHost(snackbarHostState) { data ->
                 Snackbar(snackbarData = data, modifier = Modifier.testTag(BankTestTags.HOME_SNACKBAR))
             }
@@ -86,7 +85,6 @@ private fun HomeContent(
         contentPadding = PaddingValues(bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        // contentType: 헤더와 계좌 행은 구조가 달라, 스크롤 시 같은 타입끼리만 재사용되도록 구분한다.
         item(contentType = "header") {
             TotalBalanceHeader(
                 totalAssets = state.totalAssets,
