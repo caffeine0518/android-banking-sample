@@ -3,7 +3,6 @@ package com.study.bank.data.remote.kftc.dto.account
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/** `currency_code`는 KFTC 잔액조회의 외환 확장 필드로, mock은 항상 포함한다. */
 @Serializable
 data class AccountBalanceResponse(
     @SerialName("api_tran_id") val apiTranId: String,
@@ -18,5 +17,6 @@ data class AccountBalanceResponse(
     @SerialName("available_amt") val availableAmt: String,
     @SerialName("account_type") val accountType: String,
     @SerialName("product_name") val productName: String? = null,
+    // KFTC 잔액조회의 외환 확장 필드. mock은 항상 포함한다.
     @SerialName("currency_code") val currencyCode: String,
 )
