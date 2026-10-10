@@ -9,7 +9,6 @@ import kotlinx.coroutines.test.setMain
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
-/** 같은 [testDispatcher]를 ViewModel의 MviStore에도 주입하면 runTest에서 reducer 루프까지 결정적으로 실행된다. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainDispatcherRule(
     val testDispatcher: TestDispatcher = UnconfinedTestDispatcher(),

@@ -140,7 +140,6 @@ class AccountDetailViewModelTest {
         transactionRepository = txRepo,
         accountUiMapper = accountUiMapper,
         transactionUiMapper = transactionUiMapper,
-        // store에도 Main과 같은 디스패처를 주입해 reducer 루프까지 결정적으로 실행한다.
         dispatcherProvider = TestDispatcherProvider(mainDispatcherRule.testDispatcher),
     )
 
@@ -192,7 +191,6 @@ class AccountDetailViewModelTest {
         var lastStreamAccountId: AccountId? = null
             private set
 
-        // 이 화면은 transactionStream만 쓴다.
         override fun observeTransactions(accountId: AccountId): Flow<List<Transaction>> = emptyFlow()
         override suspend fun refresh(accountId: AccountId) {
             refreshCount++

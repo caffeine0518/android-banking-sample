@@ -38,7 +38,6 @@ class AccountDetailScreenTest {
 
     private val intents = mutableListOf<AccountDetailIntent>()
 
-    // 지정하지 않으면 refresh가 Loading으로 남아 빈 안내가 표시되지 않는다.
     private val idleLoadStates = LoadStates(
         refresh = LoadState.NotLoading(endOfPaginationReached = true),
         prepend = LoadState.NotLoading(endOfPaginationReached = true),
