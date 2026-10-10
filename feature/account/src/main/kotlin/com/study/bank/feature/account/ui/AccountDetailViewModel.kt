@@ -46,7 +46,6 @@ class AccountDetailViewModel @AssistedInject constructor(
         fun create(route: AccountRoute): AccountDetailViewModel
     }
 
-    // 진입 내비 키로 확정된 계좌 식별자(= fintech_use_num). 이 화면의 단일 대상.
     private val accountId = AccountId(route.accountId)
 
     private val store = MviStore<AccountDetailState, AccountDetailAction, AccountDetailEffect>(

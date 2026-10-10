@@ -50,15 +50,9 @@ internal val previewTransactionItems = listOf(
     ),
 )
 
-// 프리뷰는 androidx 공식 샘플(PagingPreviewSample)대로 MutableStateFlow를 쓴다.
-// flowOf는 1회 emit 후 완료되는 cold flow라 정적 @Preview에서 presenter가 데이터를 그리지 못하고
-// 초기 프레임(빈/로딩)에 머문다 — 모든 프리뷰가 똑같이 보이는 원인. MutableStateFlow는 완료되지
-// 않는 hot flow라 즉시 present 되어 정적 프리뷰에서도 상태별로 렌더된다.
-
 internal val previewTransactions: Flow<PagingData<TransactionUi>> =
     MutableStateFlow(PagingData.from(previewTransactionItems))
 
-/** LazyColumn 스크롤 확인용 다건 페이징 프리뷰. */
 internal val previewTransactionsLong: Flow<PagingData<TransactionUi>> = MutableStateFlow(
     PagingData.from(
         List(PREVIEW_LIST_SIZE) { index ->
@@ -74,14 +68,9 @@ internal val previewTransactionsLong: Flow<PagingData<TransactionUi>> = MutableS
     ),
 )
 
-/** 거래내역 없음 — 빈 안내 프리뷰. (IDLE = refresh NotLoading) */
 internal val previewTransactionsEmpty: Flow<PagingData<TransactionUi>> =
     MutableStateFlow(PagingData.from(emptyList()))
 
-/**
- * 첫 진입 로딩 — refresh가 Loading이고 아이템이 아직 없음. 현재 리스트 영역은 비고 상단 진행바만 표시된다
- * (리스트 영역 스피너/스켈레톤은 미구현). 이 프리뷰가 그 "로딩 중 빈 리스트"를 드러낸다.
- */
 internal val previewTransactionsLoading: Flow<PagingData<TransactionUi>> = MutableStateFlow(
     PagingData.from(
         emptyList(),
@@ -95,7 +84,6 @@ internal val previewTransactionsLoading: Flow<PagingData<TransactionUi>> = Mutab
 
 private val previewLoadError = IllegalStateException("미리보기용 에러")
 
-/** 첫 페이지 로드 실패 — 화면 전체 에러+재시도 프리뷰. */
 internal val previewTransactionsError: Flow<PagingData<TransactionUi>> = MutableStateFlow(
     PagingData.from(
         emptyList(),
@@ -107,7 +95,6 @@ internal val previewTransactionsError: Flow<PagingData<TransactionUi>> = Mutable
     ),
 )
 
-/** 아이템은 있으나 다음 페이지(append) 적재가 실패 — 하단 재시도 푸터 프리뷰. */
 internal val previewTransactionsFooterError: Flow<PagingData<TransactionUi>> = MutableStateFlow(
     PagingData.from(
         previewTransactionItems,
@@ -119,7 +106,6 @@ internal val previewTransactionsFooterError: Flow<PagingData<TransactionUi>> = M
     ),
 )
 
-/** 아이템이 있고 다음 페이지(append)를 당겨오는 중 — 하단 진행 표시 푸터 프리뷰. */
 internal val previewTransactionsFooterLoading: Flow<PagingData<TransactionUi>> = MutableStateFlow(
     PagingData.from(
         previewTransactionItems,
