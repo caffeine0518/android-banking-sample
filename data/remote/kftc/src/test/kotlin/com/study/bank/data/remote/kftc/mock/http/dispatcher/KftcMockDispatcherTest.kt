@@ -173,8 +173,6 @@ class KftcMockDispatcherTest {
         assertEquals(firstSeq + 1, secondSeq)
     }
 
-    // --- transaction_list / withdraw 라우팅 ---
-
     @Test
     fun `transaction_list는 200과 envelope + 시드 없는 계좌는 빈 res_list를 반환한다`() {
         // 신한 계좌는 시드 거래내역이 없다.
@@ -246,8 +244,6 @@ class KftcMockDispatcherTest {
         assertEquals(400, code)
         assertTrue("MissingTransferBody 메시지: $body", body.contains("출금이체 요청 본문"))
     }
-
-    // --- inquiry/real_name 라우팅 ---
 
     @Test
     fun `real_name 활성 수취인은 200과 예금주명 + ACTIVE를 반환한다`() {

@@ -153,8 +153,6 @@ class KftcWithdrawalServiceTest {
         assertEquals("2797320", bank.accountDao.find(SALARY)!!.balanceAmt)
     }
 
-    // --- 멱등성(bank_tran_id 중복 판정) ---
-
     @Test
     fun `같은 bank_tran_id로 다시 출금하면 한 번만 차감하고 같은 응답을 반환한다`() {
         val bank = newBank()
@@ -219,8 +217,6 @@ class KftcWithdrawalServiceTest {
         assertEquals("첫번째", ledger[1].counterpartyName)
         assertEquals("2817320", ledger[0].afterBalanceAmt) // 2847320 - 10000 - 20000
     }
-
-    // --- 페이지네이션용 시드 거래내역(statement) ---
 
     @Test
     fun `월급통장 statement는 1천 건 이상의 시드 거래내역을 노출한다`() {
