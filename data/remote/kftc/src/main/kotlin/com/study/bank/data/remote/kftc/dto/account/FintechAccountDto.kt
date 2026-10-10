@@ -6,8 +6,8 @@ import kotlinx.serialization.Serializable
 /**
  * KFTC 오픈뱅킹 v2.0 `account/list_finuse` 응답의 `res_list` 항목.
  *
- * 실제 KFTC 스펙은 잔액/통화를 분리된 `account/balance/fin_num` 엔드포인트로 내려주므로
- * 이 DTO에는 잔액 필드가 없다. (잔액은 [AccountBalanceResponse] 참조)
+ * KFTC 스펙에서 잔액·통화는 별도 엔드포인트(`account/balance/fin_num`)로 조회하므로 이 DTO에는 잔액 필드가 없다.
+ * 잔액은 [AccountBalanceResponse]를 참조한다.
  */
 @Serializable
 data class FintechAccountDto(

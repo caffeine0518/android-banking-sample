@@ -6,9 +6,9 @@ import kotlinx.serialization.Serializable
 /**
  * KFTC 오픈뱅킹 v2.0 출금이체(`transfer/withdraw/fin_num`) 요청 본문.
  *
- * `fintech_use_num`은 출금계좌(이용기관 등록 계좌), 수취는 `recv_client_*`로 식별한다.
- * 본 mock은 (recv_client_account_num, recv_client_bank_code_std)가 시드 계좌와 매칭되면
- * 내부 이체로 입금까지 시뮬레이션한다. KFTC 스펙의 핵심 필드만 추렸다.
+ * `fintech_use_num`은 출금계좌(이용기관에 등록된 계좌)이고, 수취 계좌는 `recv_client_*`로 식별한다.
+ * mock은 (recv_client_account_num, recv_client_bank_code_std)가 시드 계좌와 일치하면 내부 이체로 보고
+ * 입금까지 처리한다. KFTC 스펙의 핵심 필드만 포함했다.
  */
 @Serializable
 data class WithdrawTransferRequest(
