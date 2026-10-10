@@ -29,7 +29,6 @@ import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset
 
-/** KFTC withdraw 응답을 모사해 [TransferRepositoryImpl]의 결과·실패 매핑과 SSOT 재동기화 호출을 검증한다. */
 class TransferRepositoryImplTest {
 
     private val fixedClock = Clock.fixed(Instant.parse("2026-06-18T01:30:00Z"), ZoneOffset.UTC)

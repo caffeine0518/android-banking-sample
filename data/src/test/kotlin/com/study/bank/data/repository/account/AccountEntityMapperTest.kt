@@ -32,13 +32,11 @@ class AccountEntityMapperTest {
 
         val entity = mapper.toEntity(account)
 
-        // primary: enum/value class가 평탄화돼 SQLite primitive로 들어가는지
         assertEquals("FINTECH-001", entity.id)
         assertEquals("1000-12-***6789", entity.number)
         assertEquals("092", entity.bankCode) // TOSS.code
         assertEquals("KRW", entity.balanceCurrency)
         assertEquals("CHECKING", entity.type)
-        // secondary: nullable nickname 보존
         assertEquals("월급통장", entity.nickname)
     }
 

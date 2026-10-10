@@ -23,11 +23,6 @@ import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset
 
-/**
- * [TransactionRepositoryImpl] SSOT 동작 검증.
- *
- * Room을 단위 테스트에서 띄우려면 Robolectric이 필요해 [TransactionDao]를 인터페이스 충실 모사로 대체한다.
- */
 class TransactionRepositoryImplTest {
 
     private val salary = AccountId("120220112345678901234001")
@@ -171,8 +166,6 @@ class TransactionRepositoryImplTest {
         clock = fixedClock,
     )
 
-    // --- 픽스처 ---
-
     private fun txnItem(
         date: String,
         time: String,
@@ -209,12 +202,7 @@ class TransactionRepositoryImplTest {
         resList = items,
     )
 
-    // --- 페이크 ---
-
-    /**
-     * Room InvalidationTracker/Transaction 보장은 못 살리지만 SSOT의 행동(계좌별 필터, occurred_at desc 정렬,
-     * replaceForAccount의 clear→insert)은 동일하게 모사한다. replaceForAccount는 인터페이스 기본 구현 사용.
-     */
+    /** replaceForAccount는 인터페이스 기본 구현(clear → insert)을 그대로 쓴다. */
     private class FakeTransactionDao : TransactionDao {
         private val source = MutableStateFlow<List<TransactionEntity>>(emptyList())
 

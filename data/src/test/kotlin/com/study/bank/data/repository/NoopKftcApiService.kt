@@ -9,11 +9,7 @@ import com.study.bank.data.remote.kftc.dto.transaction.TransactionListResponse
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferRequest
 import com.study.bank.data.remote.kftc.dto.transfer.WithdrawTransferResponse
 
-/**
- * 모든 엔드포인트가 호출되면 실패하는 [KftcApiService] 기본 구현(테스트 공용).
- *
- * 각 레포 테스트는 `by NoopKftcApiService`로 위임하고 자기가 쓰는 메서드만 override한다.
- */
+/** 각 레포 테스트는 `by NoopKftcApiService`로 위임하고 쓰는 메서드만 override한다. */
 internal object NoopKftcApiService : KftcApiService {
     override suspend fun getAccountList(userSeqNo: String, includeCancelYn: String, sortOrder: String): AccountListResponse =
         error("unused")
