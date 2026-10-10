@@ -35,7 +35,6 @@ internal class TransactionRemoteMediator(
 ) : RemoteMediator<Int, TransactionEntity>() {
 
     // KFTC 연속조회 커서(befor_inquiry_trace_info). null이면 다음 페이지가 없다.
-    // load는 직렬화되지만 호출마다 스레드가 다를 수 있어 @Volatile.
     @Volatile
     private var nextCursor: String? = null
 
@@ -43,7 +42,6 @@ internal class TransactionRemoteMediator(
         loadType: LoadType,
         state: PagingState<Int, TransactionEntity>,
     ): MediatorResult = when (loadType) {
-        // 전방 전용 — 위쪽(더 최신)으로 받을 건 없다. 특정 구간 선진입도 없다.
         LoadType.PREPEND -> MediatorResult.Success(endOfPaginationReached = true)
         LoadType.REFRESH -> loadPage(cursor = null, replaceCache = true)
         LoadType.APPEND -> {

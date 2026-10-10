@@ -9,10 +9,6 @@ import javax.inject.Singleton
 @Singleton
 class CurrencyRebaser @Inject constructor() {
 
-    /**
-     * anchor 맵을 target 기준으로 재계산. [target]이 [anchored]에 없으면 환산 자체가 불가능하므로
-     * 호출 측이 사전에 보장해야 함. 위반 시 [IllegalArgumentException].
-     */
     fun rebase(
         anchored: Map<Currency, BigDecimal>,
         target: Currency,
