@@ -39,7 +39,7 @@ class CurrencyTest {
         assertNull(Currency.byCode("XYZ"))
     }
 
-    // 도메인이 명시한 단일 fallback 정책 — 모든 피쳐가 같은 기본값을 공유해야 함.
+    // 모든 피쳐가 같은 기본값을 써야 한다.
     @Test
     fun `DEFAULT is USD`() {
         assertEquals(Currency.USD, Currency.DEFAULT)
