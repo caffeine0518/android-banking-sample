@@ -48,7 +48,6 @@ class ResultScreenTest {
 
         composeRule.onNodeWithText(string(R.string.transfer_result_loading)).assertIsDisplayed()
         composeRule.onNodeWithText(string(R.string.transfer_result_confirm)).assertDoesNotExist()
-        // 송금 진행 중에는 상단 백 버튼이 숨겨진다(중도 이탈 방지).
         composeRule.onNodeWithContentDescription(string(R.string.transfer_action_back))
             .assertDoesNotExist()
     }
@@ -58,7 +57,6 @@ class ResultScreenTest {
         setScreen(ResultState(header = header(), phase = ResultPhase.Success))
 
         composeRule.onNodeWithText("이수취", substring = true).assertIsDisplayed()
-        // 로딩이 끝나면 백 버튼이 다시 노출된다.
         composeRule.onNodeWithContentDescription(string(R.string.transfer_action_back))
             .assertIsDisplayed()
         composeRule.onNodeWithText(string(R.string.transfer_result_success_sent)).assertIsDisplayed()

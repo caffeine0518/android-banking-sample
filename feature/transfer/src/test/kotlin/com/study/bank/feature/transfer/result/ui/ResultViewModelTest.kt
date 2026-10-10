@@ -122,7 +122,7 @@ class ResultViewModelTest {
 
     @Test
     fun `외부 수취인은 출금계좌 저장소에 없어도 라우트 신원으로 송금된다`() = runTest {
-        // 출금계좌만 저장소에 있고, 외부(타행) 수취인은 라우트 신원으로만 전달된다(재조회 없음).
+        // 외부 수취인은 저장소에 없고 라우트로만 전달된다.
         val accounts = FakeAccountRepository().apply { emit(account(SOURCE_ID, holder = "박송금")) }
         val transfer = SequencedTransferRepository(success())
         val vm = buildViewModel(
@@ -143,7 +143,6 @@ class ResultViewModelTest {
 
         assertEquals(ResultPhase.Success, vm.state.value.phase)
         assertEquals("김토스", vm.state.value.header?.recipientName)
-        // 라우트의 수취인 신원이 그대로 송금 요청에 포함된다.
         val request = transfer.requests.single()
         assertEquals("110-555-667788", request.toAccountNumber.value)
         assertEquals(BankCode.SHINHAN, request.toBankCode)
@@ -155,7 +154,6 @@ class ResultViewModelTest {
         val accounts = FakeAccountRepository().apply {
             emit(account(SOURCE_ID), account(RECIPIENT_ID))
         }
-        // 첫 실행은 네트워크 실패, 두 번째(재시도)는 성공.
         val transfer = SequencedTransferRepository(
             TransferOutcome.Failure.Network(RuntimeException("net")),
             success(),
@@ -173,7 +171,6 @@ class ResultViewModelTest {
         val accounts = FakeAccountRepository().apply {
             emit(account(SOURCE_ID), account(RECIPIENT_ID))
         }
-        // 1차는 네트워크 실패(타임아웃 가정), 재시도는 성공.
         val transfer = SequencedTransferRepository(
             TransferOutcome.Failure.Network(RuntimeException("timeout")),
             success(),
@@ -182,7 +179,6 @@ class ResultViewModelTest {
 
         vm.onIntent(ResultIntent.RetryClicked)
 
-        // 같은 논리적 송금이므로 재시도는 첫 시도와 동일한 키로 나가야 한다(서버 dedup → 이중출금 방지).
         assertEquals(2, transfer.requests.size)
         assertEquals(transfer.requests[0].idempotencyKey, transfer.requests[1].idempotencyKey)
     }
@@ -192,8 +188,7 @@ class ResultViewModelTest {
         val accounts = FakeAccountRepository().apply {
             emit(account(SOURCE_ID), account(RECIPIENT_ID))
         }
-        // 확인 화면이 같은 송금으로 결과 화면을 두 번 연 상황(내비게이션 중복 실행), 또는 프로세스 death 뒤
-        // Navigation 이 결과 화면을 복원해 송금을 자동 재실행하는 상황. 서버가 한 건으로 판정하려면 키가 같아야 한다.
+        // 결과 화면이 중복으로 열리거나 프로세스 종료 후 복원돼 송금이 다시 실행되는 상황.
         val first = SequencedTransferRepository(success())
         buildViewModel(accounts, first, amount = 1)
         val second = SequencedTransferRepository(success())
@@ -210,18 +205,18 @@ class ResultViewModelTest {
         val accounts = FakeAccountRepository().apply {
             emit(account(SOURCE_ID), account(RECIPIENT_ID))
         }
-        // init은 즉시 실패, 재시도는 release 전까지 멈춰 phase를 Loading으로 붙잡아 둔다.
+        // 재시도를 release 전까지 멈춰 Loading을 유지한다.
         val transfer = GatedTransferRepository(retryOutcome = success())
         val vm = buildViewModel(accounts, transfer, amount = 1)
         assertTrue(vm.state.value.phase is ResultPhase.Failure)
         assertEquals(1, transfer.callCount)
 
-        vm.onIntent(ResultIntent.RetryClicked) // 재실행 시작 → phase=Loading, gate에서 멈춤
-        vm.onIntent(ResultIntent.RetryClicked) // 무시(이미 Loading)
-        vm.onIntent(ResultIntent.RetryClicked) // 무시
+        vm.onIntent(ResultIntent.RetryClicked) // 재실행이 gate에서 멈춘다
+        vm.onIntent(ResultIntent.RetryClicked)
+        vm.onIntent(ResultIntent.RetryClicked)
         assertEquals(2, transfer.callCount)
 
-        transfer.release() // 멈춘 재실행 완료
+        transfer.release()
         assertEquals(ResultPhase.Success, vm.state.value.phase)
         assertEquals(2, transfer.callCount)
     }
@@ -321,7 +316,7 @@ class ResultViewModelTest {
         }
     }
 
-    /** 첫 호출(init)은 즉시 실패, 이후 호출은 [release] 전까지 멈춰 재실행을 인플라이트로 붙잡아 둔다. */
+    /** 첫 호출(init)은 즉시 실패하고, 이후 호출은 [release] 전까지 멈춘다. */
     private class GatedTransferRepository(
         private val retryOutcome: TransferOutcome,
     ) : TransferRepository {

@@ -15,13 +15,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-/**
- * 결과 화면의 시스템 뒤로가기 허용 여부.
- *
- * 뒤로가기로 결과 화면을 벗어나면 ResultViewModel 과 멱등성 키가 함께 제거되고, 금액·확인 화면을 거쳐
- * 다시 보내면 새 키가 발급된다. 서버 반영 여부를 알 수 없는 실패(NETWORK·UNKNOWN)에서 이 경로가 열려
- * 있으면, 응답만 유실된 첫 송금과 새 키의 재송금이 모두 체결되어 이중출금이 발생한다.
- */
+/** 반영 여부를 알 수 없는 실패에서 뒤로가기가 열리면 새 키로 재송금돼 이중 출금이 발생한다. */
 @RunWith(RobolectricTestRunner::class)
 class ResultBackHandlerTest {
 
@@ -33,7 +27,7 @@ class ResultBackHandlerTest {
 
     @Before
     fun setUp() {
-        // 결과 화면보다 먼저 등록된 콜백 = 백스택의 이전 화면. 결과 화면이 소비하지 않은 뒤로가기만 여기에 도달한다.
+        // 먼저 등록된 콜백이 이전 화면이다. 결과 화면이 소비하지 않은 뒤로가기만 도달한다.
         val previousScreen = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 reachedPreviousScreen = true
@@ -76,7 +70,6 @@ class ResultBackHandlerTest {
         assertEquals(false, backReachesPreviousScreen(ResultPhase.Success))
     }
 
-    /** [phase]에서 뒤로가기를 누르면 결과 화면이 소비하지 않고 이전 화면까지 전달되는지 반환한다. */
     private fun backReachesPreviousScreen(phase: ResultPhase): Boolean {
         this.phase = phase
         reachedPreviousScreen = false

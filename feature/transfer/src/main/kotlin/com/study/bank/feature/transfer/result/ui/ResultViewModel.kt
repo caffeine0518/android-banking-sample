@@ -46,15 +46,10 @@ class ResultViewModel @AssistedInject constructor(
     }
 
     private val sourceAccountId = AccountId(route.sourceAccountId)
-    // 수취인은 라우트 신원(외부 계좌는 출금계좌 저장소에 없으므로 식별자 재조회 없이 그대로 송금에 쓴다).
     private val recipient = route.recipient
     private val amount = route.amount
 
-    /**
-     * 멱등성 키는 "이 송금 한 건"에 묶여 재시도 내내 동일해야 한다. 재시도마다 새로 만들면
-     * 타임아웃 뒤 재시도가 서버엔 새 거래(=새 bank_tran_id)로 보여 이중출금을 못 막는다.
-     * 키는 확인 화면이 발급해 라우트로 전달하므로, 결과 화면이 중복 생성되거나 복원돼도 같은 키를 쓴다.
-     */
+    /** 재시도마다 새 키를 쓰면 타임아웃 뒤 재시도가 새 거래로 체결돼 이중 출금이 된다. */
     private val idempotencyKey = route.idempotencyKey
 
     private val store = MviStore<ResultState, ResultAction, ResultEffect>(
@@ -67,8 +62,7 @@ class ResultViewModel @AssistedInject constructor(
                 sendEffect(ResultEffect.Finish(sourceAccountId.value))
 
             ResultIntent.RetryClicked -> {
-                // 단발 가드: 이미 재실행 중이면 무시한다. 로딩 중 버튼을 숨기는 UI 가드는 재합성
-                // 타이밍에 의존해 빠른 연타를 못 막으므로, 상태로 직접 재진입을 차단한다.
+                // 버튼 숨김은 재합성 타이밍에 의존해 빠른 연타를 막지 못하므로 상태로 재진입을 막는다.
                 if (state.phase != ResultPhase.Loading) {
                     setState { copy(phase = ResultPhase.Loading) }
                     execute()
@@ -92,7 +86,6 @@ class ResultViewModel @AssistedInject constructor(
         store.sendIntent(intent)
     }
 
-    /** 두 계좌를 조회해 송금 요청을 만들고 실행한 뒤, 결과를 phase로 반영한다. */
     private fun execute() {
         viewModelScope.launch {
             // 조회 실패는 계좌를 찾지 못한 경우와 같이 UNKNOWN 실패로 표시해 재시도할 수 있게 한다.

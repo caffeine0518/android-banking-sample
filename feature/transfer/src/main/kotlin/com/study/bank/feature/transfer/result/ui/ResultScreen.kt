@@ -65,7 +65,6 @@ internal fun ResultScreen(
             TopAppBar(
                 title = {},
                 navigationIcon = {
-                    // 송금 진행(로딩) 중에는 백 버튼을 숨겨 중도 이탈/혼동을 막는다. 성공·실패에서만 노출.
                     if (state.phase != ResultPhase.Loading) {
                         IconButton(onClick = { onIntent(ResultIntent.BackClicked) }) {
                             Icon(
@@ -133,7 +132,6 @@ private fun OutcomeContent(
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        // 성공/실패 결과 화면을 문구가 아니라 안정 태그로 식별.
         modifier = Modifier.testTag(testTag),
     ) {
         Icon(
