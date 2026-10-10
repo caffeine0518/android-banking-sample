@@ -122,7 +122,6 @@ class ResultViewModelTest {
 
     @Test
     fun `외부 수취인은 출금계좌 저장소에 없어도 라우트 신원으로 송금된다`() = runTest {
-        // 외부 수취인은 저장소에 없고 라우트로만 전달된다.
         val accounts = FakeAccountRepository().apply { emit(account(SOURCE_ID, holder = "박송금")) }
         val transfer = SequencedTransferRepository(success())
         val vm = buildViewModel(
@@ -188,7 +187,6 @@ class ResultViewModelTest {
         val accounts = FakeAccountRepository().apply {
             emit(account(SOURCE_ID), account(RECIPIENT_ID))
         }
-        // 결과 화면이 중복으로 열리거나 프로세스 종료 후 복원돼 송금이 다시 실행되는 상황.
         val first = SequencedTransferRepository(success())
         buildViewModel(accounts, first, amount = 1)
         val second = SequencedTransferRepository(success())
@@ -205,13 +203,12 @@ class ResultViewModelTest {
         val accounts = FakeAccountRepository().apply {
             emit(account(SOURCE_ID), account(RECIPIENT_ID))
         }
-        // 재시도를 release 전까지 멈춰 Loading을 유지한다.
         val transfer = GatedTransferRepository(retryOutcome = success())
         val vm = buildViewModel(accounts, transfer, amount = 1)
         assertTrue(vm.state.value.phase is ResultPhase.Failure)
         assertEquals(1, transfer.callCount)
 
-        vm.onIntent(ResultIntent.RetryClicked) // 재실행이 gate에서 멈춘다
+        vm.onIntent(ResultIntent.RetryClicked)
         vm.onIntent(ResultIntent.RetryClicked)
         vm.onIntent(ResultIntent.RetryClicked)
         assertEquals(2, transfer.callCount)

@@ -124,7 +124,6 @@ class AmountViewModelTest {
 
         vm.onIntent(AmountIntent.FillBalanceClicked)
 
-        // $3,245.80 → 324,580센트.
         assertEquals(324_580L, vm.state.value.amount)
     }
 
@@ -137,11 +136,9 @@ class AmountViewModelTest {
             account(RECIPIENT_ID),
         )
 
-        // $100.50 = 10,050센트를 키패드로 입력
         "10050".forEach { vm.onIntent(AmountIntent.DigitAppended(it.toString())) }
         assertEquals(10_050L, vm.state.value.amount)
 
-        // 잔액(10,050센트) 초과 입력은 잔액으로 클램프된다
         vm.onIntent(AmountIntent.DigitAppended("9"))
         assertEquals(10_050L, vm.state.value.amount)
     }

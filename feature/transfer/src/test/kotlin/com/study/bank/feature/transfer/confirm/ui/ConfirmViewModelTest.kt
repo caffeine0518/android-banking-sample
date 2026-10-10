@@ -132,7 +132,6 @@ class ConfirmViewModelTest {
     @Test
     fun `복원돼도 Submit effect의 멱등성 키가 보존된다`() = runTest {
         val repo = FakeAccountRepository()
-        // 같은 SavedStateHandle로 다시 만들면 프로세스 종료 후 복원과 같다.
         val savedStateHandle = SavedStateHandle()
         val newKey = { UUID.randomUUID().toString() }
         val first = buildViewModel(repo, amount = 2, savedStateHandle = savedStateHandle, newKey = newKey)

@@ -15,7 +15,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-/** 반영 여부를 알 수 없는 실패에서 뒤로가기가 열리면 새 키로 재송금돼 이중 출금이 발생한다. */
 @RunWith(RobolectricTestRunner::class)
 class ResultBackHandlerTest {
 
