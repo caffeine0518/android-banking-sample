@@ -15,15 +15,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-/**
- * HTTP·직렬화 없이 [KftcWithdrawalService]의 잔액·원장 변경 로직만 검증한다.
- * 기본 시드를 그대로 쓰고, 시각은 고정 clock으로 지정한다.
- * Room이 Context를 요구하므로 Robolectric에서 실행한다. 테스트마다 새 인메모리 DB를 쓰므로 서로 격리된다.
- */
 @RunWith(RobolectricTestRunner::class)
 class KftcWithdrawalServiceTest {
 
-    // 시드 거래내역의 최신 시각(2026-06-25 18:00)보다 뒤여야 세션 이체가 최신 거래가 된다. 프로덕션(now > 시드 시각)과 같은 조건이다.
+    // 세션 이체가 최신 거래가 되도록 시드 거래내역의 최신 시각(2026-06-25 18:00)보다 뒤로 둔다.
     private val fixedClock: Clock = Clock.fixed(
         LocalDateTime.of(2026, 6, 27, 10, 30, 0).atZone(ZoneId.systemDefault()).toInstant(),
         ZoneId.systemDefault(),
@@ -63,7 +58,6 @@ class KftcWithdrawalServiceTest {
 
         bank.withdrawalService.withdraw(internalCommand(from = SALARY, toAccountNum = SAFEBOX_NUM, amount = "50000"))
 
-        // 출금계좌에서 차감하고 수취계좌에 입금한다.
         assertEquals("2797320", bank.accountDao.find(SALARY)!!.balanceAmt)
         assertEquals("12050000", bank.accountDao.find(SAFEBOX)!!.balanceAmt)
 
@@ -82,11 +76,10 @@ class KftcWithdrawalServiceTest {
     fun `출금계좌와 수취계좌가 같으면 차감과 입금이 상쇄돼 잔액이 보존된다`() {
         val bank = newBank()
 
-        // 같은 계좌로 송금하는 경우. 같은 행에 출금과 입금이 연달아 반영된다.
+        // 같은 행에 출금과 입금이 연달아 반영된다.
         bank.withdrawalService.withdraw(internalCommand(from = SALARY, toAccountNum = SALARY_NUM, amount = "50000"))
 
         assertEquals("2847320", bank.accountDao.find(SALARY)!!.balanceAmt)
-        // 원장에는 출금·입금 두 행이 기록된다.
         val ledger = bank.transactionDao.sessionLedger(SALARY)
         assertEquals(2, ledger.size)
         assertEquals(TransactionDirection.DEPOSIT, ledger[0].direction)
@@ -110,7 +103,6 @@ class KftcWithdrawalServiceTest {
     fun `내부 수취계좌 통화가 다르면 통화불일치로 실패하고 양쪽 상태를 보존한다`() {
         val bank = newBank()
 
-        // SALARY(KRW) → USD 외화통장(092, 1000-98-7654321)
         val result = bank.withdrawalService.withdraw(internalCommand(from = SALARY, toAccountNum = USD_NUM, amount = "1000"))
 
         assertTrue(result is WithdrawResult.CurrencyMismatch)
@@ -134,7 +126,6 @@ class KftcWithdrawalServiceTest {
         assertTrue(bank.withdrawalService.withdraw(externalCommand(from = SALARY, amount = "0")) is WithdrawResult.InvalidAmount)
         assertTrue(bank.withdrawalService.withdraw(externalCommand(from = SALARY, amount = "-100")) is WithdrawResult.InvalidAmount)
         assertTrue(bank.withdrawalService.withdraw(externalCommand(from = SALARY, amount = "abc")) is WithdrawResult.InvalidAmount)
-        // 거절 건은 상태를 변경하지 않는다.
         assertEquals("2847320", bank.accountDao.find(SALARY)!!.balanceAmt)
     }
 
@@ -168,13 +159,11 @@ class KftcWithdrawalServiceTest {
     fun `같은 bank_tran_id로 다시 출금하면 한 번만 차감하고 같은 응답을 반환한다`() {
         val bank = newBank()
 
-        // 응답이 유실돼 클라이언트가 같은 멱등성 키로 재시도하는 상황.
         val first = bank.withdrawalService.withdraw(externalCommand(from = SALARY, amount = "50000", bankTranId = REPLAYED_ID))
         val second = bank.withdrawalService.withdraw(externalCommand(from = SALARY, amount = "50000", bankTranId = REPLAYED_ID))
 
         assertEquals("2797320", bank.accountDao.find(SALARY)!!.balanceAmt)
         assertEquals(1, bank.transactionDao.sessionLedger(SALARY).size)
-        // 재요청은 원장을 변경하지 않고 처음 체결한 응답을 그대로 반환한다(거래고유번호까지 동일).
         assertEquals(first, second)
         assertEquals(REPLAYED_ID, (second as WithdrawResult.Success).bankTranId)
     }
@@ -183,7 +172,7 @@ class KftcWithdrawalServiceTest {
     fun `같은 bank_tran_id라도 금액이 다르면 체결된 응답을 반환하지 않는다`() {
         val bank = newBank()
 
-        // 키 충돌로 서로 다른 송금이 같은 번호를 받은 상황. 앞 건의 성공 응답이 반환되면 송금하지 않은 건이 성공으로 표시된다.
+        // 앞 건의 성공 응답을 반환하면 송금하지 않은 건이 성공으로 표시된다.
         bank.withdrawalService.withdraw(externalCommand(from = SALARY, amount = "50000", bankTranId = REPLAYED_ID))
         val collided = bank.withdrawalService.withdraw(externalCommand(from = SALARY, amount = "30000", bankTranId = REPLAYED_ID))
 
@@ -209,7 +198,7 @@ class KftcWithdrawalServiceTest {
     fun `거절된 요청은 같은 bank_tran_id로 다시 시도할 수 있다`() {
         val bank = newBank()
 
-        // 잔액 부족으로 거절되면 원장은 변경되지 않는다. 같은 번호로 다시 보내면 정상 체결돼야 한다.
+        // 거절 건은 기록하지 않으므로 같은 번호로 다시 보내면 체결돼야 한다.
         bank.withdrawalService.withdraw(externalCommand(from = SALARY, amount = "999999999", bankTranId = REPLAYED_ID))
         val retried = bank.withdrawalService.withdraw(externalCommand(from = SALARY, amount = "50000", bankTranId = REPLAYED_ID))
 
@@ -262,7 +251,6 @@ class KftcWithdrawalServiceTest {
 
         val statement = bank.transactionDao.statement(SALARY)
         assertEquals(KftcTransactionSeed.HISTORY_COUNT + 1, statement.size)
-        // statement는 seq(기록 순서) 내림차순이다. 세션 이체의 seq가 모든 시드보다 커서 맨 앞에 온다.
         assertEquals(TransactionDirection.WITHDRAWAL, statement.first().direction)
         assertEquals("2797320", statement.first().afterBalanceAmt)
     }
@@ -275,13 +263,11 @@ class KftcWithdrawalServiceTest {
         bank.withdrawalService.withdraw(externalCommand(from = SALARY, amount = "20000", recvName = "두번째"))
 
         val statement = bank.transactionDao.statement(SALARY)
-        // 나중에 기록된 "두번째"의 seq가 더 커서 맨 앞에 온다.
         assertEquals("두번째", statement[0].counterpartyName)
         assertEquals("첫번째", statement[1].counterpartyName)
         assertTrue("seq가 엄격히 내림차순이어야", statement.zipWithNext().all { (a, b) -> a.seq > b.seq })
     }
 
-    // 지정하지 않으면 호출마다 새 거래고유번호를 부여해, 서로 다른 송금이 중복으로 판정되지 않게 한다.
     private var tranSeq = 0
     private fun newTranId(): String = "M202300001U%09d".format(++tranSeq)
 
@@ -294,7 +280,7 @@ class KftcWithdrawalServiceTest {
         bankTranId = bankTranId,
         fintechUseNum = from,
         tranAmt = amount,
-        recvAccountNum = "9999-99-9999999", // 시드에 없는 계좌번호 → 외부 이체
+        recvAccountNum = "9999-99-9999999", // 시드에 없는 계좌 → 외부 이체
         recvBankCode = "004",
         recvName = recvName,
         reqName = "홍길동",
@@ -307,7 +293,7 @@ class KftcWithdrawalServiceTest {
         fintechUseNum = from,
         tranAmt = amount,
         recvAccountNum = toAccountNum,
-        recvBankCode = "092", // 토스뱅크 시드 계좌
+        recvBankCode = "092",
         recvName = "홍길동",
         reqName = "홍길동",
         wdPrintContent = "보냄",
@@ -315,7 +301,6 @@ class KftcWithdrawalServiceTest {
     )
 
     private companion object {
-        // 재시도가 같은 송금임을 나타내는 고정 거래고유번호.
         const val REPLAYED_ID = "M202300001U000000777"
         const val SALARY = KftcSeedAccountIds.PAYROLL_KRW
         const val USD = KftcSeedAccountIds.FX_USD

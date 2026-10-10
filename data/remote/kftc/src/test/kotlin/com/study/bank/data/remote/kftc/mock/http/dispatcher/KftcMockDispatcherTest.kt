@@ -19,13 +19,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-/**
- * [KftcMockDispatcher]의 라우팅과 오류 분기만 검증한다.
- *
- * Retrofit·DTO 직렬화를 거치지 않고 HTTP body 문자열만 확인하므로, 실패 원인이 경로 매칭·시드 조회·
- * [MockError] 분기로 한정된다.
- * 상태가 Room 테이블에 있어 Context가 필요하므로 Robolectric에서 실행한다.
- */
 @RunWith(RobolectricTestRunner::class)
 class KftcMockDispatcherTest {
 
@@ -81,7 +74,6 @@ class KftcMockDispatcherTest {
         assertTrue("시드 통화코드와 일치: $body", body.contains(""""currency_code":"${krw.currencyCode}""""))
     }
 
-    // MissingFintechUseNum: 쿼리 자체가 없는 경우(isNullOrBlank의 null 분기).
     @Test
     fun `fintech_use_num 쿼리 누락은 400과 MissingFintechUseNum 메시지`() {
         val (code, body) = get("/v2.0/account/balance/fin_num")
@@ -91,7 +83,6 @@ class KftcMockDispatcherTest {
             body.contains("fintech_use_num 쿼리 누락"))
     }
 
-    // MissingFintechUseNum: 쿼리 값이 빈 경우(isNullOrBlank의 blank 분기). 입력 형태가 위와 달라 분리했다.
     @Test
     fun `fintech_use_num 쿼리가 빈 값이어도 동일 분기로 400`() {
         val (code, body) = get("/v2.0/account/balance/fin_num?fintech_use_num=")
@@ -111,7 +102,6 @@ class KftcMockDispatcherTest {
         assertTrue("UnknownFintechUseNum 메시지에 입력값 포함: $body", body.contains(bogus))
     }
 
-    // UnknownEndpoint. 등록되지 않은 경로는 404로 응답해야 한다.
     @Test
     fun `등록되지 않은 path는 404와 UnknownEndpoint 메시지 + 해당 path 포함`() {
         val (code, body) = get("/v2.0/garbage")
@@ -120,7 +110,6 @@ class KftcMockDispatcherTest {
         assertTrue("입력 path 포함: $body", body.contains("/v2.0/garbage"))
     }
 
-    // 라우트가 (메서드, 경로)로 매칭하는지 확인한다. 경로만 비교하면 조회 경로에 POST해도 200이 반환된다.
     @Test
     fun `조회 경로에 POST하면 405와 MethodNotAllowed 메시지`() {
         val (code, body) = post("/v2.0/account/list_finuse", "")
@@ -137,7 +126,6 @@ class KftcMockDispatcherTest {
         assertTrue("메서드와 경로를 메시지에 포함: $body", body.contains("GET") && body.contains("withdraw"))
     }
 
-    // KFTC 스펙: 오류 응답도 envelope 형식을 유지해야 한다. 필드가 빠지면 클라이언트 파싱이 실패한다.
     @Test
     fun `에러 응답도 KFTC envelope 4필드와 A0001 rsp_code를 모두 채운다`() {
         val (_, body) = get("/v2.0/garbage")
@@ -145,7 +133,6 @@ class KftcMockDispatcherTest {
         assertEnvelope(body, rspCode = "A0001")
     }
 
-    // 생성자로 주입한 seed를 쓰는지 확인한다. dispatcher가 기본 seed를 직접 참조하면 실패한다.
     @Test
     fun `커스텀 seed 주입 시 list_finuse는 주입한 seed만 반환한다`() {
         server.dispatcher = newDispatcher(
@@ -175,7 +162,6 @@ class KftcMockDispatcherTest {
         assertTrue("주입한 별칭이 응답에 들어있음: $body", body.contains("테스트통장"))
     }
 
-    // api_tran_id 카운터가 호출마다 정확히 1 증가하는지 확인한다. 중복 증가·미증가·카운터 공유 회귀를 검출한다.
     @Test
     fun `연속 호출의 api_tran_id는 정확히 1씩 증가한다`() {
         val firstBody = get("/v2.0/account/list_finuse").second
@@ -191,7 +177,7 @@ class KftcMockDispatcherTest {
 
     @Test
     fun `transaction_list는 200과 envelope + 시드 없는 계좌는 빈 res_list를 반환한다`() {
-        // 월급통장은 시드 거래내역이 있으므로, 빈 결과는 시드가 없는 신한 계좌로 검증한다.
+        // 신한 계좌는 시드 거래내역이 없다.
         val (code, body) = get("/v2.0/account/transaction_list/fin_num?fintech_use_num=$SHINHAN")
 
         assertEquals(200, code)
@@ -275,7 +261,6 @@ class KftcMockDispatcherTest {
 
     @Test
     fun `real_name은 계좌목록의 본인 계좌도 활성 수취인으로 조회한다`() {
-        // 수취인 목록은 계좌 시드에서 만들어지므로 신한 계좌로도 송금(내부 이체)할 수 있어야 한다.
         val (code, body) = post("/v2.0/inquiry/real_name", realNameBody(bank = "088", accountNum = "110-23-1237890"))
 
         assertEquals(200, code)
@@ -288,7 +273,7 @@ class KftcMockDispatcherTest {
 
     @Test
     fun `real_name은 하이픈 없는 숫자 계좌번호도 시드와 매칭한다`() {
-        // 앱은 계좌번호를 숫자로만 입력받으므로(토스와 동일), 하이픈 없는 번호가 하이픈이 포함된 시드와 매칭돼야 한다.
+        // 앱은 계좌번호를 숫자로만 입력받는다.
         val (code, body) = post("/v2.0/inquiry/real_name", realNameBody(bank = "088", accountNum = "110555667788"))
 
         assertEquals(200, code)

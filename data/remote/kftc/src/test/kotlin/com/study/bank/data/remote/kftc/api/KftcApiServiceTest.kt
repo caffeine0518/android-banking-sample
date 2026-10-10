@@ -22,11 +22,9 @@ import org.robolectric.RobolectricTestRunner
 import retrofit2.HttpException
 import retrofit2.Retrofit
 
-/** mock 서버가 Room에 상태를 저장해 Context가 필요하므로 Robolectric에서 실행한다. */
 @RunWith(RobolectricTestRunner::class)
 class KftcApiServiceTest {
 
-    // takeRequest()는 구현체에만 있어 구현 타입으로 선언한다.
     private lateinit var mockServer: KftcMockServerImpl
     private lateinit var api: KftcApiService
 
@@ -179,7 +177,7 @@ class KftcApiServiceTest {
 
     @Test
     fun `시드 거래내역이 없는 계좌는 빈 res_list와 next_page_yn=N을 반환한다`() = runTest {
-        // 신한 계좌는 시드 거래내역도 세션 이체도 없어 첫 페이지가 빈 결과다.
+        // 신한 계좌는 시드 거래내역이 없다.
         val response = api.getTransactionList(
             bankTranId = "M202300001U000010",
             fintechUseNum = SHINHAN,
@@ -203,14 +201,12 @@ class KftcApiServiceTest {
             fromDate = "20260101",
             toDate = "20261231",
             tranDtime = "20260618103000",
-            // 첫 페이지는 커서 미전송(null).
         )
 
         assertEquals("A0000", first.rspCode)
         assertEquals(KFTC_TRANSACTION_PAGE_SIZE, first.resList.size)
         assertEquals("Y", first.nextPageYn)
         assertTrue("다음 커서가 있어야 한다", first.beforInquiryTraceInfo.isNotEmpty())
-        // 최신순이므로 첫 거래의 잔액은 현재 잔액이다.
         assertEquals("2847320", first.resList.first().afterBalanceAmt)
     }
 
@@ -234,17 +230,15 @@ class KftcApiServiceTest {
             pageCount++
         } while (cursor != null && pageCount < 1_000)
 
-        // 전체 시드 건수를 누락·중복 없이 조회했다.
         assertEquals(KftcTransactionSeed.HISTORY_COUNT, collected.size)
         assertEquals(KftcTransactionSeed.HISTORY_COUNT, collected.distinct().size)
-        // ceil(전체 / 페이지 크기). 현재는 1200/20=60이지만 나누어떨어지지 않아도 맞도록 계산한다.
         val expectedPages = (KftcTransactionSeed.HISTORY_COUNT + KFTC_TRANSACTION_PAGE_SIZE - 1) / KFTC_TRANSACTION_PAGE_SIZE
         assertEquals(expectedPages, pageCount)
     }
 
     @Test
     fun `연속조회 도중 새 거래가 맨 앞에 추가돼도 페이지 경계가 바뀌지 않는다`() = runTest {
-        // 키셋 커서 회귀 테스트. 오프셋 커서라면 새 거래 때문에 모든 오프셋이 1씩 늘어 경계 행이 1·2페이지에 중복된다.
+        // 오프셋 커서라면 새 거래만큼 오프셋이 늘어 경계 행이 1·2페이지에 중복된다.
         val first = api.getTransactionList(
             bankTranId = "M202300001U000030",
             fintechUseNum = SALARY,
@@ -253,7 +247,6 @@ class KftcApiServiceTest {
             tranDtime = "20260618103000",
         )
 
-        // 조회 도중 월급통장에서 새 이체가 발생해 거래내역 맨 앞에 추가된다.
         api.withdraw(externalRequest(from = SALARY, amount = "1000"))
 
         val second = api.getTransactionList(
@@ -332,7 +325,7 @@ class KftcApiServiceTest {
         assertTrue("fintech_use_num 필드: $body", body.contains("fintech_use_num"))
         assertTrue("recv_client_account_num 필드: $body", body.contains("recv_client_account_num"))
         assertTrue("tran_amt 필드: $body", body.contains("tran_amt"))
-        // 기본값("TR")이어도 KFTC 필수 필드라 반드시 포함돼야 한다. encodeDefaults 회귀 테스트.
+        // 기본값이어도 KFTC 필수 필드다(encodeDefaults).
         assertTrue("transfer_purpose 필드: $body", body.contains("transfer_purpose"))
     }
 

@@ -10,12 +10,7 @@ import com.study.bank.data.remote.kftc.mock.storage.seed
 import java.time.Clock
 import org.robolectric.RuntimeEnvironment
 
-/**
- * 테스트용 mock 은행. Hilt가 조립하는 것과 같은 의존성을 수동으로 생성한다.
- *
- * 인스턴스마다 새 인메모리 DB를 만들어 시드를 적재하므로 테스트끼리 상태가 공유되지 않는다.
- * Room이 Context를 요구하므로 Robolectric 러너 안에서만 생성할 수 있다.
- */
+/** Hilt 그래프와 같은 mock 은행 의존성을 수동으로 조립한다. 인스턴스마다 새 DB를 쓴다. */
 internal class TestMockBank(
     private val accountSeed: List<SeedAccount> = KftcAccountSeed.accounts,
     clock: Clock = Clock.systemDefaultZone(),
@@ -33,6 +28,5 @@ internal class TestMockBank(
         withdrawalDao = database.withdrawalDao(),
     )
 
-    /** 시드 초깃값으로 되돌린다. 프로덕션에서 DB 프로바이더가 앱 시작 시 한 번 실행하는 적재와 같다. */
     fun reseed() = database.seed(accountSeed)
 }
