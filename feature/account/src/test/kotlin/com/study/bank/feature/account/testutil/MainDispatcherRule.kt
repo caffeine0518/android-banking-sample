@@ -9,12 +9,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
-/**
- * 테스트 동안 Main 디스패처를 [testDispatcher]로 교체하는 JUnit TestRule.
- *
- * 같은 [testDispatcher]를 ViewModel(및 MviStore)에도 주입하면 viewModelScope와 reducer 루프가 한
- * 디스패처를 공유해 runTest에서 결정적으로 구동된다.
- */
+/** 같은 [testDispatcher]를 ViewModel의 MviStore에도 주입하면 runTest에서 reducer 루프까지 결정적으로 실행된다. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainDispatcherRule(
     val testDispatcher: TestDispatcher = UnconfinedTestDispatcher(),

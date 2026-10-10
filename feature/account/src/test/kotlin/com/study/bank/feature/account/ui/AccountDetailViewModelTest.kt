@@ -66,7 +66,7 @@ class AccountDetailViewModelTest {
     fun `거래내역 페이징 스트림을 화면 계좌 id로 요청한다`() = runTest {
         val txRepo = FakeTransactionRepository()
 
-        buildViewModel(FakeAccountRepository(), txRepo) // transactions val 초기화 시 transactionStream(accountId) 호출
+        buildViewModel(FakeAccountRepository(), txRepo) // transactions 초기화 시 transactionStream을 호출한다
 
         assertEquals(ACCOUNT_ID, txRepo.lastStreamAccountId?.value)
     }
@@ -140,7 +140,7 @@ class AccountDetailViewModelTest {
         transactionRepository = txRepo,
         accountUiMapper = accountUiMapper,
         transactionUiMapper = transactionUiMapper,
-        // Main(rule)과 동일 디스패처를 store에 주입 → reducer 루프까지 결정적으로 구동.
+        // store에도 Main과 같은 디스패처를 주입해 reducer 루프까지 결정적으로 실행한다.
         dispatcherProvider = TestDispatcherProvider(mainDispatcherRule.testDispatcher),
     )
 
@@ -192,7 +192,7 @@ class AccountDetailViewModelTest {
         var lastStreamAccountId: AccountId? = null
             private set
 
-        // 이 화면은 거래내역을 transactionStream 으로만 조회한다. 인터페이스 구현용 stub.
+        // 이 화면은 transactionStream만 쓴다.
         override fun observeTransactions(accountId: AccountId): Flow<List<Transaction>> = emptyFlow()
         override suspend fun refresh(accountId: AccountId) {
             refreshCount++

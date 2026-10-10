@@ -30,7 +30,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 
-/** state를 직접 주입하는 [AccountDetailScreen] 화면 테스트. Robolectric으로 JVM에서 구동한다. */
 @RunWith(RobolectricTestRunner::class)
 class AccountDetailScreenTest {
 
@@ -39,7 +38,7 @@ class AccountDetailScreenTest {
 
     private val intents = mutableListOf<AccountDetailIntent>()
 
-    // 적재 완료(NotLoading) 상태로 PagingData를 만든다 — 안 주면 refresh가 Loading으로 남아 '빈 안내' 조건이 안 켜진다.
+    // 지정하지 않으면 refresh가 Loading으로 남아 빈 안내가 표시되지 않는다.
     private val idleLoadStates = LoadStates(
         refresh = LoadState.NotLoading(endOfPaginationReached = true),
         prepend = LoadState.NotLoading(endOfPaginationReached = true),
@@ -109,7 +108,6 @@ class AccountDetailScreenTest {
     fun `백 버튼을 누르면 BackClicked 인텐트가 방출된다`() {
         setScreen(AccountDetailState(account = account()))
 
-        // 아이콘 버튼이라 텍스트가 아닌 contentDescription으로 특정한다.
         composeRule.onNodeWithContentDescription(string(R.string.account_action_back)).performClick()
 
         assertEquals(listOf(AccountDetailIntent.BackClicked), intents)
