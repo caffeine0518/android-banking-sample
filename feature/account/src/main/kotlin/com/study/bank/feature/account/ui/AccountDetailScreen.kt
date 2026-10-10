@@ -154,7 +154,6 @@ private fun TransactionsPlaceholder(
     }
 }
 
-/** 거래 목록(스크롤) + 다음 페이지 적재 상태 푸터([appendStateFooter]). */
 @Composable
 private fun TransactionItems(
     items: LazyPagingItems<TransactionUi>,
@@ -176,7 +175,6 @@ private fun TransactionItems(
     }
 }
 
-/** 목록 하단 푸터: 다음 페이지를 당겨오는 중이면 진행 표시, append(다음 페이지)·refresh(새로고침)가 실패하면 재시도 버튼. */
 private fun LazyListScope.appendStateFooter(items: LazyPagingItems<TransactionUi>) {
     val append = items.loadState.append
     val refresh = items.loadState.refresh
@@ -267,8 +265,7 @@ private fun SendButton(
     enabled: Boolean,
     onClick: () -> Unit,
 ) {
-    // Surface 배경은 내비게이션 바 뒤까지 채우되(edge-to-edge), 버튼 콘텐츠는 navigationBarsPadding으로
-    // 시스템 내비 바 위로 띄워 겹침을 막는다.
+    // 배경은 내비게이션 바 뒤까지 그리고(edge-to-edge) 버튼만 navigationBarsPadding으로 올린다.
     Surface(color = MaterialTheme.colorScheme.background) {
         Button(
             onClick = onClick,

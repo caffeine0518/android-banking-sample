@@ -27,7 +27,7 @@ internal fun AccountDetailHeader(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            // 헤더는 계좌 로딩 완료 후에만 그려지므로, 이 태그의 등장 = "해당 id 상세에 도착(로딩 완료)"이다.
+            // 계좌 로딩 후에만 그려지므로 E2E가 이 태그로 상세 화면 도착을 판정한다.
             .testTag(BankTestTags.accountDetail(account.id))
             .padding(horizontal = 20.dp, vertical = 24.dp),
     ) {
