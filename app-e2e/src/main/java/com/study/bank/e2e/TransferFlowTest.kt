@@ -25,9 +25,6 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
 
-/**
- * 송금 풀 플로우 E2E: 홈 → 계좌 상세 → 수취인 → 금액 → 확인 → 결과.
- */
 @HiltAndroidTest
 class TransferFlowTest {
 
@@ -46,11 +43,9 @@ class TransferFlowTest {
         composeRule.awaitTag(AMOUNT_NEXT)
         composeRule.onNodeWithTag(AMOUNT_NEXT).performClick()
 
-        // 확인 화면 도착(detail 로딩 후) → 보내기.
         composeRule.awaitTag(SCREEN_CONFIRM)
         composeRule.onNodeWithTag(CONFIRM_SEND).performClick()
 
-        // 로딩 → 성공 화면.
         composeRule.awaitTag(RESULT_SUCCESS)
     }
 
@@ -66,7 +61,7 @@ class TransferFlowTest {
         composeRule.awaitTag(SCREEN_CONFIRM)
         composeRule.onNodeWithTag(CONFIRM_SEND).performClick()
 
-        // KRW→USD는 mock 서버가 통화 불일치로 거절 → 성공이 아니라 실패 화면이 뜬다(문구는 검증 안 함).
+        // mock 서버가 통화 불일치로 거절한다.
         composeRule.awaitTag(RESULT_FAILURE)
     }
 
@@ -84,12 +79,10 @@ class TransferFlowTest {
 
         composeRule.awaitTag(RESULT_SUCCESS)
 
-        // 보낸 뒤에는 시스템 뒤로가기가 차단된다(확인 화면으로 되돌아가 재송금 불가) — 여전히 성공 화면.
+        // 확인 화면으로 돌아가 재송금하지 못하도록 시스템 뒤로가기가 차단된다.
         pressSystemBack()
         composeRule.onNodeWithTag(RESULT_SUCCESS).assertIsDisplayed()
 
-        // "확인" → 송금 플로우(수취인~결과)가 모두 걷히고 출금계좌 상세로 복귀.
-        // 마스킹 번호 문자열이 아니라 출금계좌(source) id의 상세 태그로 "그 계좌 상세에 복귀"를 확인한다.
         composeRule.onNodeWithTag(RESULT_CONFIRM).performClick()
         composeRule.awaitTag(accountDetail(source))
         composeRule.onNodeWithTag(RESULT_SUCCESS).assertDoesNotExist()
@@ -97,18 +90,15 @@ class TransferFlowTest {
 
     @Test
     fun 같은_USD_계좌로_소수점_금액을_보내면_절삭_없이_송금된다() {
-        // 출금·수취 모두 USD(소수점 통화). 동일 통화라 송금이 성립하고, 소수점 보존을 검증한다.
         val (source, recipient) = AccountsByCurrency.sameCurrencyPair(Currency.USD)
         openAmountScreen(sourceId = source, recipientId = recipient)
-        // $100.50 = 10,050센트를 키패드로 입력(소수점 키 없이 최소단위 누적).
+        // $100.50 = 10,050센트
         enterDigits("10050")
 
         composeRule.awaitTag(AMOUNT_NEXT)
         composeRule.onNodeWithTag(AMOUNT_NEXT).performClick()
 
-        // 회귀 가드: 확인 화면에 정확히 $100.50이 떠야 한다. 이건 copy가 아니라 입력으로부터 계산된
-        // 금액 값이라(문자열 리소스 무관) 텍스트로 그대로 단언한다 — 절삭/오해석 버그를 잡는 핵심.
-        // (옛 절삭 코드는 잔액을 $3,245로 클램프하거나 10050을 $10,050로 오해석했다.)
+        // 입력으로부터 계산된 값이라 텍스트로 단언한다. 옛 코드는 10050을 $10,050로 해석했다.
         composeRule.awaitTag(SCREEN_CONFIRM)
         composeRule.onNodeWithText("$100.50", substring = true).assertIsDisplayed()
         composeRule.onNodeWithTag(CONFIRM_SEND).performClick()
@@ -116,19 +106,18 @@ class TransferFlowTest {
         composeRule.awaitTag(RESULT_SUCCESS)
     }
 
-    /** 홈 → [sourceId] 상세 → 보내기 → 수취인 [recipientId] 선택 → 금액 화면 진입까지. 계좌는 모두 id 태그로 지목. */
+    /** 홈 → [sourceId] 상세 → 보내기 → 수취인 [recipientId] → 금액 화면. */
     private fun openAmountScreen(sourceId: String, recipientId: String) {
         composeRule.awaitTag(accountItem(sourceId))
         composeRule.onNodeWithTag(accountItem(sourceId)).performClick()
 
-        // 상세 헤더 태그 등장 = 계좌 로딩 완료(=보내기 버튼 활성) → 송금 진입.
         composeRule.awaitTag(accountDetail(sourceId))
         composeRule.onNodeWithTag(DETAIL_SEND).performClick()
 
-        composeRule.awaitTag(SCREEN_RECIPIENT)                          // 수취인 화면 도착
+        composeRule.awaitTag(SCREEN_RECIPIENT)
         composeRule.onNodeWithTag(accountItem(recipientId)).performClick()
 
-        composeRule.awaitTag(SCREEN_AMOUNT)                             // 금액 화면 도착
+        composeRule.awaitTag(SCREEN_AMOUNT)
     }
 
     /** 커스텀 키패드로 [digits]를 한 자리씩 입력. 각 숫자 키는 화면에서 유일한 동일 텍스트 노드다. */
@@ -136,7 +125,6 @@ class TransferFlowTest {
         digits.forEach { composeRule.onNodeWithText(it.toString()).performClick() }
     }
 
-    /** 시스템 뒤로가기(하드웨어 백/제스처)를 호출한다 — BackHandler 차단 여부를 검증하기 위함. */
     private fun pressSystemBack() {
         composeRule.runOnUiThread {
             composeRule.activity.onBackPressedDispatcher.onBackPressed()

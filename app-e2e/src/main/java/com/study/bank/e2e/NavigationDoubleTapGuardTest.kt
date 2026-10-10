@@ -21,12 +21,7 @@ import org.junit.Rule
 import org.junit.Test
 
 /**
- * 더블탭 내비게이션 가드(BankNavHost의 push/pop 헬퍼) 회귀 E2E.
- *
- * 클릭→intent→effect→콜백의 비동기 홉 때문에 리컴포지션 반영 전 더블탭이 백스택을 두 번
- * 조작할 수 있다. 가드 도입 전 실기 재현된 증상:
- * - 전진 더블탭 → 동일 NavKey 중복 push(contentKey 공유로 상태·VM 섞임, 뒤로가기 2번 필요)
- * - 백버튼 더블탭 → 백스택 소진 → "NavDisplay backstack cannot be empty" 크래시
+ * BankNavHost의 push/pop 가드 회귀 E2E.
  *
  * [performTouchInput] 한 배치에 클릭 2회를 넣어야 재현된다 — performClick 2회는 사이에 idle 동기화가 낀다.
  */
@@ -64,7 +59,7 @@ class NavigationDoubleTapGuardTest {
         composeRule.onNodeWithTag(accountItem(account)).performClick()
         composeRule.awaitTag(accountDetail(account))
 
-        // 가드 도입 전에는 두 번째 pop이 백스택을 비워 NavDisplay가 즉시 죽었다.
+        // 가드가 없으면 두 번째 pop이 백스택을 비워 NavDisplay에서 크래시가 발생한다.
         composeRule.onNodeWithTag(DETAIL_BACK).performTouchInput {
             click(center)
             advanceEventTime(DOUBLE_TAP_GAP_MILLIS)

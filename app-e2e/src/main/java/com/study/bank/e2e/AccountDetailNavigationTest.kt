@@ -31,16 +31,13 @@ class AccountDetailNavigationTest {
 
     @Test
     fun 계좌를_탭하면_상세_화면이_보인다() {
-        // 이 테스트는 통화 무관 — 아무 계좌나 하나 열어 상세가 끝까지 표시되는지 검증한다(거래내역 적재는 페이징·비동기라 단정하지 않음).
+        // 거래내역 적재는 페이징·비동기라 단언하지 않는다.
         val account = AccountsByCurrency.firstOf(Currency.KRW)
-        // 표시명이 아니라 안정적 id 태그로 그 계좌 행을 지목해 클릭.
         composeRule.awaitTag(accountItem(account))
         composeRule.onNodeWithTag(accountItem(account)).performClick()
 
-        // 상세 헤더 태그는 계좌 로딩 후에만 등장 → 상세가 떴고 그 계좌가 로딩됐음을 보장한다.
         composeRule.awaitTag(accountDetail(account))
         composeRule.onNodeWithTag(DETAIL_TX_LABEL).assertIsDisplayed()
-        // 하단 송금 진입 버튼.
         composeRule.onNodeWithTag(DETAIL_SEND).assertIsDisplayed()
     }
 
@@ -51,10 +48,9 @@ class AccountDetailNavigationTest {
         composeRule.onNodeWithTag(accountItem(account)).performClick()
         composeRule.awaitTag(accountDetail(account))
 
-        // 상단 백 버튼 → popBackStack → 홈.
         composeRule.onNodeWithTag(DETAIL_BACK).performClick()
 
-        composeRule.awaitTag(SCREEN_HOME)                                 // 홈 도착
+        composeRule.awaitTag(SCREEN_HOME)
         composeRule.onNodeWithTag(HOME_TOTAL_BALANCE).assertIsDisplayed()
     }
 }
