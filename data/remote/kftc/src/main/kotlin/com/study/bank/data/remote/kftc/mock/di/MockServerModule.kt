@@ -17,7 +17,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-/** mock 내부 구현체 바인딩. 구현체가 internal이라 `:data-di`가 아니라 이 모듈 안에 둔다. */
+/** mock 내부 구현체 바인딩. 구현체가 internal이라 `:data-di`가 아니라 이 모듈에 둔다. */
 @Module
 @InstallIn(SingletonComponent::class)
 internal abstract class MockServerModule {
@@ -34,7 +34,7 @@ internal abstract class MockServerModule {
 
     companion object {
 
-        /** 연결 차단 토글과 api_tran_id 시퀀스를 서버 하나가 공유하도록 [Singleton]이어야 한다. */
+        /** 연결 차단 플래그와 api_tran_id 시퀀스를 서버 전체에서 하나만 쓰도록 [Singleton]으로 제공한다. */
         @Provides
         @Singleton
         fun provideKftcMockDispatcher(
@@ -52,7 +52,7 @@ internal abstract class MockServerModule {
             responseDelayMillis = WITHDRAW_RESPONSE_DELAY_MS,
         )
 
-        /** 데모/수동 테스트용: 송금 응답을 지연시켜 "보내는 중이에요" 로딩 화면이 최소 1초 보이게 한다. */
+        /** 데모·수동 테스트용 송금 응답 지연. "보내는 중이에요" 로딩 화면이 최소 1초 보이게 한다. */
         private const val WITHDRAW_RESPONSE_DELAY_MS = 1_000L
     }
 }

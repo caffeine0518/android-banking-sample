@@ -30,8 +30,8 @@ internal class InquiryRequestHandler(
         runCatching { json.decodeFromString<RealNameInquiryRequest>(body) }.getOrNull()
 
     /**
-     * 계좌번호 비교용 정규화. 실제 KFTC는 account_num을 하이픈 없는 숫자로 주고받고(하이픈은 표시용)
-     * 시드는 하이픈 표기를 쓰므로, 양쪽에서 숫자만 남겨 비교한다.
+     * 계좌번호 비교용 정규화. 실제 KFTC는 account_num을 하이픈 없는 숫자로 전송하지만 시드는 하이픈을
+     * 포함하므로, 양쪽 모두 숫자만 남겨 비교한다.
      */
     private fun String.digitsOnly(): String = filter(Char::isDigit)
 }

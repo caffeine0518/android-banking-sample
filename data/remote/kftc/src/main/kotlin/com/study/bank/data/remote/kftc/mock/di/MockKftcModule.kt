@@ -17,17 +17,17 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 /**
- * Mock 은행 DB와 그 DAO들을 그래프에 노출한다 — `:data-di`의 LocalModule이 앱 캐시에 하는 것과 같은 모양.
+ * Mock 은행 DB와 DAO를 Hilt 그래프에 제공한다. `:data-di`의 LocalModule이 앱 캐시 DB를 제공하는 방식과 같다.
  *
- * mock 내부 타입(internal)을 바인딩하므로 `:data-di`가 아니라 이 모듈 안에 둔다.
+ * mock 내부(internal) 타입을 바인딩하므로 `:data-di`가 아니라 이 모듈에 둔다.
  */
 @Module
 @InstallIn(SingletonComponent::class)
 internal object MockKftcModule {
 
     /**
-     * DAO 넷이 같은 인스턴스를 보게 [Singleton]이어야 한다 — 아니면 계좌와 원장이 서로 다른 DB에 쌓인다.
-     * 첫 요청 전에 시드가 들어가도록 생성 직후 적재한다.
+     * DAO 네 개가 같은 DB를 쓰도록 [Singleton]으로 제공한다. 그렇지 않으면 계좌와 원장이 서로 다른 DB에 저장된다.
+     * 첫 요청 전에 데이터가 있도록 생성 직후 시드를 적재한다.
      */
     @Provides
     @Singleton
@@ -51,7 +51,7 @@ internal object MockKftcModule {
     fun provideMockWithdrawalDao(database: MockKftcDatabase): MockWithdrawalDao =
         database.withdrawalDao()
 
-    /** 부팅 시 테이블을 채우는 계좌 시드. 테스트는 DB를 직접 만들어 다른 시드를 적재한다. */
+    /** 앱 시작 시 적재하는 계좌 시드. 테스트는 DB를 직접 생성해 다른 시드를 적재한다. */
     @Provides
     fun provideAccountSeed(): List<SeedAccount> = KftcAccountSeed.accounts
 }

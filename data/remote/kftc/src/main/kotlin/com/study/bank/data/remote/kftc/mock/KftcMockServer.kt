@@ -4,11 +4,11 @@ import okhttp3.HttpUrl
 import okhttp3.tls.HandshakeCertificates
 
 /**
- * KFTC v2.0 mock 서버의 계약 — 라이프사이클과 네트워크 장애 주입.
+ * KFTC v2.0 mock 서버 인터페이스. 서버 수명 주기와 네트워크 장애 주입을 제공한다.
  *
- * [com.study.bank.data.remote.kftc.api.KftcApiService]가 실제 네트워크 스택을 그대로 거치게 해서
- * 인터셉터·직렬화·에러 경로까지 in-process로 검증한다. 구현이 HTTPS를 제공하므로 클라이언트는
- * [clientCertificates]로 그 CA를 신뢰해야 한다.
+ * [com.study.bank.data.remote.kftc.api.KftcApiService]가 실제 네트워크 스택을 그대로 거치므로
+ * 인터셉터·직렬화·오류 처리까지 프로세스 안에서 검증할 수 있다. 구현이 HTTPS로 응답하므로 클라이언트는
+ * [clientCertificates]로 서버 인증서를 신뢰해야 한다.
  */
 interface KftcMockServer {
 
@@ -25,8 +25,8 @@ interface KftcMockServer {
     fun shutdown()
 
     /**
-     * 이후 요청의 **응답만** 유실시킨다 — 서버 상태는 이미 반영된 뒤라, 응답을 받지 못한 클라이언트가
-     * 재시도하는 상황(이중출금 후보)을 재현한다.
+     * 이후 요청의 **응답만** 유실시킨다. 서버 상태는 이미 반영되므로, 응답을 받지 못한 클라이언트가
+     * 재시도하는 상황(이중 출금 위험)을 재현한다.
      */
     fun startDroppingConnections()
 

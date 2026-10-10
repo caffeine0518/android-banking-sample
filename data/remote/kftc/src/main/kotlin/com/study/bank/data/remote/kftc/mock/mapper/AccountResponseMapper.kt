@@ -45,7 +45,7 @@ internal class AccountResponseMapper(private val tranIds: KftcTranIds) {
         currencyCode = account.currencyCode,
     )
 
-    /** 방향 enum을 와이어 문자열("입금"/"출금")로, tran_type를 "이체"로 고정 변환한다. */
+    /** 방향 enum은 응답 문자열("입금"/"출금")로 변환하고, tran_type은 "이체"로 고정한다. */
     fun toTransactionListResponse(
         account: SeedAccount,
         records: List<TransactionRecord>,
@@ -92,7 +92,7 @@ internal class AccountResponseMapper(private val tranIds: KftcTranIds) {
     )
 
     private companion object {
-        // 사용자 일련번호. 실서비스에선 OAuth 토큰에서 유도되지만 mock은 고정값을 응답에 넣는다.
+        // 사용자 일련번호. 실서비스에서는 OAuth 토큰에서 얻지만 mock은 고정값을 쓴다.
         const val USER_SEQ_NO = "1100000001"
     }
 }

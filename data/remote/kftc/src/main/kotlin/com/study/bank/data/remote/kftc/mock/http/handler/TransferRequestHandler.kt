@@ -18,7 +18,7 @@ import okhttp3.mockwebserver.MockResponse
 /**
  * KFTC `/v2.0/transfer/…` 출금이체 핸들러.
  *
- * [responseDelayMillis] 기본값 0 — 테스트는 지연 없이 실행되고, 데모용 지연은
+ * [responseDelayMillis]의 기본값은 0이라 테스트는 지연 없이 실행된다. 데모용 지연은
  * 프로덕션 조립(`MockServerModule`)에서만 주입한다.
  */
 internal class TransferRequestHandler(
