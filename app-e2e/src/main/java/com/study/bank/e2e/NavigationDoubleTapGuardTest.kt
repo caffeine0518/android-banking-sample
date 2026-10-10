@@ -20,11 +20,7 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
 
-/**
- * BankNavHost의 push/pop 가드 회귀 E2E.
- *
- * [performTouchInput] 한 배치에 클릭 2회를 넣어야 재현된다 — performClick 2회는 사이에 idle 동기화가 낀다.
- */
+/** [performTouchInput] 한 배치에 클릭 2회를 넣어야 재현된다. performClick 2회 사이에는 idle 동기화가 실행된다. */
 @HiltAndroidTest
 class NavigationDoubleTapGuardTest {
 

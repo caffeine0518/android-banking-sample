@@ -98,7 +98,7 @@ class TransferFlowTest {
         composeRule.awaitTag(AMOUNT_NEXT)
         composeRule.onNodeWithTag(AMOUNT_NEXT).performClick()
 
-        // 입력으로부터 계산된 값이라 텍스트로 단언한다. 옛 코드는 10050을 $10,050로 해석했다.
+        // 입력으로부터 계산된 값이라 텍스트로 단언한다.
         composeRule.awaitTag(SCREEN_CONFIRM)
         composeRule.onNodeWithText("$100.50", substring = true).assertIsDisplayed()
         composeRule.onNodeWithTag(CONFIRM_SEND).performClick()
@@ -106,7 +106,6 @@ class TransferFlowTest {
         composeRule.awaitTag(RESULT_SUCCESS)
     }
 
-    /** 홈 → [sourceId] 상세 → 보내기 → 수취인 [recipientId] → 금액 화면. */
     private fun openAmountScreen(sourceId: String, recipientId: String) {
         composeRule.awaitTag(accountItem(sourceId))
         composeRule.onNodeWithTag(accountItem(sourceId)).performClick()
