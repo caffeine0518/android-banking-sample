@@ -7,12 +7,6 @@ sealed interface ConfirmAction
 sealed interface ConfirmIntent : ConfirmAction {
     data object BackClicked : ConfirmIntent
 
-    /** "받는 분에게 표시" 행(수취인에게 노출될 이름 편집). 편집 화면 미구현이라 placeholder. */
-    data object DisplayNameClicked : ConfirmIntent
-
-    /** "출금 계좌" 행(출금계좌 변경). 변경 화면 미구현이라 placeholder. */
-    data object SourceAccountClicked : ConfirmIntent
-
     data object SendClicked : ConfirmIntent
 }
 
