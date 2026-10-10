@@ -10,37 +10,29 @@ import com.study.bank.feature.transfer.recipient.ui.RecipientRoute
 import com.study.bank.feature.transfer.result.ui.ResultRoute
 import kotlinx.serialization.Serializable
 
-/**
- * 송금 플로우 동안 화면 사이를 흐르는 수취인 신원. 실명조회(외부 계좌)나 "내 계좌" 선택(picker)에서 한 번
- * 확정돼 금액→확인→결과까지 그대로 전달된다 — 출금계좌 저장소에 없는 외부 계좌도 식별자 재조회 없이 처리된다.
- * Nav3 내비 키는 kotlinx 직렬화로 통째 저장되므로 [TransferAmountRoute] 등에 중첩 필드로 그대로 포함한다.
- */
+/** 실명조회나 내 계좌 선택에서 확정된 수취인. 외부 계좌는 저장소에 없으므로 재조회 없이 결과 화면까지 전달한다. */
 @Serializable
 data class TransferRecipientArg(
     val bankCode: String,
     val accountNumber: String,
     val holderName: String,
 ) {
-    /** 표시용 은행명. 알 수 없는 코드는 코드 원문으로 폴백. */
     val bankDisplayName: String get() = BankCode.byCode(bankCode)?.displayName ?: bankCode
 }
 
-/** 송금 1번째 화면: 수취인 선택. */
 @Serializable
 data class TransferRecipientRoute(val sourceAccountId: String) : NavKey
 
-/** 송금 1-b 화면: 계좌번호 직접 입력(외부 수취계좌). */
 @Serializable
 data class TransferAccountInputRoute(val sourceAccountId: String) : NavKey
 
-/** 송금 2번째 화면: 금액 입력. 수취인 신원을 함께 포함한다. */
 @Serializable
 data class TransferAmountRoute(
     val sourceAccountId: String,
     val recipient: TransferRecipientArg,
 ) : NavKey
 
-/** 송금 3번째 화면: 송금 확인. [amount]=출금계좌 통화 최소단위(minor unit) 정수. */
+/** [amount]는 출금계좌 통화의 최소 단위 정수다. */
 @Serializable
 data class TransferConfirmRoute(
     val sourceAccountId: String,
@@ -48,10 +40,7 @@ data class TransferConfirmRoute(
     val amount: Long,
 ) : NavKey
 
-/**
- * 송금 4번째 화면: 송금 결과(로딩→성공/실패). 진입과 동시에 실제 송금을 실행한다.
- * [idempotencyKey]는 확인 화면이 송금 한 건마다 발급한다. 결과 화면이 중복 생성되거나 복원돼도 같은 키로 송금한다.
- */
+/** 진입 시 송금을 실행한다. */
 @Serializable
 data class TransferResultRoute(
     val sourceAccountId: String,
