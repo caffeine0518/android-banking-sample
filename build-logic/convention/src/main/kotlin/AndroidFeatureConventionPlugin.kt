@@ -6,7 +6,7 @@ import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.project
 
-/** feature 모듈 공통 설정. material-icons·roborazzi 같은 모듈별 차이는 각 모듈에서 추가한다. */
+/** material-icons·roborazzi 같은 모듈별 차이는 각 모듈에서 추가한다. */
 class AndroidFeatureConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
         with(pluginManager) {
