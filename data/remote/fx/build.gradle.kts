@@ -7,7 +7,7 @@ android {
     namespace = "com.study.bank.data.remote.fx"
 
     defaultConfig {
-        // KEXIM 환율 API 인증키. 오픈소스로 하드코딩 — 일 1,000회 한도의 무료 키
+        // 일 1,000회 한도의 무료 키라 저장소에 그대로 둔다.
         buildConfigField("String", "KEXIM_API_KEY", "\"0FSe6rlaniiSnwd5nR55bCMqp5ZyVjx3\"")
     }
 
