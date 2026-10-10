@@ -27,8 +27,6 @@ class AccountRepositoryImplTest {
 
     private val fixedClock = Clock.fixed(Instant.parse("2026-06-18T01:30:00Z"), ZoneOffset.UTC)
 
-    // ----- refresh: 원격 fetch → DB 덮어쓰기 -----
-
     @Test
     fun `refresh는 원격에서 가져온 결과를 DB에 저장한다`() = runTest {
         val api = FakeKftcApiService(initialSeeds = listOf(SEED_TOSS_KRW))
@@ -37,13 +35,10 @@ class AccountRepositoryImplTest {
 
         repo.refresh()
 
-        // primary: 첫 호출은 list + balance 둘 다 1회씩
         assertEquals(1, api.listCallCount)
         assertEquals(1, api.balanceCallCount)
         assertEquals(1, dao.count())
     }
-
-    // ----- SSOT: refresh 후 여러 구독자가 같은 DAO source를 구독한다 -----
 
     @Test
     fun `refresh 1회 후 여러 구독자가 observeAccounts를 collect해도 fetch는 1회`() = runTest {
@@ -55,14 +50,11 @@ class AccountRepositoryImplTest {
         val byVm = repo.observeAccounts().first()
         val byUseCase = repo.observeAccounts().first()
 
-        // primary: 같은 source(DAO)에서 발행되니 두 collect가 같은 데이터
         assertEquals(byVm, byUseCase)
         assertEquals(2, byVm.size)
-        // secondary: 구독 횟수가 fetch 횟수를 늘리지 않는다 — cold flow 회귀 방지
+        // 구독 횟수가 fetch 횟수를 늘리지 않는다.
         assertEquals(1, api.listCallCount)
     }
-
-    // ----- replaceAll: 응답에서 사라진 계좌는 DB에서도 제거 (stale 차단) -----
 
     @Test
     fun `refresh 시 응답에 없는 계좌는 DB에서 사라진다`() = runTest {
@@ -94,8 +86,6 @@ class AccountRepositoryImplTest {
         assertNull(miss)
         assertEquals(baseline, api.listCallCount)
     }
-
-    // ----- distinctUntilChanged: Room 테이블 단위 invalidation의 중복 emit 흡수 -----
 
     @Test
     fun `observeAccounts는 동일 스냅샷 재방출을 거르고 실제 변경만 흘린다`() = runTest {
@@ -150,8 +140,6 @@ class AccountRepositoryImplTest {
         // fixedClock 2026-06-18T01:30:00Z 를 KST 로 환산한 값
         assertEquals("20260618103000", api.lastBalanceTranDtime)
     }
-
-    // ----- 헬퍼 -----
 
     private fun buildRepo(api: KftcApiService, dao: AccountDao) = AccountRepositoryImpl(
         api = api,
@@ -287,10 +275,7 @@ class AccountRepositoryImplTest {
         )
     }
 
-    /**
-     * Room을 단위 테스트에서 띄우려면 Robolectric이 필요해 인터페이스 충실 모사로 대체.
-     * @Transaction 같은 ACID 보장은 검증 못 하지만 SSOT/clear-then-insert 순서는 행동 동일.
-     */
+    /** @Transaction 원자성은 검증하지 못하지만 clear → insert 순서는 실 DAO와 같다. */
     private class FakeAccountDao : AccountDao {
 
         private val source = MutableStateFlow<List<AccountEntity>>(emptyList())
@@ -306,7 +291,6 @@ class AccountRepositoryImplTest {
         override suspend fun count(): Int = source.value.size
 
         override suspend fun insertAll(entities: List<AccountEntity>) {
-            // ON CONFLICT REPLACE 모사: 같은 id가 있으면 덮어쓴다
             val merged = (source.value.filter { existing -> entities.none { it.id == existing.id } } + entities)
             source.value = merged.sortedBy { it.id }
         }
@@ -320,14 +304,12 @@ class AccountRepositoryImplTest {
             insertAll(entities)
         }
 
-        // 보장: Fake가 인터페이스에 정확히 맞춰 누락 없이 구현됐는지 컴파일러가 검출
         init { assertTrue(true) }
     }
 
     /**
-     * Room InvalidationTracker는 테이블 단위라 결과가 같아도 쓰기마다 재방출한다.
-     * [FakeAccountDao]의 MutableStateFlow는 자체 conflation이 있어 그 행동을 못 살리므로,
-     * distinctUntilChanged 검증 전용으로 중복을 그대로 흘리는 SharedFlow 기반 페이크를 둔다.
+     * Room은 결과가 같아도 쓰기마다 재방출하는데 [FakeAccountDao]의 MutableStateFlow는 conflate하므로,
+     * distinctUntilChanged 검증용으로 중복을 그대로 방출하는 페이크를 따로 둔다.
      */
     private class EmittingAccountDao : AccountDao {
 

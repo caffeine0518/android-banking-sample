@@ -18,8 +18,6 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * KFTC 거래내역 `res_list` 항목 → 도메인 [Transaction] 매퍼.
- *
  * id는 (계좌+발생일시+12자리 0패딩 tran_seq)로 합성한다. tran_seq가 단조 증가 고유값이라 페이지·새로고침과
  * 무관하게 같은 거래가 같은 id를 유지하고(Paging 식별 안정성), 발생일시를 앞에 둬 Room
  * `ORDER BY occurred_at DESC, id DESC`의 타이브레이커가 seq 순서와 일치한다.

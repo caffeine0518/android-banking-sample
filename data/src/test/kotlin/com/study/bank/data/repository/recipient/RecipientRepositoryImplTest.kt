@@ -15,9 +15,6 @@ import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset
 
-/**
- * [RecipientRepositoryImpl] 검증. 실명조회는 원격 전용이라 Room/DAO 없이 KftcApiService만 모사한다.
- */
 class RecipientRepositoryImplTest {
 
     private val fixedClock = Clock.fixed(Instant.parse("2026-06-18T01:30:00Z"), ZoneOffset.UTC)

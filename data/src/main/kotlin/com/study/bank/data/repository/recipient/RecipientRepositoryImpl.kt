@@ -12,13 +12,7 @@ import java.time.Clock
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * 수취인 실명조회 = KFTC inquiry/real_name 직접 호출 (원격 전용, SSOT/캐시 없음).
- *
- * 남의 계좌에 대한 일회성 질의라 Room에 캐시하지 않는다 —
- * [com.study.bank.data.repository.account.AccountRepositoryImpl]의 SSOT 패턴과 의도적으로 다른 결.
- * 응답→도메인 매핑은 [mapper]에 위임.
- */
+/** 다른 사람 계좌에 대한 일회성 조회라 Room에 캐시하지 않는다. */
 @Singleton
 class RecipientRepositoryImpl @Inject constructor(
     private val api: KftcApiService,

@@ -34,14 +34,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-/**
- * 데이터 레이어 E2E(L3) — UI 없이 **앱의 실제 Hilt 그래프**를 Robolectric(JVM)에서 부팅해
- * KFTC mock 서버 + Room SSOT + 실제 레포/유스케이스가 끝까지 흐르는지 검증한다.
- *
- * 수동 와이어가 아니라 @HiltAndroidTest 주입이므로 실제 DI 배선까지 런타임 검증된다. 앱이 설계상 mock
- * KFTC + 인메모리 Room으로 실행되기 때문에 주입받은 스택이 곧 실 런타임 스택이고, HiltAndroidRule이
- * 테스트마다 컴포넌트를 새로 구성하므로 시드/Room도 테스트별로 초기화된다.
- */
+/** 앱은 mock KFTC + 인메모리 Room으로 실행되므로, 주입받은 Hilt 그래프가 곧 실 런타임 스택이다. */
 @HiltAndroidTest
 @RunWith(RobolectricTestRunner::class)
 @Config(application = HiltTestApplication::class, sdk = [34])
@@ -79,7 +72,6 @@ class DataFlowIntegrationTest {
     fun `룩업 → 송금 → 양쪽 잔액과 거래내역이 SSOT에 반영된다`() = runBlocking {
         accountRepository.refresh()
 
-        // 룩업(계좌실명조회) — 본인의 다른 계좌(세이프박스)로 송금.
         val validation = ValidateRecipientUseCase(recipientRepository)(
             fromAccountId = SALARY,
             toAccountNumber = SAFEBOX_NUMBER,
@@ -87,7 +79,6 @@ class DataFlowIntegrationTest {
         )
         assertEquals(RecipientValidation.Valid(SAFEBOX, "홍길동"), validation)
 
-        // 송금(출금이체) 50,000원.
         val outcome = ExecuteTransferUseCase(transferRepository)(
             TransferRequest(
                 fromAccountId = SALARY,
@@ -102,14 +93,13 @@ class DataFlowIntegrationTest {
         )
         assertTrue("송금 성공해야 함: $outcome", outcome is TransferOutcome.Success)
 
-        // 잔액: 출금계좌 차감 + 수취계좌 입금(복식부기) — execute의 accountRepository.refresh가 전 계좌 갱신.
+        // execute가 accountRepository.refresh로 전 계좌를 갱신한다.
         val salary = requireNotNull(accountRepository.observeAccount(SALARY).first())
         val safebox = requireNotNull(accountRepository.observeAccount(SAFEBOX).first())
         assertEquals(0, salary.balance.amount.compareTo(BigDecimal("2797320")))
         assertEquals(0, safebox.balance.amount.compareTo(BigDecimal("12050000")))
 
-        // 거래내역: execute가 출금계좌 내역을 refresh → 첫 페이지(PAGE_SIZE건) = 방금 송금분(최신) + 시드 과거.
-        // 건수는 한 페이지로 고정되고, 맨 앞(최신)이 이번 송금 TRANSFER_OUT인지 확인한다.
+        // execute가 출금계좌 내역의 첫 페이지를 다시 적재하므로 맨 앞이 이번 송금이다.
         val salaryTxns = transactionRepository.observeTransactions(SALARY).first()
         assertEquals(PAGE_SIZE, salaryTxns.size)
         assertEquals(TransactionType.TRANSFER_OUT, salaryTxns.first().type)
@@ -203,7 +193,6 @@ class DataFlowIntegrationTest {
         val source = requireNotNull(accountRepository.observeAccount(SALARY).first())     // KRW
         val recipient = requireNotNull(accountRepository.observeAccount(FX_USD).first())  // USD
 
-        // 앱 실제 플로우대로 출금계좌 통화로 금액을 만들어 다른 통화 계좌에 송금 시도.
         val outcome = ExecuteTransferUseCase(transferRepository)(
             TransferRequest(
                 fromAccountId = SALARY,
@@ -217,10 +206,8 @@ class DataFlowIntegrationTest {
             ),
         )
 
-        // 통화 불일치는 일반 오류가 아니라 전용 실패로 매핑돼야 한다(결과 화면에서 명확한 안내).
         assertEquals(TransferOutcome.Failure.CurrencyMismatch, outcome)
 
-        // 거절됐으므로 어느 잔액도 변하지 않아야 한다.
         val salary = requireNotNull(accountRepository.observeAccount(SALARY).first())
         val usd = requireNotNull(accountRepository.observeAccount(FX_USD).first())
         assertEquals(0, salary.balance.amount.compareTo(BigDecimal("2847320")))

@@ -25,7 +25,6 @@ import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset
 
-/** Room 없이 인메모리 fake DAO로 [TransactionRemoteMediator]의 네트워크→DB 적재를 검증한다. */
 @OptIn(ExperimentalPagingApi::class)
 class TransactionRemoteMediatorTest {
 
@@ -104,8 +103,6 @@ class TransactionRemoteMediatorTest {
         // fixedClock 2026-06-18T01:30:00Z 를 KST 로 환산한 값
         assertEquals("20260618103000", api.lastTranDtime)
     }
-
-    // --- 헬퍼 ---
 
     private fun mediator(api: KftcApiService) = TransactionRemoteMediator(
         accountId = accountId,

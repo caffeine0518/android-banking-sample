@@ -21,10 +21,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
-/**
- * 거래내역 SSOT = Room. 원격(KFTC)은 [refresh]와 [TransactionRemoteMediator]에서만 호출되고, 화면은 늘
- * 로컬 캐시를 관찰한다([com.study.bank.data.repository.account.AccountRepositoryImpl]와 같은 패턴).
- */
 @OptIn(ExperimentalPagingApi::class)
 @Singleton
 class TransactionRepositoryImpl @Inject constructor(
