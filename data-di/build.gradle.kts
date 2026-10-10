@@ -7,7 +7,6 @@ android {
     namespace = "com.study.bank.data.di"
 
     testOptions {
-        // android.util.* 직접 호출(Log 등)이 JVM 단위 테스트에서 stub(0/false) 반환.
         unitTests.isReturnDefaultValues = true
         unitTests.isIncludeAndroidResources = true
     }
