@@ -3,9 +3,9 @@ package com.study.bank.data.remote.kftc.mock
 import okhttp3.HttpUrl
 import okhttp3.tls.HandshakeCertificates
 
-/** HTTPS로 응답하므로 클라이언트는 [clientCertificates]로 서버 인증서를 신뢰해야 한다. */
 interface KftcMockServer {
 
+    /** 서버가 HTTPS로 응답하므로 클라이언트는 이 인증서를 신뢰해야 한다. */
     val clientCertificates: HandshakeCertificates
 
     /** 실행 중인 서버 주소. [start] 전에 호출하면 실패한다. */

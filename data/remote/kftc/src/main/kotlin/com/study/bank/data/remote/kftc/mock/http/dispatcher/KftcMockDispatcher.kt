@@ -17,17 +17,17 @@ internal class KftcMockDispatcher(
     @Volatile
     var dropConnections: Boolean = false
 
-    /** [route]를 먼저 실행하므로 [dropConnections]여도 서버 상태는 반영된다. */
     override fun dispatch(request: RecordedRequest): MockResponse {
+        // 연결을 끊어도 서버 상태는 반영되도록 라우팅을 먼저 실행한다.
         val response = route(request)
         if (dropConnections) return MockResponse().apply { socketPolicy = SocketPolicy.DISCONNECT_AFTER_REQUEST }
         return response
     }
 
-    /** 404(경로 없음)와 405(메서드 불일치)를 구분하려고 경로를 먼저 찾는다. */
     private fun route(request: RecordedRequest): MockResponse {
         val url = request.requestUrl ?: return errors.toResponse(MockError.InvalidUrl)
         val path = url.encodedPath
+        // 404(경로 없음)와 405(메서드 불일치)를 구분하려고 경로를 먼저 찾는다.
         val samePath = routes.filter { it.path == path }
         if (samePath.isEmpty()) return errors.toResponse(MockError.UnknownEndpoint(path))
 

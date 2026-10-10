@@ -16,7 +16,6 @@ import com.study.bank.data.remote.kftc.mock.storage.dao.MockTransactionDao
 import com.study.bank.data.remote.kftc.mock.storage.entity.SeedAccount
 import kotlinx.serialization.json.Json
 
-/** api_tran_id가 엔드포인트와 관계없이 1씩 증가하도록 [KftcTranIds]를 모든 매퍼가 공유한다. */
 internal fun kftcMockDispatcher(
     accountDao: MockAccountDao,
     transactionDao: MockTransactionDao,
@@ -25,6 +24,7 @@ internal fun kftcMockDispatcher(
     json: Json,
     responseDelayMillis: Long = 0,
 ): KftcMockDispatcher {
+    // api_tran_id가 엔드포인트와 관계없이 1씩 증가하도록 모든 매퍼가 공유한다.
     val tranIds = KftcTranIds()
     val errors = ErrorResponseMapper(tranIds)
     return KftcMockDispatcher(

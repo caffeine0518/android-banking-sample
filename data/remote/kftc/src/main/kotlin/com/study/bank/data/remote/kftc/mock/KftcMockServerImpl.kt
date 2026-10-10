@@ -11,7 +11,6 @@ import okhttp3.mockwebserver.RecordedRequest
 import okhttp3.tls.HandshakeCertificates
 import okhttp3.tls.HeldCertificate
 
-/** 매니페스트에 cleartext 허용을 두지 않으려고 자체 서명 인증서로 HTTPS를 제공한다. 생성 시 바로 시작된다. */
 @Singleton
 internal class KftcMockServerImpl @Inject constructor(
     private val dispatcher: KftcMockDispatcher,
@@ -39,6 +38,7 @@ internal class KftcMockServerImpl @Inject constructor(
         val serverCertificates = HandshakeCertificates.Builder()
             .heldCertificate(localhostCertificate)
             .build()
+        // 매니페스트에 cleartext 허용을 두지 않으려고 자체 서명 인증서로 HTTPS를 제공한다.
         server.useHttps(serverCertificates.sslSocketFactory(), false)
         server.dispatcher = dispatcher
         // 인자 없는 start()는 getByName("localhost")로 이름을 해석해 메인 스레드에서 NetworkOnMainThreadException이 발생한다.

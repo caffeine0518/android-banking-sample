@@ -9,13 +9,13 @@ import com.study.bank.data.remote.kftc.mock.service.model.WithdrawResult
 
 internal class TransferResponseMapper(private val tranIds: KftcTranIds) {
 
-    /** 재요청도 같은 거래로 식별되도록 bank_tran_id는 요청 값을 그대로 반환한다. */
     fun toResponse(result: WithdrawResult.Success): WithdrawTransferResponse =
         WithdrawTransferResponse(
             apiTranId = tranIds.newApiTranId(),
             apiTranDtm = tranIds.nowDtm(),
             rspCode = RSP_SUCCESS,
             rspMessage = "",
+            // 재요청도 같은 거래로 식별되도록 새로 발급하지 않는다.
             bankTranId = result.bankTranId,
             bankTranDate = tranIds.nowDate(),
             bankCodeTran = result.bankCodeStd,
