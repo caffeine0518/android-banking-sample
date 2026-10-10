@@ -24,18 +24,9 @@ android {
 }
 
 dependencies {
-    // ── 프로덕션: 모듈 그래프 ────────────────────────────────────────────
     implementation(projects.navigation)
     implementation(projects.dataDi)
     implementation(projects.coreUi.designsystem)
 
-    // ── 프로덕션: Compose / AndroidX ─────────────────────────────────────
     implementation(libs.androidx.activity.compose)
-
-    // Hilt(DI), Compose 컴파일러/BOM, compileSdk/minSdk/Java 11은
-    // bank.android.application.compose + bank.android.hilt convention plugin이 제공.
-    //
-    // 테스트 의존성은 전용 모듈로 분리:
-    //  · L3 데이터 E2E(JVM/Robolectric) → :data-di src/test
-    //  · L3 UI E2E(계기) → :app-e2e (com.android.test, :app을 instrument)
 }

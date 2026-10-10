@@ -20,7 +20,6 @@ tasks.withType<KotlinCompile>().configureEach {
 }
 
 dependencies {
-    // convention plugin 코드가 AGP / Kotlin Gradle DSL 타입을 참조하기 위한 컴파일 전용 의존성.
     compileOnly(libs.android.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
 }

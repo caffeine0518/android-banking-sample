@@ -1,5 +1,3 @@
-// build-logic — convention plugin을 담는 독립 컴포지트 빌드.
-// 루트 settings.gradle.kts의 includeBuild("build-logic")로 메인 빌드에 합류한다.
 dependencyResolutionManagement {
     repositories {
         google()
