@@ -3,9 +3,9 @@ package com.study.bank.data.remote.kftc.mock.seed
 import com.study.bank.data.remote.kftc.mock.storage.entity.SeedAccount
 
 /**
- * KFTC mock 서버가 부팅 시 적재하는 시드 계좌.
+ * KFTC mock 서버가 앱 시작 시 적재하는 시드 계좌.
  *
- * 외화 계좌를 함께 두어 다통화 도메인이 실제 호출 흐름 끝까지 흐르는지 통합 테스트가 검증할 수 있게 한다.
+ * 외화 계좌를 함께 두어 다통화 도메인이 실제 호출 흐름 끝까지 처리되는지 통합 테스트로 검증할 수 있게 한다.
  */
 internal object KftcAccountSeed {
 
@@ -62,7 +62,7 @@ internal object KftcAccountSeed {
             currencyCode = "KRW",
             productName = "신한 주거래 통장",
         ),
-        // KEXIM API가 TWD/VND 환율을 제공하지 않아 자연스럽게 환산 불가 경로로 흐름.
+        // KEXIM API가 TWD·VND 환율을 제공하지 않으므로 환산 불가 경로를 검증할 수 있다.
         SeedAccount(
             fintechUseNum = KftcSeedAccountIds.TWD_TRAVEL,
             bankCodeStd = "092",
@@ -89,7 +89,7 @@ internal object KftcAccountSeed {
             currencyCode = "VND",
             productName = "토스뱅크 외화통장",
         ),
-        // '외화통장 USD'의 수취 짝 — 동일 통화 송금의 소수점 보존을 E2E로 검증한다.
+        // '외화통장 USD'에서 송금받는 계좌. 같은 통화 송금에서 소수점이 보존되는지 E2E로 검증한다.
         SeedAccount(
             fintechUseNum = KftcSeedAccountIds.FX_USD_2,
             bankCodeStd = "092",

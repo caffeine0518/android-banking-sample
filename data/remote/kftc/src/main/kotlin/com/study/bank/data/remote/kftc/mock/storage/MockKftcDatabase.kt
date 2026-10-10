@@ -15,13 +15,13 @@ import com.study.bank.data.remote.kftc.mock.storage.entity.SettledWithdrawal
 import com.study.bank.data.remote.kftc.mock.storage.entity.TransactionRecord
 
 /**
- * Mock 서버가 들고 있는 인메모리 은행 DB — 잔액·거래원장·멱등 기록.
+ * Mock 서버가 보유한 인메모리 은행 DB. 잔액·거래원장·멱등 기록을 저장한다.
  *
- * 앱 캐시인 `:data:local`의 BankDatabase와 **별개 인스턴스**다. 서버 상태와 클라 캐시가 갈라진 상황
+ * 앱 캐시인 `:data:local`의 BankDatabase와 **별개 인스턴스**다. 서버 상태와 클라이언트 캐시가 달라지는 상황
  * (새로고침 실패·동기화 지연)을 재현하려면 분리돼 있어야 한다.
  *
- * 프레임워크 SQLite를 그대로 쓴다 — androidx.sqlite 번들 드라이버는 Robolectric 클래스로더에서
- * 네이티브 로딩이 실패하고(UnsatisfiedLinkError), Android 빌더는 어차피 Context를 요구해 이득이 없다.
+ * 프레임워크 SQLite를 그대로 쓴다. androidx.sqlite 번들 드라이버는 Robolectric 클래스로더에서 네이티브
+ * 라이브러리 로딩에 실패하고(UnsatisfiedLinkError), Android 빌더는 어차피 Context가 필요해 이점이 없다.
  */
 @Database(
     entities = [SeedAccount::class, TransactionRecord::class, SettledWithdrawal::class],
@@ -38,11 +38,11 @@ internal abstract class MockKftcDatabase : RoomDatabase() {
 
     companion object {
         /**
-         * mock 전용 인메모리 DB. 디스패처는 자기 스레드에서 동기 호출하지만, 부팅 시드 적재는 Hilt가
-         * 메인 스레드에서 생성할 수 있어 메인 스레드 질의를 허용한다.
+         * mock 전용 인메모리 DB. 디스패처는 자체 스레드에서 동기 호출하지만, Hilt가 메인 스레드에서 DB를
+         * 생성하면 시드 적재도 메인 스레드에서 실행되므로 메인 스레드 쿼리를 허용한다.
          *
-         * ponytail: 테스트·데모용 mock이라 메인 스레드 질의를 허용한다. 실제 앱 DB(:data:local)에는
-         * 적용하지 않으며, 시드 적재가 체감될 만큼 커지면 그때 백그라운드 초기화로 옮긴다.
+         * ponytail: 테스트·데모용 mock이라 메인 스레드 쿼리를 허용한다. 실제 앱 DB(:data:local)에는
+         * 적용하지 않으며, 시드 적재가 체감될 만큼 느려지면 백그라운드 초기화로 옮긴다.
          */
         fun inMemory(context: Context): MockKftcDatabase =
             Room.inMemoryDatabaseBuilder(context, MockKftcDatabase::class.java)

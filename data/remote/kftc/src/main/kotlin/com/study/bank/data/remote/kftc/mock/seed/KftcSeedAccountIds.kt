@@ -3,8 +3,8 @@ package com.study.bank.data.remote.kftc.mock.seed
 /**
  * 시드 계좌 식별자(fintechUseNum = AccountId.value)의 단일 출처.
  *
- * 시드와 값이 일치해야 하는 테스트(kftc 단위·data-di 통합·app-e2e)만 여기를 참조한다. 격리 단위테스트는
- * 일부러 자급 픽스처를 쓴다 — 시드가 바뀌어도 영향받지 않아야 하고, feature는 이 모듈을 의존하지도 않는다.
+ * 시드와 값이 일치해야 하는 테스트(kftc 단위·data-di 통합·app-e2e)만 이 객체를 참조한다. 격리된 단위 테스트는
+ * 시드가 바뀌어도 영향받지 않도록 일부러 자체 픽스처를 쓴다. feature 모듈은 이 모듈에 의존하지도 않는다.
  */
 object KftcSeedAccountIds {
     const val PAYROLL_KRW = "120220112345678901234001"
@@ -15,7 +15,7 @@ object KftcSeedAccountIds {
     const val VND_DONG = "120220112345678901234006"
     const val FX_USD_2 = "120220112345678901234007"
 
-    /** [currencyCode] 통화의 시드 계좌 id를 등록 순서대로. */
+    /** [currencyCode] 통화인 시드 계좌의 id를 등록 순서대로 반환한다. */
     fun idsOf(currencyCode: String): List<String> =
         KftcAccountSeed.accounts.filter { it.currencyCode == currencyCode }.map { it.fintechUseNum }
 }
