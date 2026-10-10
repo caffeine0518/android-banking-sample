@@ -45,7 +45,6 @@ class ConfirmViewModelTest {
         val repo = FakeAccountRepository()
         val vm = buildViewModel(repo, amount = 2)
 
-        // 수취인은 라우트로 확정돼 들어온다(아래 buildViewModel 참고). 출금계좌만 로딩하면 확정 정보가 채워진다.
         repo.emit(account(SOURCE_ID, holder = "박송금", nickname = "U드림 저축예금", balance = 284_797))
 
         val detail = vm.state.value.detail!!
@@ -62,7 +61,6 @@ class ConfirmViewModelTest {
         val repo = FakeAccountRepository()
         val vm = buildViewModel(repo, amount = 2)
 
-        // 출금계좌 미로딩. 수취인은 라우트로 있지만 출금계좌가 없으면 확정 정보를 만들 수 없다.
         assertNull(vm.state.value.detail)
     }
 
@@ -134,7 +132,7 @@ class ConfirmViewModelTest {
     @Test
     fun `복원돼도 Submit effect의 멱등성 키가 보존된다`() = runTest {
         val repo = FakeAccountRepository()
-        // 같은 SavedStateHandle로 VM 재생성 = 프로세스 death 후 Navigation이 확인 화면을 복원하는 상황.
+        // 같은 SavedStateHandle로 다시 만들면 프로세스 종료 후 복원과 같다.
         val savedStateHandle = SavedStateHandle()
         val newKey = { UUID.randomUUID().toString() }
         val first = buildViewModel(repo, amount = 2, savedStateHandle = savedStateHandle, newKey = newKey)

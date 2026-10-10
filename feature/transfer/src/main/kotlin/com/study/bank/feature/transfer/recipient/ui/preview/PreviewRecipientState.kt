@@ -31,7 +31,6 @@ internal val PreviewRecipientState = RecipientState(
     ),
 )
 
-/** LazyColumn 스크롤이 실제로 동작하는지 확인하기 위한 다건 내 계좌 프리뷰 상태. */
 internal val PreviewRecipientStateLongList = RecipientState(
     myAccounts = List(PREVIEW_LIST_SIZE) { index ->
         AccountUi(

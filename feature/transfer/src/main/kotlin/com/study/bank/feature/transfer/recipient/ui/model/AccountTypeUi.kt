@@ -11,7 +11,6 @@ enum class AccountTypeUi {
     DEPOSIT,
 }
 
-/** 도메인 계좌 타입 → 송금 피쳐 UI 타입. recipient/amount 화면이 공유한다. */
 internal fun AccountType.toAccountTypeUi(): AccountTypeUi = when (this) {
     AccountType.CHECKING -> AccountTypeUi.CHECKING
     AccountType.SAVINGS -> AccountTypeUi.SAVINGS

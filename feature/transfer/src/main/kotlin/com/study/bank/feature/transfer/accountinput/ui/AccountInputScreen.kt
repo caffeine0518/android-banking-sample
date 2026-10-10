@@ -72,7 +72,6 @@ internal fun AccountInputScreen(
             )
         },
         bottomBar = {
-            // 스크린샷 1·3과 같이 키보드 위에 표시한다.
             val isInputStarted = state.accountNumber.isNotBlank()
             if (isInputStarted) {
                 ConfirmBar(
@@ -111,8 +110,6 @@ internal fun AccountInputScreen(
                 onClick = { onIntent(AccountInputIntent.BankSelectorClicked) },
             )
 
-            // 디버그 빌드에서만 칩이 보인다(릴리스는 stub → Unit).
-            // 일반 입력과 동일 경로로 채운다(번호는 숫자 필터를 그대로 통과).
             AccountInputDebugBar(
                 onApplyPreset = { number, bank ->
                     onIntent(AccountInputIntent.AccountNumberChanged(number))

@@ -28,7 +28,6 @@ internal fun MyAccountRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            // 표시명이 아니라 안정적 id로 테스트가 지목 — 서버가 이름을 바꿔도 안 깨짐.
             .testTag(BankTestTags.accountItem(account.id))
             .clickable(onClick = onClick)
             .padding(horizontal = 20.dp, vertical = 14.dp),

@@ -38,11 +38,8 @@ class RecipientViewModel @AssistedInject constructor(
         fun create(route: TransferRecipientRoute): RecipientViewModel
     }
 
-    // 출금계좌(보내는 쪽). "내 계좌" 목록에서 자기 자신은 제외한다.
     private val sourceAccountId = AccountId(route.sourceAccountId)
 
-    // 클릭 시 수취인 신원(번호·은행·명의)을 구성하려고 원본 계좌를 식별자로 보관. 단일 컨슈머 reducer가
-    // MyAccountsUpdated/MyAccountClicked를 직렬 처리하므로 별도 동기화 없이 안전하다.
     private var accountsById: Map<String, Account> = emptyMap()
 
     private val store = MviStore<RecipientState, RecipientAction, RecipientEffect>(

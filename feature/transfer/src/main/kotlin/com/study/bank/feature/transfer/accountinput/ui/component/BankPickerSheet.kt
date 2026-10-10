@@ -22,10 +22,6 @@ import androidx.compose.ui.unit.dp
 import com.study.bank.domain.model.BankCode
 import com.study.bank.feature.transfer.R
 
-/**
- * 은행 선택 바텀시트 콘텐츠. 송금 가능한 은행을 3열 그리드로 보여준다.
- * (로고 자산이 없어 은행명만 표기 — 실제 토스는 로고를 함께 노출.)
- */
 @Composable
 internal fun BankPickerSheet(
     banks: List<BankCode>,
@@ -44,7 +40,7 @@ internal fun BankPickerSheet(
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(vertical = 12.dp),
         )
-        // 8개뿐이라 LazyVerticalGrid 대신 3개씩 끊어 단순 Row로 깐다(시트 높이 측정 이슈 회피).
+        // 바텀시트 안에서 LazyVerticalGrid 높이 측정 문제를 피하려고 Row로 배치한다.
         for (rowBanks in banks.chunked(COLUMNS)) {
             Row(
                 modifier = Modifier
@@ -60,7 +56,6 @@ internal fun BankPickerSheet(
                         modifier = Modifier.weight(1f),
                     )
                 }
-                // 마지막 줄이 3칸 미만이면 빈 칸으로 채워 정렬을 유지.
                 repeat(COLUMNS - rowBanks.size) { Spacer(Modifier.weight(1f)) }
             }
         }

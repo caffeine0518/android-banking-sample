@@ -16,9 +16,7 @@ sealed interface AccountInputIntent : AccountInputAction {
 }
 
 internal sealed interface AccountInputInternalAction : AccountInputAction {
-    /** 실명조회 완료. 결과에 따라 금액 화면 이동 또는 오류 노출. */
     data class Resolved(val validation: RecipientValidation) : AccountInputInternalAction
 
-    /** 실명조회 중 예외(네트워크 등). */
     data object ResolveFailed : AccountInputInternalAction
 }

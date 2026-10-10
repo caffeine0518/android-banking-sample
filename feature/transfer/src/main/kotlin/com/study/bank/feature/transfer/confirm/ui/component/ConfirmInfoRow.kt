@@ -17,9 +17,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
-/**
- * "라벨 ─ 값" 한 줄. [leadingIcon]은 값 앞에 작은 아이콘(예: 입금계좌 확인 배지)을 둔다.
- */
 @Composable
 internal fun ConfirmInfoRow(
     label: String,

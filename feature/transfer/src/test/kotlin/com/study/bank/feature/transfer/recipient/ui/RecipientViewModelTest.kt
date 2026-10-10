@@ -70,7 +70,6 @@ class RecipientViewModelTest {
     fun `내 계좌를 선택하면 그 계좌의 수취인 신원을 실은 NavigateToAmount effect를 보낸다`() = runTest {
         val repo = FakeAccountRepository()
         val vm = buildViewModel(repo)
-        // 선택할 계좌가 목록에 있어야 그 신원(번호·은행·명의)을 구성할 수 있다.
         repo.emit(account(SOURCE_ID), account("acc-2"))
 
         vm.effect.test {

@@ -12,13 +12,11 @@ sealed interface AmountIntent : AmountAction {
 
     data object BackspacePressed : AmountIntent
 
-    /** "잔액 · N원 입력" 칩 → 잔액 전액 입력. */
     data object FillBalanceClicked : AmountIntent
 
     data object NextClicked : AmountIntent
 }
 
 internal sealed interface AmountInternalAction : AmountAction {
-    /** 출금계좌 잔액 갱신. 수취인은 라우트로 확정돼 고정이라 여기 싣지 않는다. */
     data class SourceUpdated(val source: Account?) : AmountInternalAction
 }
