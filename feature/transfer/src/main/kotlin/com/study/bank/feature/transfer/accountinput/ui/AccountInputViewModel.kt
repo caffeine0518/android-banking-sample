@@ -39,7 +39,6 @@ class AccountInputViewModel @AssistedInject constructor(
         fun create(route: TransferAccountInputRoute): AccountInputViewModel
     }
 
-    // 출금계좌(보내는 쪽). 실명조회 시 자기이체 판별에 쓴다.
     private val sourceAccountId = AccountId(route.sourceAccountId)
 
     private val store = MviStore<AccountInputState, AccountInputAction, AccountInputEffect>(
@@ -75,7 +74,6 @@ class AccountInputViewModel @AssistedInject constructor(
                 is RecipientValidation.Valid -> sendEffect(
                     AccountInputEffect.NavigateToAmount(
                         sourceAccountId = sourceAccountId.value,
-                        // 실명조회로 확정된 수취인 신원: 사용자가 입력한 번호·은행 + 조회된 예금주명.
                         recipient = TransferRecipientArg(
                             bankCode = state.selectedBank.code,
                             accountNumber = state.accountNumber,
@@ -106,7 +104,6 @@ class AccountInputViewModel @AssistedInject constructor(
         store.sendIntent(intent)
     }
 
-    /** (계좌번호, 은행)으로 실명조회를 실행해 결과를 내부 액션으로 전달한다. 입력값은 호출 시점 스냅샷. */
     private fun resolve(accountNumber: String, bank: BankCode) {
         viewModelScope.launch {
             cancellableCatching {

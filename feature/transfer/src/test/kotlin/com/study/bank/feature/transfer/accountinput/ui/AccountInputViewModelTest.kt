@@ -80,7 +80,6 @@ class AccountInputViewModelTest {
             assertEquals(
                 AccountInputEffect.NavigateToAmount(
                     sourceAccountId = SOURCE_ID,
-                    // 입력한 번호·기본 은행(KAKAO=090) + 조회된 예금주명. 합성 식별자가 아니라 실제 신원이 흐른다.
                     recipient = TransferRecipientArg(
                         bankCode = "090",
                         accountNumber = "868369666",
