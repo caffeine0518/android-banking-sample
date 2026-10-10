@@ -16,14 +16,14 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 /**
- * HTTP/직렬화 없이 [KftcWithdrawalService]의 잔액·원장 변동 로직만 검증한다.
- * 기본 시드를 그대로 쓰되 시각은 고정 clock으로 결정적이게 만든다.
- * Room이 Context를 요구하므로 Robolectric에서 실행한다 — 테스트마다 새 인메모리 DB라 서로 격리된다.
+ * HTTP·직렬화 없이 [KftcWithdrawalService]의 잔액·원장 변경 로직만 검증한다.
+ * 기본 시드를 그대로 쓰고, 시각은 고정 clock으로 지정한다.
+ * Room이 Context를 요구하므로 Robolectric에서 실행한다. 테스트마다 새 인메모리 DB를 쓰므로 서로 격리된다.
  */
 @RunWith(RobolectricTestRunner::class)
 class KftcWithdrawalServiceTest {
 
-    // 시드 히스토리 최신(2026-06-25 18:00)보다 뒤여야 세션 이체가 실제로도 최신 — 프로덕션(now>시드)과 같은 전제.
+    // 시드 거래내역의 최신 시각(2026-06-25 18:00)보다 뒤여야 세션 이체가 최신 거래가 된다. 프로덕션(now > 시드 시각)과 같은 조건이다.
     private val fixedClock: Clock = Clock.fixed(
         LocalDateTime.of(2026, 6, 27, 10, 30, 0).atZone(ZoneId.systemDefault()).toInstant(),
         ZoneId.systemDefault(),
@@ -63,7 +63,7 @@ class KftcWithdrawalServiceTest {
 
         bank.withdrawalService.withdraw(internalCommand(from = SALARY, toAccountNum = SAFEBOX_NUM, amount = "50000"))
 
-        // 출금계좌 차감, 수취계좌 입금.
+        // 출금계좌에서 차감하고 수취계좌에 입금한다.
         assertEquals("2797320", bank.accountDao.find(SALARY)!!.balanceAmt)
         assertEquals("12050000", bank.accountDao.find(SAFEBOX)!!.balanceAmt)
 
@@ -82,11 +82,11 @@ class KftcWithdrawalServiceTest {
     fun `출금계좌와 수취계좌가 같으면 차감과 입금이 상쇄돼 잔액이 보존된다`() {
         val bank = newBank()
 
-        // 내 계좌로 내가 보내는 경우 — 같은 행에 출금·입금이 연달아 적용된다.
+        // 같은 계좌로 송금하는 경우. 같은 행에 출금과 입금이 연달아 반영된다.
         bank.withdrawalService.withdraw(internalCommand(from = SALARY, toAccountNum = SALARY_NUM, amount = "50000"))
 
         assertEquals("2847320", bank.accountDao.find(SALARY)!!.balanceAmt)
-        // 원장에는 출금·입금 두 줄이 남는다.
+        // 원장에는 출금·입금 두 행이 기록된다.
         val ledger = bank.transactionDao.sessionLedger(SALARY)
         assertEquals(2, ledger.size)
         assertEquals(TransactionDirection.DEPOSIT, ledger[0].direction)
@@ -157,7 +157,7 @@ class KftcWithdrawalServiceTest {
 
         assertEquals("2847320", bank.accountDao.find(SALARY)!!.balanceAmt)
         assertTrue(bank.transactionDao.sessionLedger(SALARY).isEmpty())
-        // 멱등 기록도 비워져야 한다 — 남아 있으면 초기화 후 같은 번호의 송금이 중복으로 판정된다.
+        // 멱등 기록도 비워져야 한다. 남아 있으면 초기화 후 같은 번호의 송금이 중복으로 판정된다.
         bank.withdrawalService.withdraw(externalCommand(from = SALARY, amount = "50000", bankTranId = REPLAYED_ID))
         assertEquals("2797320", bank.accountDao.find(SALARY)!!.balanceAmt)
     }
@@ -165,7 +165,7 @@ class KftcWithdrawalServiceTest {
     // --- 멱등성(bank_tran_id 중복 판정) ---
 
     @Test
-    fun `같은 bank_tran_id로 다시 출금하면 한 번만 차감하고 같은 응답을 돌려준다`() {
+    fun `같은 bank_tran_id로 다시 출금하면 한 번만 차감하고 같은 응답을 반환한다`() {
         val bank = newBank()
 
         // 응답이 유실돼 클라이언트가 같은 멱등성 키로 재시도하는 상황.
@@ -209,7 +209,7 @@ class KftcWithdrawalServiceTest {
     fun `거절된 요청은 같은 bank_tran_id로 다시 시도할 수 있다`() {
         val bank = newBank()
 
-        // 잔액 부족으로 거절 = 원장 미변경. 같은 번호로 다시 보내면 정상 체결돼야 한다.
+        // 잔액 부족으로 거절되면 원장은 변경되지 않는다. 같은 번호로 다시 보내면 정상 체결돼야 한다.
         bank.withdrawalService.withdraw(externalCommand(from = SALARY, amount = "999999999", bankTranId = REPLAYED_ID))
         val retried = bank.withdrawalService.withdraw(externalCommand(from = SALARY, amount = "50000", bankTranId = REPLAYED_ID))
 
@@ -262,7 +262,7 @@ class KftcWithdrawalServiceTest {
 
         val statement = bank.transactionDao.statement(SALARY)
         assertEquals(KftcTransactionSeed.HISTORY_COUNT + 1, statement.size)
-        // statement는 seq(기록순) 내림차순 정렬. 세션 이체 seq > 모든 시드 seq라 맨 앞.
+        // statement는 seq(기록 순서) 내림차순이다. 세션 이체의 seq가 모든 시드보다 커서 맨 앞에 온다.
         assertEquals(TransactionDirection.WITHDRAWAL, statement.first().direction)
         assertEquals("2797320", statement.first().afterBalanceAmt)
     }
@@ -275,13 +275,13 @@ class KftcWithdrawalServiceTest {
         bank.withdrawalService.withdraw(externalCommand(from = SALARY, amount = "20000", recvName = "두번째"))
 
         val statement = bank.transactionDao.statement(SALARY)
-        // 나중에 기록된 "두번째"가 더 큰 seq → 맨 앞. seq는 전체적으로 내림차순.
+        // 나중에 기록된 "두번째"의 seq가 더 커서 맨 앞에 온다.
         assertEquals("두번째", statement[0].counterpartyName)
         assertEquals("첫번째", statement[1].counterpartyName)
         assertTrue("seq가 엄격히 내림차순이어야", statement.zipWithNext().all { (a, b) -> a.seq > b.seq })
     }
 
-    // 명시하지 않으면 호출마다 새 거래고유번호를 부여한다 — 서로 다른 송금이 중복 판정에 걸리지 않게.
+    // 지정하지 않으면 호출마다 새 거래고유번호를 부여해, 서로 다른 송금이 중복으로 판정되지 않게 한다.
     private var tranSeq = 0
     private fun newTranId(): String = "M202300001U%09d".format(++tranSeq)
 

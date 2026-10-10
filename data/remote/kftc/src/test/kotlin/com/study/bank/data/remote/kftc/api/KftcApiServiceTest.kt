@@ -22,11 +22,11 @@ import org.robolectric.RobolectricTestRunner
 import retrofit2.HttpException
 import retrofit2.Retrofit
 
-/** mock 서버가 Room 기반 상태를 들고 있어 Context가 필요하다 — Robolectric에서 실행한다. */
+/** mock 서버가 Room에 상태를 저장해 Context가 필요하므로 Robolectric에서 실행한다. */
 @RunWith(RobolectricTestRunner::class)
 class KftcApiServiceTest {
 
-    // takeRequest()가 구현체에만 있어 인터페이스가 아닌 구현 타입으로 받는다.
+    // takeRequest()는 구현체에만 있어 구현 타입으로 선언한다.
     private lateinit var mockServer: KftcMockServerImpl
     private lateinit var api: KftcApiService
 
@@ -82,7 +82,7 @@ class KftcApiServiceTest {
     }
 
     @Test
-    fun `balance fin_num이 KRW 시드 계좌의 잔액과 통화코드를 정확히 돌려준다`() = runTest {
+    fun `balance fin_num이 KRW 시드 계좌의 잔액과 통화코드를 정확히 반환한다`() = runTest {
         val krwFintechUseNum = KftcSeedAccountIds.PAYROLL_KRW
 
         val balance = api.getAccountBalance(
@@ -98,7 +98,7 @@ class KftcApiServiceTest {
     }
 
     @Test
-    fun `balance fin_num이 USD 외화통장의 소수점 잔액을 그대로 돌려준다`() = runTest {
+    fun `balance fin_num이 USD 외화통장의 소수점 잔액을 그대로 반환한다`() = runTest {
         val usdFintechUseNum = KftcSeedAccountIds.FX_USD
 
         val balance = api.getAccountBalance(
@@ -178,8 +178,8 @@ class KftcApiServiceTest {
     // --- 거래내역 조회 / 출금이체 E2E ---
 
     @Test
-    fun `시드 거래내역이 없는 계좌는 빈 res_list와 next_page_yn=N을 돌려준다`() = runTest {
-        // 신한 계좌는 시드 히스토리가 없다(세션 이체도 안 함) → 첫 페이지가 곧 빈 결과.
+    fun `시드 거래내역이 없는 계좌는 빈 res_list와 next_page_yn=N을 반환한다`() = runTest {
+        // 신한 계좌는 시드 거래내역도 세션 이체도 없어 첫 페이지가 빈 결과다.
         val response = api.getTransactionList(
             bankTranId = "M202300001U000010",
             fintechUseNum = SHINHAN,
@@ -210,7 +210,7 @@ class KftcApiServiceTest {
         assertEquals(KFTC_TRANSACTION_PAGE_SIZE, first.resList.size)
         assertEquals("Y", first.nextPageYn)
         assertTrue("다음 커서가 있어야 한다", first.beforInquiryTraceInfo.isNotEmpty())
-        // 명세서 최신순 → 첫 거래의 잔액은 현재 잔액.
+        // 최신순이므로 첫 거래의 잔액은 현재 잔액이다.
         assertEquals("2847320", first.resList.first().afterBalanceAmt)
     }
 
@@ -234,17 +234,17 @@ class KftcApiServiceTest {
             pageCount++
         } while (cursor != null && pageCount < 1_000)
 
-        // 전체 시드 건수를 빠짐없이, 중복 없이 받았다.
+        // 전체 시드 건수를 누락·중복 없이 조회했다.
         assertEquals(KftcTransactionSeed.HISTORY_COUNT, collected.size)
         assertEquals(KftcTransactionSeed.HISTORY_COUNT, collected.distinct().size)
-        // ceil(전체 / 페이지) — 비배수여도 맞도록(현재 1200/20=60이지만 가정에 의존하지 않게).
+        // ceil(전체 / 페이지 크기). 현재는 1200/20=60이지만 나누어떨어지지 않아도 맞도록 계산한다.
         val expectedPages = (KftcTransactionSeed.HISTORY_COUNT + KFTC_TRANSACTION_PAGE_SIZE - 1) / KFTC_TRANSACTION_PAGE_SIZE
         assertEquals(expectedPages, pageCount)
     }
 
     @Test
-    fun `연속조회 도중 새 거래가 명세서 머리에 끼어도 페이지 경계가 밀리지 않는다`() = runTest {
-        // 키셋 커서 회귀 보호: 오프셋 커서였다면 새 거래가 모든 오프셋을 +1 밀어 경계행이 1·2페이지에 중복된다.
+    fun `연속조회 도중 새 거래가 맨 앞에 추가돼도 페이지 경계가 바뀌지 않는다`() = runTest {
+        // 키셋 커서 회귀 테스트. 오프셋 커서라면 새 거래 때문에 모든 오프셋이 1씩 늘어 경계 행이 1·2페이지에 중복된다.
         val first = api.getTransactionList(
             bankTranId = "M202300001U000030",
             fintechUseNum = SALARY,
@@ -253,7 +253,7 @@ class KftcApiServiceTest {
             tranDtime = "20260618103000",
         )
 
-        // 페이지 도중 월급통장에 새 이체 발생 → ledger.add(0, …)로 명세서 맨 앞에 끼어든다.
+        // 조회 도중 월급통장에서 새 이체가 발생해 거래내역 맨 앞에 추가된다.
         api.withdraw(externalRequest(from = SALARY, amount = "1000"))
 
         val second = api.getTransactionList(
@@ -311,7 +311,7 @@ class KftcApiServiceTest {
     }
 
     @Test
-    fun `잔액부족이면 rsp_code A0001과 bank_rsp_code를 돌려준다`() = runTest {
+    fun `잔액부족이면 rsp_code A0001과 bank_rsp_code를 반환한다`() = runTest {
         val result = api.withdraw(externalRequest(from = SALARY, amount = "999999999"))
 
         assertEquals("A0001", result.rspCode)
@@ -332,14 +332,14 @@ class KftcApiServiceTest {
         assertTrue("fintech_use_num 필드: $body", body.contains("fintech_use_num"))
         assertTrue("recv_client_account_num 필드: $body", body.contains("recv_client_account_num"))
         assertTrue("tran_amt 필드: $body", body.contains("tran_amt"))
-        // 기본값("TR")뿐이어도 KFTC 필수 필드라 반드시 실려야 한다 — encodeDefaults 회귀 방지.
+        // 기본값("TR")이어도 KFTC 필수 필드라 반드시 포함돼야 한다. encodeDefaults 회귀 테스트.
         assertTrue("transfer_purpose 필드: $body", body.contains("transfer_purpose"))
     }
 
     // --- 계좌실명조회 E2E ---
 
     @Test
-    fun `inquireRealName 활성 수취인은 예금주명과 ACTIVE를 돌려준다`() = runTest {
+    fun `inquireRealName 활성 수취인은 예금주명과 ACTIVE를 반환한다`() = runTest {
         val response = api.inquireRealName(realNameRequest(bank = "088", accountNum = "110-555-667788"))
 
         assertEquals("A0000", response.rspCode)
@@ -348,7 +348,7 @@ class KftcApiServiceTest {
     }
 
     @Test
-    fun `inquireRealName 휴면 수취인은 INACTIVE를 돌려준다`() = runTest {
+    fun `inquireRealName 휴면 수취인은 INACTIVE를 반환한다`() = runTest {
         val response = api.inquireRealName(realNameRequest(bank = "004", accountNum = "004-999-888777"))
 
         assertEquals("A0000", response.rspCode)
@@ -356,7 +356,7 @@ class KftcApiServiceTest {
     }
 
     @Test
-    fun `inquireRealName 미존재 계좌는 A0001과 bank_rsp_code를 돌려준다`() = runTest {
+    fun `inquireRealName 미존재 계좌는 A0001과 bank_rsp_code를 반환한다`() = runTest {
         val response = api.inquireRealName(realNameRequest(bank = "092", accountNum = "0000-00-0000000"))
 
         assertEquals("A0001", response.rspCode)
