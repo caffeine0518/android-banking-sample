@@ -27,7 +27,6 @@ class CurrencyRebaserTest {
         }
     }
 
-    // 단방향 환산만 옳고 역방향이 어긋나는 수학 오류 방지.
     @Test
     fun `source-target 역수 관계를 만족`() {
         val anchored = sampleAnchored()
@@ -43,7 +42,6 @@ class CurrencyRebaserTest {
         )
     }
 
-    // contract: target 없는 anchored로 호출하면 silent 폴백 대신 즉시 실패해야 호출자가 알 수 있음.
     @Test
     fun `target이 입력에 없으면 IllegalArgumentException`() {
         val partial = mapOf(
