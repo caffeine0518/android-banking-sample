@@ -4,16 +4,7 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
-/**
- * L3 UI E2E 전용 모듈(`com.android.test`).
- *
- * 별도 test APK로 빌드되어 [targetProjectPath]=`:app`의 APK를 instrument한다. 실제 MainActivity →
- * BankNavHost → Hilt 그래프 → KFTC mock 서버까지 앱 전체를 디바이스/에뮬레이터에서 부팅해 검증한다.
- * androidTest 의존성(compose-ui-test / espresso / hilt-testing)이 :app이 아닌 이 모듈에 모인다.
- *
- * com.android.test 모듈은 **main 소스셋이 곧 테스트 코드**다(별도 androidTest 없음).
- * 실행: ./gradlew :app-e2e:connectedDebugAndroidTest (디바이스/에뮬레이터 필요)
- */
+// L3 UI E2E. 실행: ./gradlew :app-e2e:connectedDebugAndroidTest
 android {
     namespace = "com.study.bank.e2e"
     compileSdk {
@@ -25,7 +16,6 @@ android {
     defaultConfig {
         minSdk = 26
         targetSdk = 36
-        // @HiltAndroidTest가 HiltTestApplication 위에서 돌도록 커스텀 러너 사용.
         testInstrumentationRunner = "com.study.bank.e2e.harness.HiltTestRunner"
     }
 
@@ -34,7 +24,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    // instrument 대상 앱.
     targetProjectPath = ":app"
 }
 
