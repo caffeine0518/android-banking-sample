@@ -58,7 +58,6 @@ class RecipientScreenTest {
     fun `내 계좌를 누르면 해당 accountId로 MyAccountClicked 인텐트가 방출된다`() {
         setScreen(RecipientState(myAccounts = listOf(account(id = "acc-2", nickname = "세이프박스"))))
 
-        // Row의 clickable은 자식 텍스트를 머지하지 않으므로 텍스트 노드를 직접 탭 → clickable 조상이 처리.
         composeRule.onNodeWithText("세이프박스").performClick()
 
         assertEquals(listOf(RecipientIntent.MyAccountClicked("acc-2")), intents)

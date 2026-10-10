@@ -63,8 +63,6 @@ internal fun RecipientScreen(
                 .padding(innerPadding),
             contentPadding = PaddingValues(bottom = 24.dp),
         ) {
-            // contentType: 타이틀/입력버튼/섹션헤더/계좌 행은 구조가 달라, 스크롤 시 같은 타입끼리만
-            // composition이 재사용되도록 타입을 구분한다.
             item(contentType = "title") {
                 Text(
                     text = stringResource(R.string.transfer_recipient_title),
@@ -77,7 +75,6 @@ internal fun RecipientScreen(
                 )
             }
             item(contentType = "account_input") {
-                // 입력은 별도 화면에서 받으므로 여기선 입력 필드처럼 보이는 '버튼'(탭 → 입력 화면).
                 Surface(
                     onClick = { onIntent(RecipientIntent.AccountNumberInputClicked) },
                     shape = RoundedCornerShape(12.dp),
