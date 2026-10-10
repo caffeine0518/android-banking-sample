@@ -49,7 +49,6 @@ class ResultViewModel @AssistedInject constructor(
     private val recipient = route.recipient
     private val amount = route.amount
 
-    /** 재시도마다 새 키를 쓰면 타임아웃 뒤 재시도가 새 거래로 체결돼 이중 출금이 된다. */
     private val idempotencyKey = route.idempotencyKey
 
     private val store = MviStore<ResultState, ResultAction, ResultEffect>(
@@ -62,7 +61,6 @@ class ResultViewModel @AssistedInject constructor(
                 sendEffect(ResultEffect.Finish(sourceAccountId.value))
 
             ResultIntent.RetryClicked -> {
-                // 버튼 숨김은 재합성 타이밍에 의존해 빠른 연타를 막지 못하므로 상태로 재진입을 막는다.
                 if (state.phase != ResultPhase.Loading) {
                     setState { copy(phase = ResultPhase.Loading) }
                     execute()
@@ -88,7 +86,6 @@ class ResultViewModel @AssistedInject constructor(
 
     private fun execute() {
         viewModelScope.launch {
-            // 조회 실패는 계좌를 찾지 못한 경우와 같이 UNKNOWN 실패로 표시해 재시도할 수 있게 한다.
             val source = cancellableCatching { accountRepository.findAccount(sourceAccountId) }
                 .onFailure { Log.e(TAG, "출금계좌 조회 중 예외", it) }
                 .getOrNull()

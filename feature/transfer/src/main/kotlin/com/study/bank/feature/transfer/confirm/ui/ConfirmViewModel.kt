@@ -28,7 +28,6 @@ import kotlinx.coroutines.launch
 @HiltViewModel(assistedFactory = ConfirmViewModel.Factory::class)
 class ConfirmViewModel @AssistedInject constructor(
     @Assisted route: TransferConfirmRoute,
-    // 멱등성 키를 프로세스 종료 후에도 유지하려고 SavedStateHandle에 둔다.
     savedStateHandle: SavedStateHandle,
     private val accountRepository: AccountRepository,
     idempotencyKeyGenerator: IdempotencyKeyGenerator,
@@ -45,7 +44,6 @@ class ConfirmViewModel @AssistedInject constructor(
     private val recipient = route.recipient
     private val amount = route.amount
 
-    /** 송금 한 건에 묶이도록 이 화면에서 한 번 발급한다. 결과 화면이 중복 생성되거나 복원돼도 같은 키로 송금한다. */
     private val idempotencyKey: String =
         savedStateHandle.get<String>(IDEMPOTENCY_KEY) ?: idempotencyKeyGenerator.newKey().also {
             savedStateHandle[IDEMPOTENCY_KEY] = it

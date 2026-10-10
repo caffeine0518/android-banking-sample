@@ -10,7 +10,6 @@ import com.study.bank.feature.transfer.recipient.ui.RecipientRoute
 import com.study.bank.feature.transfer.result.ui.ResultRoute
 import kotlinx.serialization.Serializable
 
-/** 실명조회나 내 계좌 선택에서 확정된 수취인. 외부 계좌는 저장소에 없으므로 재조회 없이 결과 화면까지 전달한다. */
 @Serializable
 data class TransferRecipientArg(
     val bankCode: String,
@@ -40,7 +39,6 @@ data class TransferConfirmRoute(
     val amount: Long,
 ) : NavKey
 
-/** 진입 시 송금을 실행한다. */
 @Serializable
 data class TransferResultRoute(
     val sourceAccountId: String,

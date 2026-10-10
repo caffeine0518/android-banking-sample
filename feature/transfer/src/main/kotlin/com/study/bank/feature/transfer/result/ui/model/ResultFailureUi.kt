@@ -4,10 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.study.bank.feature.transfer.R
 
-enum class ResultFailureUi(
-    /** 출금되지 않은 것이 확정된 실패. NETWORK·UNKNOWN은 출금이 반영됐을 수 있어 같은 키로 재시도만 허용한다. */
-    val isDefinite: Boolean,
-) {
+enum class ResultFailureUi(val isDefinite: Boolean) {
     INSUFFICIENT_FUNDS(isDefinite = true),
     INVALID_RECIPIENT(isDefinite = true),
     CURRENCY_MISMATCH(isDefinite = true),

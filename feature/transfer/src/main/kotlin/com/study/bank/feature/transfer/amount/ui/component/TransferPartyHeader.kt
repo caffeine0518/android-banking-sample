@@ -22,7 +22,6 @@ import com.study.bank.feature.transfer.amount.ui.model.AmountRecipientUi
 import com.study.bank.feature.transfer.amount.ui.model.AmountSourceUi
 import com.study.bank.feature.transfer.recipient.ui.model.label
 
-/** 조사("에서"/"로") 대신 언어 중립적인 FROM/TO 캡션으로 방향을 표시한다. */
 @Composable
 internal fun TransferPartyHeader(
     source: AmountSourceUi?,

@@ -43,10 +43,6 @@ fun ResultRoute(
     ResultScreen(state = state, onIntent = viewModel::onIntent)
 }
 
-/**
- * 출금되지 않은 것이 확정된 실패에서만 뒤로가기를 허용한다. 그 외에 결과 화면을 벗어나면 멱등성 키가 사라져
- * 재송금이 새 거래로 체결된다.
- */
 @Composable
 internal fun ResultBackHandler(phase: ResultPhase) {
     BackHandler(enabled = !(phase is ResultPhase.Failure && phase.reason.isDefinite)) {
