@@ -4,18 +4,12 @@ import com.study.bank.data.remote.fx.dto.KeximRateItem
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-/**
- * 한국수출입은행(KEXIM) 환율조회 Retrofit 바인딩.
- *
- * baseUrl `https://oapi.koreaexim.go.kr/` · 한도 인증키별 일 1,000회.
- * authkey는 query 강제(KEXIM 스펙) — OkHttp 로깅에 redactQueryParams("authkey") 필수.
- *
- * 직접 호출하지 말 것 — authkey/날짜 포맷팅을 가린 [KeximApiService]가 정상 경로다(public은 DI 때문).
- */
+/** [KeximApiService]를 거쳐 호출한다. DI 때문에 public이다. */
 interface KeximHttpApi {
 
     @GET("site/program/financial/exchangeJSON")
     suspend fun getRates(
+        // KEXIM 스펙상 query로만 받는다. URL이 로그에 남으므로 로깅할 때 가려야 한다.
         @Query("authkey") authKey: String,
         @Query("searchdate") searchDate: String,
         @Query("data") dataType: String = "AP01",
