@@ -8,12 +8,7 @@ import com.study.bank.data.remote.kftc.mock.storage.dao.MockWithdrawalDao
 import com.study.bank.data.remote.kftc.mock.storage.entity.SettledWithdrawal
 import javax.inject.Inject
 
-/**
- * [KftcWithdrawalService]의 Room 원장 구현. 검증은 [WithdrawPlanner], 반영은 [WithdrawExecutor]가 담당하고
- * 이 클래스는 실행 순서와 트랜잭션 경계만 정한다.
- *
- * 원자성은 [transactionScope]가 보장한다. 멱등 조회·계좌 갱신·원장 삽입·멱등 기록은 하나의 트랜잭션으로 실행돼야 한다.
- */
+/** 멱등 조회·계좌 갱신·원장 삽입·멱등 기록을 [transactionScope] 하나로 묶어 원자적으로 실행한다. */
 internal class KftcWithdrawalServiceImpl @Inject constructor(
     private val transactionScope: MockTransactionScopeDao,
     private val planner: WithdrawPlanner,

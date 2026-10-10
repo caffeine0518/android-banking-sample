@@ -6,11 +6,11 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.study.bank.data.remote.kftc.mock.storage.entity.SeedAccount
 
-/** `mock_accounts` 접근. 디스패처 스레드에서 동기 호출하므로 suspend가 아니다. */
+/** 디스패처 스레드에서 동기 호출하므로 suspend가 아니다. */
 @Dao
 internal interface MockAccountDao {
 
-    /** 적재 순서(시드 선언 순서)를 유지한다. list_finuse 응답 순서가 항상 같아야 한다. */
+    /** list_finuse 응답 순서가 시드 선언 순서와 같도록 rowid로 정렬한다. */
     @Query("SELECT * FROM mock_accounts ORDER BY rowid")
     fun findAll(): List<SeedAccount>
 
@@ -18,9 +18,8 @@ internal interface MockAccountDao {
     fun find(fintechUseNum: String): SeedAccount?
 
     /**
-     * 수취계좌 판정용 조회. 앱은 list_finuse에서 마스킹된 번호만 받으므로 내 계좌끼리 송금하면 마스킹된
-     * 번호로 요청이 들어온다. 그래서 전체 번호와 마스킹 번호 모두로 조회한다. 마스킹 번호에는 "*"가 있어
-     * 외부 계좌의 전체 번호와 겹치지 않는다.
+     * 앱은 list_finuse에서 마스킹된 번호만 받으므로 내 계좌끼리 송금하면 마스킹된 번호로 요청한다.
+     * 마스킹 번호에는 "*"가 있어 외부 계좌의 전체 번호와 겹치지 않는다.
      */
     @Query(
         """

@@ -15,18 +15,13 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
-/**
- * 승인된 [WithdrawPlan.Approved]를 원장에 반영한다. 검증은 [WithdrawPlanner]가 이미 마쳤다.
- *
- * 출금과 입금이 함께 반영돼야 하므로 호출 측([KftcWithdrawalServiceImpl])의 트랜잭션 안에서만 호출한다.
- */
+/** 출금과 입금이 함께 반영돼야 하므로 호출 측의 트랜잭션 안에서만 호출한다. */
 internal class WithdrawExecutor @Inject constructor(
     private val accountDao: MockAccountDao,
     private val transactionDao: MockTransactionDao,
     private val clock: Clock,
 ) {
 
-    /** 출금계좌에서 차감하고, 내부 수취면 같은 시각으로 입금까지 기록한다. 외부 수취면 차감만 한다. */
     fun execute(plan: WithdrawPlan.Approved, command: WithdrawCommand): WithdrawResult.Success {
         val (source, amount, recipient) = plan
         val at = LocalDateTime.now(clock)
@@ -38,7 +33,7 @@ internal class WithdrawExecutor @Inject constructor(
         return success(source, amount, command, afterSource)
     }
 
-    /** 통장 인자내용은 요청 값을 쓰고, 없으면 상대방 이름을 쓴다(KFTC 기본 동작). */
+    /** 인자내용이 없으면 상대방 이름을 쓴다(KFTC 기본 동작). */
     private fun withdrawFrom(
         source: SeedAccount,
         amount: BigDecimal,
@@ -84,13 +79,7 @@ internal class WithdrawExecutor @Inject constructor(
         afterBalanceAmt = afterBalanceAmt,
     )
 
-    /**
-     * 한 계좌에 입금 또는 출금 1건을 반영한다. 잔액을 [direction]에 따라 갱신하고 원장에 한 행을 추가한 뒤,
-     * 갱신된 잔액 문자열을 반환한다.
-     *
-     * 잔액은 스냅샷을 쓰지 않고 **매번 테이블에서 다시 조회한다**. 그렇지 않으면 같은 계좌로 송금할 때(출금 = 수취)
-     * 입금 쪽이 차감 전 잔액을 읽어 이체 금액만큼 잔액이 늘어난다.
-     */
+    /** 같은 계좌로 송금하면(출금 = 수취) 입금 쪽이 차감 전 잔액을 쓰지 않도록 잔액을 매번 다시 조회한다. */
     private fun post(
         fintechUseNum: String,
         direction: TransactionDirection,
@@ -128,6 +117,6 @@ internal class WithdrawExecutor @Inject constructor(
     }
 }
 
-/** 원장 문자열은 저장된 scale을 그대로 유지한다. 이 모듈은 :domain의 Currency를 참조하지 않아 통화별 자릿수를 모른다. */
+/** 이 모듈은 :domain의 Currency를 몰라 통화별 자릿수 대신 저장된 scale을 유지한다. */
 internal fun BigDecimal.toLedgerString(scale: Int): String =
     setScale(scale, RoundingMode.HALF_UP).toPlainString()

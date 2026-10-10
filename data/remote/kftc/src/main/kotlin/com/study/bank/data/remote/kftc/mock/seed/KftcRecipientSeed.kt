@@ -3,12 +3,7 @@ package com.study.bank.data.remote.kftc.mock.seed
 import com.study.bank.data.remote.kftc.mock.model.SeedRecipient
 import com.study.bank.data.remote.kftc.mock.storage.entity.SeedAccount
 
-/**
- * 계좌실명조회가 조회하는 수취 계좌 목록.
- *
- * 계좌 목록의 어느 계좌로도 송금할 수 있어야 하므로 본인 계좌는 [directory]가 계좌 시드에서 만든다.
- * 여기에는 계좌 목록에서 만들 수 없는 외부 수취인만 둔다.
- */
+/** 본인 계좌는 계좌 시드에서 만들므로([directory]) 여기에는 외부 수취인만 둔다. */
 internal object KftcRecipientSeed {
 
     private val externalRecipients: List<SeedRecipient> = listOf(

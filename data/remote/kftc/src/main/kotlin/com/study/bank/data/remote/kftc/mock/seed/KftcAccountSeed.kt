@@ -2,11 +2,6 @@ package com.study.bank.data.remote.kftc.mock.seed
 
 import com.study.bank.data.remote.kftc.mock.storage.entity.SeedAccount
 
-/**
- * KFTC mock 서버가 앱 시작 시 적재하는 시드 계좌.
- *
- * 외화 계좌를 함께 두어 다통화 도메인이 실제 호출 흐름 끝까지 처리되는지 통합 테스트로 검증할 수 있게 한다.
- */
 internal object KftcAccountSeed {
 
     val accounts: List<SeedAccount> = listOf(
