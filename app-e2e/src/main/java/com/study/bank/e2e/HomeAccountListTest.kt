@@ -20,7 +20,6 @@ import org.junit.Test
 @HiltAndroidTest
 class HomeAccountListTest {
 
-    // order=0: Activity가 뜨기 전에 Hilt 컴포넌트를 먼저 구성해야 한다.
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
 
@@ -29,8 +28,6 @@ class HomeAccountListTest {
 
     @Test
     fun 앱을_켜면_시드된_계좌_목록과_총자산이_보인다() {
-        // 네트워크(MockWebServer) 라운드트립 후 계좌 스트림이 도착할 때까지 대기.
-        // 표시명이 아니라 안정적 id 태그로 "그 계좌 행이 렌더됐는지"를 확인한다.
         val krwAccount = AccountsByCurrency.firstOf(Currency.KRW)
         val usdAccount = AccountsByCurrency.firstOf(Currency.USD)
         composeRule.awaitTag(accountItem(krwAccount))

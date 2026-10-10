@@ -30,13 +30,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-/**
- * "응답 유실 → 재시도"가 이중출금이 되지 않는지 검증하는 E2E.
- *
- * 송금 요청은 서버에 도달해 원장에 반영됐는데 응답만 유실되는 상황을 만든다. 이때 결과 화면은 실패를
- * 표시하고, 사용자가 재시도하면 같은 멱등성 키로 다시 나간다. 서버가 그 키로 중복을 판정해야
- * 잔액이 한 번만 차감된다 — 판정하지 못하면 두 번 차감된다.
- */
+/** 원장에 반영된 뒤 응답만 유실된 송금을 재시도해도 같은 멱등성 키로 한 번만 차감되는지 검증한다. */
 @HiltAndroidTest
 class TransferRetryIdempotencyTest {
 
@@ -74,13 +68,13 @@ class TransferRetryIdempotencyTest {
         composeRule.onNodeWithTag(RESULT_RETRY).performClick()
         composeRule.awaitTag(RESULT_SUCCESS)
 
-        // 출금계좌 상세로 복귀해 잔액을 확인한다. 카피가 아니라 입력으로부터 계산된 값이라 텍스트로 단언한다.
+        // 입력으로부터 계산된 값이라 텍스트로 단언한다.
         composeRule.onNodeWithTag(RESULT_CONFIRM).performClick()
         composeRule.awaitTag(accountDetail(source))
         composeRule.onNodeWithText(BALANCE_AFTER_ONE_SEND, substring = true).assertIsDisplayed()
     }
 
-    /** 홈 → [sourceId] 상세 → 보내기 → 수취인 [recipientId] 선택 → 금액 화면 진입까지. 계좌는 모두 id 태그로 지목. */
+    /** 홈 → [sourceId] 상세 → 보내기 → 수취인 [recipientId] → 금액 화면. */
     private fun openAmountScreen(sourceId: String, recipientId: String) {
         composeRule.awaitTag(accountItem(sourceId))
         composeRule.onNodeWithTag(accountItem(sourceId)).performClick()

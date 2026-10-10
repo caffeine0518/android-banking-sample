@@ -28,12 +28,7 @@ import dagger.hilt.android.testing.UninstallModules
 import org.junit.Rule
 import org.junit.Test
 
-/**
- * 해시가 같은 멱등성 키로 송금해도 거래고유번호(bank_tran_id)가 충돌하지 않는지 화면과 잔액으로 검증하는 E2E.
- *
- * 송금마다 해시가 같은 멱등성 키를 발급한다. 번호를 키의 해시로 만들면 두 번째 송금이 첫 번째 송금과 같은 번호로
- * 나가 서버가 거절한다. 번호는 키마다 순번으로 발급되므로 두 송금 모두 성공해야 한다.
- */
+/** 해시가 같은 멱등성 키로 두 번 송금해도 bank_tran_id가 충돌하지 않아 둘 다 성공하는지 검증한다. */
 @HiltAndroidTest
 @UninstallModules(IdempotencyKeyModule::class)
 class TransferBankTranIdCollisionTest {
