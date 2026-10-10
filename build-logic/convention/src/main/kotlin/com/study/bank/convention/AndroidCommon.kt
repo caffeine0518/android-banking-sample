@@ -5,12 +5,7 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
 
-/**
- * 모든 Android 모듈에 공통인 AGP 설정.
- *
- * compileSdk 36.1 / minSdk 26 / Java 11 — 기존 모든 모듈의 build.gradle.kts에 복붙돼 있던 블록을 한곳에 모은다.
- * Kotlin 타깃은 AGP 9 built-in Kotlin이 compileOptions를 따라가므로 별도로 설정하지 않는다.
- */
+/** Kotlin 타깃은 AGP 9 built-in Kotlin이 compileOptions를 따르므로 따로 설정하지 않는다. */
 internal fun Project.configureAndroid(
     commonExtension: CommonExtension,
 ) {
