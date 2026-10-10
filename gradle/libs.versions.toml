@@ -18,7 +18,7 @@ navigation3 = "1.1.4"
 lifecycleViewmodelNavigation3 = "2.10.0"
 retrofit = "2.11.0"
 okhttp = "4.12.0"
-kotlinxSerialization = "1.7.3"
+kotlinxSerialization = "1.9.0"
 retrofitKotlinxSerialization = "1.0.0"
 javaxInject = "1"
 # Nav 의존 없는 hiltViewModel(creationCallback) 제공 아티팩트. 1.4.0은 lifecycle 2.11(compileSdk 37 요구)을 끌어와 보류.
