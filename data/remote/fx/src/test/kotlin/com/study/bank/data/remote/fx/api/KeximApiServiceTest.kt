@@ -4,7 +4,6 @@ import com.study.bank.data.remote.fx.dto.KeximRateItem
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -44,35 +43,23 @@ class KeximApiServiceTest {
 
     // 유효한 인증키 없이도 실행된다.
     @Test
-    fun `잘못된 인증키로 호출하면 result 3과 null 필드들로 응답한다`() = runTest {
+    fun `잘못된 인증키로 호출하면 InvalidKey를 반환한다`() = runTest {
         val brokenApi = createKeximApiService(authKey = "INVALID_KEY_FOR_TEST")
 
-        val items = brokenApi.getRates(lastBusinessDay())
-
-        assertEquals(1, items.size)
-        val item = items.single()
-        assertEquals(3, item.result)
-        assertNull(item.curUnit)
-        assertNull(item.dealBasR)
+        assertEquals(KeximRates.InvalidKey, brokenApi.getRates(lastBusinessDay()))
     }
 
-    // KEXIM은 미래 날짜에 빈 배열이나 result=2 항목으로 응답하므로 둘 다 허용한다.
     @Test
-    fun `미래 날짜로 호출하면 정상(result 1) 응답을 받지 않는다`() = runTest {
-        val items = api.getRates(LocalDate.now().plusYears(10))
-
-        if (items.isNotEmpty()) {
-            assertTrue("미래 날짜는 result != 1이어야 한다: ${items.first().result}",
-                items.first().result != 1)
-        }
+    fun `미래 날짜로 호출하면 NotPublished를 반환한다`() = runTest {
+        assertEquals(KeximRates.NotPublished, api.getRates(LocalDate.now().plusYears(10)))
     }
 
     /** KEXIM은 당일 데이터를 약 11:00 KST에 게시하고 주말·연휴에는 게시하지 않아 정상 응답이 나올 때까지 하루씩 거슬러 조회한다. */
     private suspend fun fetchRecentSuccess(): List<KeximRateItem> {
         var date = LocalDate.now().minusDays(1)
         repeat(MAX_WALKBACK) {
-            val items = api.getRates(date)
-            if (items.isNotEmpty() && items.first().result == 1) return items
+            val rates = api.getRates(date)
+            if (rates is KeximRates.Published) return rates.items
             date = date.minusDays(1)
         }
         error("최근 ${MAX_WALKBACK}일 안에 KEXIM 정상 응답 없음 — 장기 연휴/KEXIM 장애/키 문제 의심")

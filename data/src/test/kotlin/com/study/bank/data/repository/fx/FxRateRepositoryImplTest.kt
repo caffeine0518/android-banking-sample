@@ -1,6 +1,7 @@
 package com.study.bank.data.repository.fx
 
 import com.study.bank.data.remote.fx.api.KeximApiService
+import com.study.bank.data.remote.fx.api.KeximRates
 import com.study.bank.data.remote.fx.dto.KeximRateItem
 import com.study.bank.domain.model.Currency
 import java.math.BigDecimal
@@ -33,7 +34,7 @@ class FxRateRepositoryImplTest {
             success("EUR", "1,450.00"),
             success("JPY(100)", "950.00"),
         )
-        val api = FakeKeximApiService(mapOf(yesterday() to items))
+        val api = FakeKeximApiService(mapOf(yesterday() to KeximRates.Published(items)))
         val repo = FxRateRepositoryImpl(api, FxRateMapper(CurrencyRebaser()), fixedClock)
 
         val krwView = repo.observeRates(Currency.KRW).first()
@@ -57,9 +58,9 @@ class FxRateRepositoryImplTest {
     @Test
     fun `최근 응답이 비면 다음 날짜로 walkback`() = runTest {
         val api = FakeKeximApiService(mapOf(
-            yesterday() to emptyList(),
-            yesterday().minusDays(1) to emptyList(),
-            yesterday().minusDays(2) to listOf(success("USD", "1,400.00")),
+            yesterday() to KeximRates.NotPublished,
+            yesterday().minusDays(1) to KeximRates.NotPublished,
+            yesterday().minusDays(2) to published(success("USD", "1,400.00")),
         ))
         val repo = FxRateRepositoryImpl(api, FxRateMapper(CurrencyRebaser()), fixedClock)
 
@@ -72,19 +73,25 @@ class FxRateRepositoryImplTest {
     }
 
     @Test
-    fun `result가 1이 아닌 응답도 walkback 대상`() = runTest {
-        val api = FakeKeximApiService(mapOf(
-            yesterday() to listOf(KeximRateItem(result = 2)), // holiday
-            yesterday().minusDays(1) to listOf(success("USD", "1,500.00")),
-        ))
+    fun `인증키 오류면 날짜를 바꿔 다시 조회하지 않고 identity만 반환한다`() = runTest {
+        val api = FakeKeximApiService(ratesByDate = emptyMap(), default = KeximRates.InvalidKey)
         val repo = FxRateRepositoryImpl(api, FxRateMapper(CurrencyRebaser()), fixedClock)
 
         val result = repo.observeRates(Currency.KRW).first()
 
-        // primary: 휴일 응답을 건너뛰고 -1일 데이터를 채택했는지 결과로 증명
-        assertEquals(0, BigDecimal("1500").compareTo(result[Currency.USD]))
-        // secondary: result=2가 정상 응답으로 오인되지 않았는지
-        assertEquals(2, api.callCount)
+        assertEquals(mapOf(Currency.KRW to BigDecimal.ONE), result)
+        assertEquals(1, api.callCount)
+    }
+
+    @Test
+    fun `일일 한도 초과면 날짜를 바꿔 다시 조회하지 않고 identity만 반환한다`() = runTest {
+        val api = FakeKeximApiService(ratesByDate = emptyMap(), default = KeximRates.LimitExceeded)
+        val repo = FxRateRepositoryImpl(api, FxRateMapper(CurrencyRebaser()), fixedClock)
+
+        val result = repo.observeRates(Currency.KRW).first()
+
+        assertEquals(mapOf(Currency.KRW to BigDecimal.ONE), result)
+        assertEquals(1, api.callCount)
     }
 
     // KEXIM 장기 장애 시 앱이 환율 없이도 동작 (UI가 빈 맵으로 NPE 안 나게).
@@ -104,7 +111,7 @@ class FxRateRepositoryImplTest {
     @Test
     fun `API 예외 발생해도 walkback으로 다음 날짜 시도`() = runTest {
         val api = FakeKeximApiService(
-            ratesByDate = mapOf(yesterday().minusDays(1) to listOf(success("USD", "1,200.00"))),
+            ratesByDate = mapOf(yesterday().minusDays(1) to published(success("USD", "1,200.00"))),
             failOnDates = setOf(yesterday()),
         )
         val repo = FxRateRepositoryImpl(api, FxRateMapper(CurrencyRebaser()), fixedClock)
@@ -123,18 +130,21 @@ class FxRateRepositoryImplTest {
         dealBasR = dealBasR,
     )
 
+    private fun published(vararg items: KeximRateItem) = KeximRates.Published(items.toList())
+
     private class FakeKeximApiService(
-        private val ratesByDate: Map<LocalDate, List<KeximRateItem>>,
+        private val ratesByDate: Map<LocalDate, KeximRates>,
         private val failOnDates: Set<LocalDate> = emptySet(),
+        private val default: KeximRates = KeximRates.NotPublished,
     ) : KeximApiService {
 
         var callCount: Int = 0
             private set
 
-        override suspend fun getRates(date: LocalDate): List<KeximRateItem> {
+        override suspend fun getRates(date: LocalDate): KeximRates {
             callCount++
             if (date in failOnDates) throw RuntimeException("simulated network failure for $date")
-            return ratesByDate[date] ?: emptyList()
+            return ratesByDate[date] ?: default
         }
     }
 }
