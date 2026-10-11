@@ -29,6 +29,8 @@ internal sealed interface WithdrawResult {
 
     data class InvalidAmount(val raw: String) : WithdrawResult
 
+    data class InvalidRecvAccountNum(val raw: String) : WithdrawResult
+
     data class InsufficientFunds(val balance: String, val attempted: String) : WithdrawResult
 
     data class CurrencyMismatch(val from: String, val to: String) : WithdrawResult

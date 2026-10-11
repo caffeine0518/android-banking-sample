@@ -49,6 +49,10 @@ internal class TransferRequestHandler(
             errors.toResponse(MockError.InvalidTranAmt(raw))
         }
 
+        is WithdrawResult.InvalidRecvAccountNum -> {
+            errors.toResponse(MockError.InvalidRecvAccountNum(raw))
+        }
+
         is WithdrawResult.InsufficientFunds -> {
             mapper.toRejectedResponse(BANK_RSP_INSUFFICIENT_FUNDS, "출금계좌 잔액 부족").ok()
         }

@@ -20,6 +20,11 @@ internal class WithdrawPlanner @Inject constructor(
         val amount = command.positiveAmountOrNull()
             ?: return reject(WithdrawResult.InvalidAmount(command.tranAmt))
 
+        // 마스킹 번호는 '*' 를 제거하면 다른 계좌의 숫자와 같아질 수 있어 매칭 전에 거절한다.
+        if (MASK_CHAR in command.recvAccountNum) {
+            return reject(WithdrawResult.InvalidRecvAccountNum(command.recvAccountNum))
+        }
+
         val internalRecipient = accountDao.findAll().firstOrNull { it.isRecipientOf(command) }
 
         insufficientFunds(source, amount)?.let { return reject(it) }
@@ -28,11 +33,9 @@ internal class WithdrawPlanner @Inject constructor(
         return WithdrawPlan.Approved(source, amount, internalRecipient)
     }
 
-    private fun SeedAccount.isRecipientOf(command: WithdrawCommand): Boolean {
-        if (bankCodeStd != command.recvBankCode) return false
-        val requested = command.recvAccountNum
-        return requested == accountNumMasked || AccountNumDigits.of(accountNum) == AccountNumDigits.of(requested)
-    }
+    private fun SeedAccount.isRecipientOf(command: WithdrawCommand): Boolean =
+        bankCodeStd == command.recvBankCode &&
+            AccountNumDigits.of(accountNum) == AccountNumDigits.of(command.recvAccountNum)
 
     private fun WithdrawCommand.positiveAmountOrNull(): BigDecimal? =
         tranAmt.toBigDecimalOrNull()?.takeIf { it.signum() > 0 }
@@ -55,4 +58,8 @@ internal class WithdrawPlanner @Inject constructor(
         }
 
     private fun reject(result: WithdrawResult) = WithdrawPlan.Reject(result)
+
+    private companion object {
+        const val MASK_CHAR = '*'
+    }
 }
