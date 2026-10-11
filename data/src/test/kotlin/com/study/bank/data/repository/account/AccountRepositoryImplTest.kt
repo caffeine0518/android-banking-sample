@@ -3,12 +3,16 @@ package com.study.bank.data.repository.account
 import app.cash.turbine.test
 import com.study.bank.data.local.dao.AccountDao
 import com.study.bank.data.local.entity.AccountEntity
+import com.study.bank.data.remote.kftc.corebanking.api.CoreBankingApiService
+import com.study.bank.data.remote.kftc.corebanking.dto.CoreAccountDto
+import com.study.bank.data.remote.kftc.corebanking.dto.CoreAccountListResponse
 import com.study.bank.data.remote.kftc.api.KftcApiService
 import com.study.bank.data.remote.kftc.dto.account.AccountBalanceResponse
 import com.study.bank.data.remote.kftc.dto.account.AccountListResponse
 import com.study.bank.data.remote.kftc.dto.account.FintechAccountDto
 import com.study.bank.data.repository.NoopKftcApiService
 import com.study.bank.domain.model.account.AccountId
+import com.study.bank.domain.model.account.AccountNumber
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,6 +42,19 @@ class AccountRepositoryImplTest {
         assertEquals(1, api.listCallCount)
         assertEquals(1, api.balanceCallCount)
         assertEquals(1, dao.count())
+    }
+
+    @Test
+    fun `refresh는 계정계의 전체 계좌번호를 자행 계좌에 채우고 다른 은행 계좌는 비워 둔다`() = runTest {
+        val api = FakeKftcApiService(initialSeeds = listOf(SEED_TOSS_KRW, SEED_OTHER_BANK))
+        val core = FakeCoreBankingApiService(mapOf(SEED_TOSS_KRW.fintechUseNum to "1000-12-3456789"))
+        val repo = buildRepo(api, FakeAccountDao(), core)
+
+        repo.refresh()
+
+        val accounts = repo.observeAccounts().first().associateBy { it.id.value }
+        assertEquals(AccountNumber("1000-12-3456789"), accounts.getValue(SEED_TOSS_KRW.fintechUseNum).fullNumber)
+        assertNull(accounts.getValue(SEED_OTHER_BANK.fintechUseNum).fullNumber)
     }
 
     @Test
@@ -141,8 +158,13 @@ class AccountRepositoryImplTest {
         assertEquals("20260618103000", api.lastBalanceTranDtime)
     }
 
-    private fun buildRepo(api: KftcApiService, dao: AccountDao) = AccountRepositoryImpl(
+    private fun buildRepo(
+        api: KftcApiService,
+        dao: AccountDao,
+        coreApi: CoreBankingApiService = FakeCoreBankingApiService(),
+    ) = AccountRepositoryImpl(
         api = api,
+        coreApi = coreApi,
         dao = dao,
         dtoMapper = AccountMapper(),
         entityMapper = AccountEntityMapper(),
@@ -180,6 +202,17 @@ class AccountRepositoryImplTest {
             alias = "외화통장",
             balanceAmt = "3245.80",
             currencyCode = "USD",
+        )
+
+        val SEED_OTHER_BANK = Seed(
+            fintechUseNum = "120220112345678901234004",
+            bankCode = "088",
+            accountNumMasked = "110-23-***7890",
+            holderName = "홍길동",
+            accountType = "1",
+            alias = null,
+            balanceAmt = "500000",
+            currencyCode = "KRW",
         )
 
         // DAO에 직접 밀어넣을 엔티티. type은 KFTC 코드가 아닌 AccountType enum 이름이어야 한다.
@@ -272,6 +305,14 @@ class AccountRepositoryImplTest {
             accountHolderName = holderName,
             accountHolderType = "P",
             accountType = accountType,
+        )
+    }
+
+    private class FakeCoreBankingApiService(
+        private val fullNumbers: Map<String, String> = emptyMap(),
+    ) : CoreBankingApiService {
+        override suspend fun getAccounts() = CoreAccountListResponse(
+            accounts = fullNumbers.map { (id, number) -> CoreAccountDto(fintechUseNum = id, accountNum = number) },
         )
     }
 
