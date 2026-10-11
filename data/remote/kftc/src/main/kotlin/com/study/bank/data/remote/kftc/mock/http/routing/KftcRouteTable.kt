@@ -1,6 +1,7 @@
 package com.study.bank.data.remote.kftc.mock.http.routing
 
 import com.study.bank.data.remote.kftc.mock.http.handler.AccountRequestHandler
+import com.study.bank.data.remote.kftc.mock.http.handler.CoreBankingRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.handler.InquiryRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.handler.TransferRequestHandler
 
@@ -8,6 +9,7 @@ internal fun kftcRoutes(
     account: AccountRequestHandler,
     transfer: TransferRequestHandler,
     inquiry: InquiryRequestHandler,
+    coreBanking: CoreBankingRequestHandler,
 ): List<Route> = routing {
     get(PATH_LIST_FINUSE) { account.list() }
 
@@ -25,4 +27,6 @@ internal fun kftcRoutes(
     post(PATH_TRANSFER_WITHDRAW_FIN_NUM) { request -> transfer.withdraw(request.body()) }
 
     post(PATH_INQUIRY_REAL_NAME) { request -> inquiry.realName(request.body()) }
+
+    get(PATH_CORE_ACCOUNTS) { coreBanking.accounts() }
 }

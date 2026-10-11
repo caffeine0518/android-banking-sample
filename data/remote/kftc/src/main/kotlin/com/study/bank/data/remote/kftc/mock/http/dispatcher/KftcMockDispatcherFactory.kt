@@ -1,6 +1,7 @@
 package com.study.bank.data.remote.kftc.mock.http.dispatcher
 
 import com.study.bank.data.remote.kftc.mock.http.handler.AccountRequestHandler
+import com.study.bank.data.remote.kftc.mock.http.handler.CoreBankingRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.handler.InquiryRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.handler.TransferRequestHandler
 import com.study.bank.data.remote.kftc.mock.http.response.KftcTranIds
@@ -48,6 +49,7 @@ internal fun kftcMockDispatcher(
                 errors,
                 json,
             ),
+            coreBanking = CoreBankingRequestHandler(accountDao),
         ),
         errors = errors,
     )
