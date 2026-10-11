@@ -19,11 +19,13 @@ internal class InquiryRequestHandler(
 ) {
     fun realName(body: String): MockResponse {
         val request = parse(body) ?: return errors.toResponse(MockError.MissingInquiryBody)
-        val match = recipients.firstOrNull {
-            it.accountNum sameDigitsAs request.accountNum && it.bankCodeStd == request.bankCodeStd
-        } ?: return mapper.toNotFoundResponse(request.accountNum).ok()
+        val match = recipients.firstOrNull { it.matches(request) }
+            ?: return mapper.toNotFoundResponse(request.accountNum).ok()
         return mapper.toResponse(match).ok()
     }
+
+    private fun SeedRecipient.matches(request: RealNameInquiryRequest): Boolean =
+        bankCodeStd == request.bankCodeStd && accountNum sameDigitsAs request.accountNum
 
     private fun parse(body: String): RealNameInquiryRequest? =
         runCatching { json.decodeFromString<RealNameInquiryRequest>(body) }.getOrNull()
