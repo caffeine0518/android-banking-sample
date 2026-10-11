@@ -3,6 +3,7 @@ package com.study.bank.data.repository.account
 import android.util.Log
 import com.study.bank.data.local.dao.AccountDao
 import com.study.bank.data.remote.kftc.api.KftcApiService
+import com.study.bank.data.remote.kftc.corebanking.api.CoreBankingApiService
 import com.study.bank.data.repository.tranDtime
 import com.study.bank.data.repository.bankTranIdFor
 import com.study.bank.domain.coroutine.cancellableCatching
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.map
 @Singleton
 class AccountRepositoryImpl @Inject constructor(
     private val api: KftcApiService,
+    private val coreApi: CoreBankingApiService,
     private val dao: AccountDao,
     private val dtoMapper: AccountMapper,
     private val entityMapper: AccountEntityMapper,
@@ -48,6 +50,7 @@ class AccountRepositoryImpl @Inject constructor(
 
     private suspend fun fetchFromKftc(): List<Account> {
         val listResponse = api.getAccountList(userSeqNo = USER_SEQ_NO)
+        val fullNumbers = coreApi.getAccounts().accounts.associate { it.fintechUseNum to it.accountNum }
         return coroutineScope {
             listResponse.resList.map { item ->
                 async {
@@ -57,7 +60,7 @@ class AccountRepositoryImpl @Inject constructor(
                             fintechUseNum = item.fintechUseNum,
                             tranDtime = tranDtime(clock),
                         )
-                        dtoMapper.map(item, balance)
+                        dtoMapper.map(item, balance, fullNumbers[item.fintechUseNum])
                     }.onFailure { error ->
                         Log.e(TAG, "Failed to map account ${item.fintechUseNum}, skipping", error)
                     }.getOrNull()
