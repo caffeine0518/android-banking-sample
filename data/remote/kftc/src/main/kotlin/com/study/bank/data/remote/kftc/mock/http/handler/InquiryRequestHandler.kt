@@ -19,9 +19,10 @@ internal class InquiryRequestHandler(
 ) {
     fun realName(body: String): MockResponse {
         val request = parse(body) ?: return errors.toResponse(MockError.MissingInquiryBody)
-        val match = recipients.firstOrNull { it.matches(request) }
-            ?: return mapper.toNotFoundResponse(request.accountNum).ok()
-        return mapper.toResponse(match).ok()
+        return when (val match = recipients.firstOrNull { it.matches(request) }) {
+            null -> mapper.toNotFoundResponse(request.accountNum)
+            else -> mapper.toResponse(match)
+        }.ok()
     }
 
     private fun SeedRecipient.matches(request: RealNameInquiryRequest): Boolean =
