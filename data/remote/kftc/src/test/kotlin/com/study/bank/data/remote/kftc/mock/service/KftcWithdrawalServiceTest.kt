@@ -73,6 +73,18 @@ class KftcWithdrawalServiceTest {
     }
 
     @Test
+    fun `앱이 숫자만 보낸 수취계좌번호도 시드 계좌로 매칭해 입금까지 기록한다`() {
+        val bank = newBank()
+
+        bank.withdrawalService.withdraw(
+            internalCommand(from = SALARY, toAccountNum = SAFEBOX_NUM.filter(Char::isDigit), amount = "50000"),
+        )
+
+        assertEquals("12050000", bank.accountDao.find(SAFEBOX)!!.balanceAmt)
+        assertEquals(TransactionDirection.DEPOSIT, bank.transactionDao.sessionLedger(SAFEBOX).single().direction)
+    }
+
+    @Test
     fun `출금계좌와 수취계좌가 같으면 차감과 입금이 상쇄돼 잔액이 보존된다`() {
         val bank = newBank()
 

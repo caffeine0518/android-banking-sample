@@ -12,7 +12,12 @@ import com.study.bank.data.remote.kftc.mock.model.SeedRecipient
 
 internal class InquiryResponseMapper(private val tranIds: KftcTranIds) {
 
-    fun toResponse(recipient: SeedRecipient): RealNameInquiryResponse = RealNameInquiryResponse(
+    fun toResponse(match: SeedRecipient?, requestedAccountNum: String): RealNameInquiryResponse = when (match) {
+        null -> toNotFoundResponse(requestedAccountNum)
+        else -> toFoundResponse(match)
+    }
+
+    private fun toFoundResponse(recipient: SeedRecipient): RealNameInquiryResponse = RealNameInquiryResponse(
         apiTranId = tranIds.newApiTranId(),
         apiTranDtm = tranIds.nowDtm(),
         rspCode = RSP_SUCCESS,
@@ -21,13 +26,13 @@ internal class InquiryResponseMapper(private val tranIds: KftcTranIds) {
         bankTranDate = tranIds.nowDate(),
         bankCodeTran = recipient.bankCodeStd,
         bankRspCode = BANK_RSP_OK,
-        accountNum = recipient.accountNum,
+        accountNum = recipient.accountNum.value,
         accountHolderName = recipient.holderName,
         accountId = recipient.accountId,
-        accountStatus = if (recipient.active) ACCOUNT_STATUS_ACTIVE else ACCOUNT_STATUS_INACTIVE,
+        accountStatus = if (recipient.isDormantOrClosed) ACCOUNT_STATUS_INACTIVE else ACCOUNT_STATUS_ACTIVE,
     )
 
-    fun toNotFoundResponse(accountNum: String): RealNameInquiryResponse = RealNameInquiryResponse(
+    private fun toNotFoundResponse(accountNum: String): RealNameInquiryResponse = RealNameInquiryResponse(
         apiTranId = tranIds.newApiTranId(),
         apiTranDtm = tranIds.nowDtm(),
         rspCode = RSP_ERROR,
