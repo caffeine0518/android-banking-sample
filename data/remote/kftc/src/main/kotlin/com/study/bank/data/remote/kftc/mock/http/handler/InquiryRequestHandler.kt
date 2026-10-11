@@ -24,7 +24,7 @@ internal class InquiryRequestHandler(
     }
 
     private fun SeedRecipient.matches(request: RealNameInquiryRequest): Boolean =
-        bankCodeStd == request.bankCodeStd && accountNum == AccountNumDigits.of(request.accountNum)
+        bankCodeStd == request.bankCodeStd && accountNum == AccountNumDigits.parseOrNull(request.accountNum)
 
     private fun parse(body: String): RealNameInquiryRequest? =
         runCatching { json.decodeFromString<RealNameInquiryRequest>(body) }.getOrNull()
