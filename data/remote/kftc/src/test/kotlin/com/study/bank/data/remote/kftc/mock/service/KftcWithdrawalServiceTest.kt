@@ -85,6 +85,19 @@ class KftcWithdrawalServiceTest {
     }
 
     @Test
+    fun `마스킹된 수취계좌번호는 매칭 전에 거절하고 양쪽 잔액을 바꾸지 않는다`() {
+        val bank = newBank()
+
+        val result = bank.withdrawalService.withdraw(
+            internalCommand(from = SALARY, toAccountNum = "1000-55-***4443", amount = "50000"),
+        )
+
+        assertEquals(WithdrawResult.InvalidRecvAccountNum("1000-55-***4443"), result)
+        assertEquals("2847320", bank.accountDao.find(SALARY)!!.balanceAmt)
+        assertEquals("12000000", bank.accountDao.find(SAFEBOX)!!.balanceAmt)
+    }
+
+    @Test
     fun `출금계좌와 수취계좌가 같으면 차감과 입금이 상쇄돼 잔액이 보존된다`() {
         val bank = newBank()
 

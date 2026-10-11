@@ -114,16 +114,11 @@ class DataFlowIntegrationTest {
     }
 
     @Test
-    fun `내 계좌로 송금 — 마스킹된 계좌번호로 보내도 수취계좌가 입금된다(앱 실제 플로우)`() = runBlocking {
+    fun `내 계좌로 송금 — 계정계에서 받은 전체 계좌번호로 보내면 수취계좌가 입금된다(앱 실제 플로우)`() = runBlocking {
         accountRepository.refresh()
 
-        // 앱 실제 플로우: 수취계좌(내 세이프박스)를 레포에서 로드해 그 number로 송금한다.
-        // list_finuse는 마스킹 번호만 주므로 앱이 가진 수취 계좌번호는 마스킹돼 있다(전체번호 모름).
+        // 앱 실제 플로우: 수취계좌(내 세이프박스)를 레포에서 로드해 그 fullNumber로 송금한다.
         val recipient = requireNotNull(accountRepository.observeAccount(SAFEBOX).first())
-        assertTrue(
-            "수취 계좌번호는 마스킹돼 있어야 함: ${recipient.number.value}",
-            recipient.number.value.contains("*"),
-        )
 
         val salaryBefore = requireNotNull(accountRepository.observeAccount(SALARY).first())
             .balance.amount
@@ -133,7 +128,7 @@ class DataFlowIntegrationTest {
             TransferRequest(
                 fromAccountId = SALARY,
                 senderName = "홍길동",
-                toAccountNumber = recipient.number, // 마스킹 번호 (앱이 실제로 보내는 값)
+                toAccountNumber = requireNotNull(recipient.fullNumber),
                 toBankCode = recipient.bankCode,
                 recipientName = recipient.holderName,
                 amount = Money.of(30_000L, Currency.KRW),
@@ -162,7 +157,7 @@ class DataFlowIntegrationTest {
             TransferRequest(
                 fromAccountId = SALARY,
                 senderName = source.holderName,
-                toAccountNumber = recipient.number,
+                toAccountNumber = requireNotNull(recipient.fullNumber),
                 toBankCode = recipient.bankCode,
                 recipientName = recipient.holderName,
                 amount = Money.of(20_000L, Currency.KRW),
@@ -194,7 +189,7 @@ class DataFlowIntegrationTest {
             TransferRequest(
                 fromAccountId = SALARY,
                 senderName = source.holderName,
-                toAccountNumber = recipient.number,
+                toAccountNumber = requireNotNull(recipient.fullNumber),
                 toBankCode = recipient.bankCode,
                 recipientName = recipient.holderName,
                 amount = Money.of(10_000L, source.balance.currency),
