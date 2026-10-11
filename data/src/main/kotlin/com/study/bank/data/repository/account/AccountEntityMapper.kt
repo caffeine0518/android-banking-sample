@@ -18,6 +18,7 @@ class AccountEntityMapper @Inject constructor() {
     fun toEntity(account: Account): AccountEntity = AccountEntity(
         id = account.id.value,
         number = account.number.value,
+        fullNumber = account.fullNumber?.value,
         bankCode = account.bankCode.code,
         holderName = account.holderName,
         balanceAmount = account.balance.amount.toPlainString(),
@@ -42,6 +43,7 @@ class AccountEntityMapper @Inject constructor() {
         return Account(
             id = AccountId(entity.id),
             number = AccountNumber(entity.number),
+            fullNumber = entity.fullNumber?.let(::AccountNumber),
             bankCode = bank,
             holderName = entity.holderName,
             balance = Money.of(BigDecimal(entity.balanceAmount), currency),

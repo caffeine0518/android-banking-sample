@@ -18,7 +18,7 @@ class AccountMapper @Inject constructor() {
     /**
      * @throws IllegalArgumentException 지원하지 않는 통화 코드이거나 알 수 없는 은행 코드일 때 발생한다
      */
-    fun map(dto: FintechAccountDto, balance: AccountBalanceResponse): Account {
+    fun map(dto: FintechAccountDto, balance: AccountBalanceResponse, fullNumber: String?): Account {
         val currency = requireNotNull(Currency.byCode(balance.currencyCode)) {
             "Unsupported currency: ${balance.currencyCode}"
         }
@@ -28,6 +28,7 @@ class AccountMapper @Inject constructor() {
         return Account(
             id = AccountId(dto.fintechUseNum),
             number = AccountNumber(dto.accountNumMasked),
+            fullNumber = fullNumber?.let(::AccountNumber),
             bankCode = bank,
             holderName = dto.accountHolderName,
             balance = Money.of(balance.balanceAmt, currency),

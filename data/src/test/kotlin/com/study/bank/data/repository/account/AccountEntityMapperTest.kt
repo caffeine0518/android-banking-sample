@@ -45,6 +45,7 @@ class AccountEntityMapperTest {
         val original = Account(
             id = AccountId("FINTECH-002"),
             number = AccountNumber("1000-98-***4321"),
+            fullNumber = AccountNumber("1000-98-7654321"),
             bankCode = BankCode.TOSS,
             holderName = "김외환",
             balance = Money.of(BigDecimal("3245.80"), Currency.USD),
@@ -57,6 +58,7 @@ class AccountEntityMapperTest {
         // BigDecimal은 scale 보존이 핵심 — USD는 exponent=2라 3245.80
         assertEquals(original.id, restored.id)
         assertEquals(original.number, restored.number)
+        assertEquals(original.fullNumber, restored.fullNumber)
         assertEquals(original.bankCode, restored.bankCode)
         assertEquals(original.holderName, restored.holderName)
         assertEquals(original.balance, restored.balance)

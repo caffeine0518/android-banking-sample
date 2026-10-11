@@ -42,6 +42,11 @@ internal sealed interface MockError {
         override val message = "유효하지 않은 tran_amt: $raw"
     }
 
+    data class InvalidRecvAccountNum(val raw: String) : MockError {
+        override val httpCode = HTTP_BAD_REQUEST
+        override val message = "유효하지 않은 recv_client_account_num: $raw"
+    }
+
     /** 클라이언트의 키 발급 결함이므로 4xx로 응답한다. */
     data class DuplicateBankTranId(val bankTranId: String) : MockError {
         override val httpCode = HTTP_CONFLICT

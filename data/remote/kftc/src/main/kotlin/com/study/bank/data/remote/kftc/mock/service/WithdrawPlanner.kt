@@ -20,7 +20,10 @@ internal class WithdrawPlanner @Inject constructor(
         val amount = command.positiveAmountOrNull()
             ?: return reject(WithdrawResult.InvalidAmount(command.tranAmt))
 
-        val internalRecipient = accountDao.findAll().firstOrNull { it.isRecipientOf(command) }
+        val recvDigits = AccountNumDigits.parseOrNull(command.recvAccountNum)
+            ?: return reject(WithdrawResult.InvalidRecvAccountNum(command.recvAccountNum))
+
+        val internalRecipient = accountDao.findAll().firstOrNull { it.isRecipientOf(command.recvBankCode, recvDigits) }
 
         insufficientFunds(source, amount)?.let { return reject(it) }
         currencyMismatch(source, internalRecipient)?.let { return reject(it) }
@@ -28,11 +31,8 @@ internal class WithdrawPlanner @Inject constructor(
         return WithdrawPlan.Approved(source, amount, internalRecipient)
     }
 
-    private fun SeedAccount.isRecipientOf(command: WithdrawCommand): Boolean {
-        if (bankCodeStd != command.recvBankCode) return false
-        val requested = command.recvAccountNum
-        return requested == accountNumMasked || AccountNumDigits.of(accountNum) == AccountNumDigits.of(requested)
-    }
+    private fun SeedAccount.isRecipientOf(recvBankCode: String, recvDigits: AccountNumDigits): Boolean =
+        bankCodeStd == recvBankCode && AccountNumDigits.of(accountNum) == recvDigits
 
     private fun WithdrawCommand.positiveAmountOrNull(): BigDecimal? =
         tranAmt.toBigDecimalOrNull()?.takeIf { it.signum() > 0 }

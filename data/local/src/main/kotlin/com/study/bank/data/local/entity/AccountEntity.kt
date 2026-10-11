@@ -11,6 +11,8 @@ data class AccountEntity(
     val id: String,
     @ColumnInfo(name = "number")
     val number: String,
+    @ColumnInfo(name = "full_number")
+    val fullNumber: String? = null,
     @ColumnInfo(name = "bank_code")
     val bankCode: String,
     @ColumnInfo(name = "holder_name")

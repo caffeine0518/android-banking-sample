@@ -56,13 +56,14 @@ class RecipientViewModel @AssistedInject constructor(
 
             is RecipientIntent.MyAccountClicked -> {
                 val account = accountsById[action.accountId]
-                if (account != null) {
+                val fullNumber = account?.fullNumber
+                if (account != null && fullNumber != null) {
                     sendEffect(
                         RecipientEffect.NavigateToAmount(
                             sourceAccountId = sourceAccountId.value,
                             recipient = TransferRecipientArg(
                                 bankCode = account.bankCode.code,
-                                accountNumber = account.number.value,
+                                accountNumber = fullNumber.value,
                                 holderName = account.holderName,
                             ),
                         ),
@@ -76,6 +77,8 @@ class RecipientViewModel @AssistedInject constructor(
                     copy(
                         myAccounts = action.accounts
                             .filterNot { it.id == sourceAccountId }
+                            // 전체 계좌번호를 모르는 다른 은행 계좌로는 송금할 수 없다.
+                            .filter { it.fullNumber != null }
                             .map(accountUiMapper::map),
                     )
                 }
