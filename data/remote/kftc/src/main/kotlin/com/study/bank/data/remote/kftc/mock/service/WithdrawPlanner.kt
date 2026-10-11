@@ -1,6 +1,6 @@
 package com.study.bank.data.remote.kftc.mock.service
 
-import com.study.bank.data.remote.kftc.mock.model.sameDigitsAs
+import com.study.bank.data.remote.kftc.mock.model.AccountNumDigits
 import com.study.bank.data.remote.kftc.mock.service.model.WithdrawCommand
 import com.study.bank.data.remote.kftc.mock.service.model.WithdrawPlan
 import com.study.bank.data.remote.kftc.mock.service.model.WithdrawResult
@@ -31,7 +31,7 @@ internal class WithdrawPlanner @Inject constructor(
     private fun SeedAccount.isRecipientOf(command: WithdrawCommand): Boolean {
         if (bankCodeStd != command.recvBankCode) return false
         val requested = command.recvAccountNum
-        return requested == accountNumMasked || accountNum sameDigitsAs requested
+        return requested == accountNumMasked || AccountNumDigits.of(accountNum) == AccountNumDigits.of(requested)
     }
 
     private fun WithdrawCommand.positiveAmountOrNull(): BigDecimal? =

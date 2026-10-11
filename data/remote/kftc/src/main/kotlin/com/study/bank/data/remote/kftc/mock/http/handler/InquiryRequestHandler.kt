@@ -6,7 +6,7 @@ import com.study.bank.data.remote.kftc.mock.http.response.ok
 import com.study.bank.data.remote.kftc.mock.mapper.ErrorResponseMapper
 import com.study.bank.data.remote.kftc.mock.mapper.InquiryResponseMapper
 import com.study.bank.data.remote.kftc.mock.model.SeedRecipient
-import com.study.bank.data.remote.kftc.mock.model.sameDigitsAs
+import com.study.bank.data.remote.kftc.mock.model.AccountNumDigits
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
@@ -24,7 +24,7 @@ internal class InquiryRequestHandler(
     }
 
     private fun SeedRecipient.matches(request: RealNameInquiryRequest): Boolean =
-        bankCodeStd == request.bankCodeStd && accountNum sameDigitsAs request.accountNum
+        bankCodeStd == request.bankCodeStd && accountNum == AccountNumDigits.of(request.accountNum)
 
     private fun parse(body: String): RealNameInquiryRequest? =
         runCatching { json.decodeFromString<RealNameInquiryRequest>(body) }.getOrNull()
