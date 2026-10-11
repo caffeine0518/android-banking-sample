@@ -45,6 +45,16 @@ class RecipientViewModelTest {
     }
 
     @Test
+    fun `전체 계좌번호가 없는 다른 은행 계좌는 수취인 목록에서 제외된다`() = runTest {
+        val repo = FakeAccountRepository()
+        val vm = buildViewModel(repo)
+
+        repo.emit(account(SOURCE_ID), account("acc-2"), account("other-bank", fullNumber = null))
+
+        assertEquals(listOf("acc-2"), vm.state.value.myAccounts.map { it.id })
+    }
+
+    @Test
     fun `계좌번호 입력 버튼을 누르면 NavigateToAccountNumberInput effect를 보낸다`() = runTest {
         val vm = buildViewModel(FakeAccountRepository())
 
@@ -96,9 +106,10 @@ class RecipientViewModelTest {
         dispatcherProvider = TestDispatcherProvider(mainDispatcherRule.testDispatcher),
     )
 
-    private fun account(id: String) = Account(
+    private fun account(id: String, fullNumber: String? = "1000-12-3456789") = Account(
         id = AccountId(id),
-        number = AccountNumber("1000-12-3456789"),
+        number = AccountNumber("1000-12-***6789"),
+        fullNumber = fullNumber?.let(::AccountNumber),
         bankCode = BankCode.TOSS,
         holderName = "홍길동",
         balance = Money.of(1_000_000, Currency.KRW),
