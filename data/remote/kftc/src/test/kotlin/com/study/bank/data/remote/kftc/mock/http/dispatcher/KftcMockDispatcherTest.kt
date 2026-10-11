@@ -305,6 +305,16 @@ class KftcMockDispatcherTest {
         assertTrue("MissingInquiryBody 메시지: $body", body.contains("계좌실명조회 요청 본문"))
     }
 
+    @Test
+    fun `계정계 계좌 조회는 자행 계좌만 전체 계좌번호로 반환한다`() {
+        val (code, body) = get("/core/v1/accounts")
+
+        assertEquals(200, code)
+        assertTrue("전체 계좌번호 반환: $body", body.contains(""""account_num":"1000-55-1114443""""))
+        assertTrue("마스킹 번호 미포함: $body", !body.contains("*"))
+        assertTrue("다른 은행 계좌 제외: $body", !body.contains(SHINHAN))
+    }
+
     private fun get(path: String): Pair<Int, String> {
         val response = client.newCall(
             Request.Builder().url(server.url(path)).build(),
