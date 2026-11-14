@@ -32,6 +32,10 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -56,6 +60,12 @@ internal fun AccountInputScreen(
     onIntent: (AccountInputIntent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var accountNumber by rememberSaveable { mutableStateOf(state.accountNumber) }
+    val changeAccountNumber = { value: String ->
+        accountNumber = value.filter(Char::isDigit)
+        onIntent(AccountInputIntent.AccountNumberChanged(accountNumber))
+    }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -98,9 +108,12 @@ internal fun AccountInputScreen(
             )
 
             AccountNumberField(
-                value = state.accountNumber,
-                onValueChange = { onIntent(AccountInputIntent.AccountNumberChanged(it)) },
-                onClear = { onIntent(AccountInputIntent.AccountNumberCleared) },
+                value = accountNumber,
+                onValueChange = changeAccountNumber,
+                onClear = {
+                    accountNumber = ""
+                    onIntent(AccountInputIntent.AccountNumberCleared)
+                },
             )
 
             Spacer(Modifier.height(16.dp))
@@ -112,7 +125,7 @@ internal fun AccountInputScreen(
 
             AccountInputDebugBar(
                 onApplyPreset = { number, bank ->
-                    onIntent(AccountInputIntent.AccountNumberChanged(number))
+                    changeAccountNumber(number)
                     onIntent(AccountInputIntent.BankSelected(bank))
                 },
             )
