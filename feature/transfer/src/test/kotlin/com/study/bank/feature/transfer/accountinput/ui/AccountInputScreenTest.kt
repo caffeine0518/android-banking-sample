@@ -59,6 +59,23 @@ class AccountInputScreenTest {
     }
 
     @Test
+    fun `VM 상태 반영 전에 이어 입력해도 앞서 입력한 숫자가 유지된다`() {
+        setScreen(AccountInputState())
+        val field = composeRule.onNodeWithText(string(R.string.transfer_account_input_number_label))
+
+        field.performTextInput("1")
+        field.performTextInput("2")
+
+        assertEquals(
+            listOf(
+                AccountInputIntent.AccountNumberChanged("1"),
+                AccountInputIntent.AccountNumberChanged("12"),
+            ),
+            intents,
+        )
+    }
+
+    @Test
     fun `지우기 버튼을 누르면 AccountNumberCleared 인텐트가 방출된다`() {
         setScreen(AccountInputState(accountNumber = "868369666"))
 
